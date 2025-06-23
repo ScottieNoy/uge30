@@ -13,7 +13,7 @@ type Point = {
   user_id: string
   value: number
 }
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Jersey = {
   name: string
   holder_id: string

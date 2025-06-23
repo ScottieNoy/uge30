@@ -20,6 +20,7 @@ const categoryOptions = [
 export default function LogForUser() {
   const { id } = useParams()
   const router = useRouter()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [targetUser, setTargetUser] = useState<any>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
