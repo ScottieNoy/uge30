@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import { QRCodeCanvas } from "qrcode.react"
+import { User } from "@/types"
 
-type User = {
-  id: string
-  name: string
-  emoji: string
-}
 
 export default function MyPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -74,7 +70,7 @@ export default function MyPage() {
     <main className="p-4 max-w-lg mx-auto">
       <h1 className="text-2xl font-bold mb-4">👤 My Festival Stats</h1>
       <div className="bg-white shadow rounded p-4 mb-6">
-        <p className="text-lg">{user.emoji} <strong>{user.name}</strong></p>
+        <p className="text-lg">{user.emoji} <strong>{user.firstname}</strong></p>
         <p>Total Points: <strong>{points}</strong></p>
         <p>Jersey: {jersey ? <strong>{jersey}</strong> : "None"}</p>
       </div>
@@ -84,7 +80,7 @@ export default function MyPage() {
         <p className="text-gray-600 mb-3">Lad en ven scanne den for at logge en drik for dig</p>
         <div className="inline-block bg-white p-4 rounded shadow">
           <QRCodeCanvas value={`${origin}/drink/u/${user.id}`} size={200} />
-          <p className="mt-2 font-semibold">{user.emoji} {user.name}</p>
+          <p className="mt-2 font-semibold">{user.emoji} {user.firstname}</p>
         </div>
       </div>
     </main>

@@ -43,24 +43,25 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white border-b shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo Slot */}
-        <div className="flex items-center space-x-2">
-          {/* Replace with: <img src="/logo.png" alt="UGE 30" className="h-8" /> if available */}
-          <Link href="/" className="text-lg font-semibold tracking-tight text-gray-800 hover:text-black">
-            <img src="/uge30-logo.png" alt="UGE 30 Logo" className="h-8" />
-          </Link>
-        </div>
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap sm:flex-nowrap">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2">
+          <img
+            src="/uge30-logo.png"
+            alt="UGE 30 Logo"
+            className="h-10 sm:h-12 w-auto"
+          />
+        </Link>
 
-        {/* Navigation links */}
-        <div className="flex items-center space-x-2 flex-wrap">
-          <NavItem href="/" label="Leaderboard" />
-          <NavItem href="/log" label="Log" />
-          <NavItem href="/jerseys" label="Jerseys" />
+        {/* Navigation */}
+        <div className="flex flex-wrap items-center justify-end gap-2 mt-2 sm:mt-0">
+          <NavItem href="/" label="Klassement" />
+          <NavItem href="/jerseys" label="Trøjer" />
           <NavItem href="/my" label="Min side" />
           {isAdmin && (
             <>
-              <NavItem href="/users/add" label="Tilføj" subtle />
+              {/* <NavItem href="/users/add" label="Tilføj" subtle /> */}
+              <NavItem href="/add-points" label="Add Points" subtle />
               <NavItem href="/jerseys/edit" label="Rediger Jerseys" subtle />
             </>
           )}

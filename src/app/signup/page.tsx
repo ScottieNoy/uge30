@@ -5,14 +5,15 @@ import { supabase } from "@/lib/supabaseClient"
 
 export default function SignupPage() {
   const [email, setEmail] = useState("")
-  const [name, setName] = useState("")
+  const [firstname, setFirstname] = useState("")
+  const [lastname, setLastname] = useState("")
   const [emoji, setEmoji] = useState("🍻")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleSignup = async () => {
-    if (!email || !password || !name) {
-      return alert("All fields are required")
+    if (!email || !password || !firstname || !lastname) {
+      return alert("Alle felter skal udfyldes")
     }
 
     setLoading(true)
@@ -33,21 +34,22 @@ export default function SignupPage() {
     const { error: profileError } = await supabase.from("users").insert([
       {
         id: userId,
-        name,
+        firstname,
+        lastname,
         emoji,
-        is_admin: false, // new users are not admins by default
       },
     ])
 
     setLoading(false)
 
     if (profileError) {
-      alert("User created, but profile failed to save.")
+      alert("Bruger oprettet, men profil kunne ikke gemmes.")
       console.error(profileError)
     } else {
-      alert("Signup successful! You can now log in.")
+      alert("Tilmelding gennemført! Du kan nu logge ind.")
       setEmail("")
-      setName("")
+      setFirstname("")
+      setLastname("")
       setEmoji("🍻")
       setPassword("")
     }
@@ -55,7 +57,7 @@ export default function SignupPage() {
 
   return (
     <main className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🎉 Sign Up</h1>
+      <h1 className="text-2xl font-bold mb-4">🎉 Opret Bruger</h1>
 
       <input
         className="w-full border p-2 mb-4"
@@ -67,9 +69,16 @@ export default function SignupPage() {
 
       <input
         className="w-full border p-2 mb-4"
-        placeholder="Your Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
+        placeholder="Fornavn"
+        value={firstname}
+        onChange={e => setFirstname(e.target.value)}
+      />
+
+      <input
+        className="w-full border p-2 mb-4"
+        placeholder="Efternavn"
+        value={lastname}
+        onChange={e => setLastname(e.target.value)}
       />
 
       <input
@@ -82,7 +91,7 @@ export default function SignupPage() {
       <input
         className="w-full border p-2 mb-4"
         type="password"
-        placeholder="Password"
+        placeholder="Adgangskode"
         value={password}
         onChange={e => setPassword(e.target.value)}
       />
@@ -92,7 +101,7 @@ export default function SignupPage() {
         disabled={loading}
         className="w-full bg-green-600 text-white p-2 rounded"
       >
-        {loading ? "Signing up..." : "Sign Up"}
+        {loading ? "Opretter..." : "Opret Bruger"}
       </button>
     </main>
   )
