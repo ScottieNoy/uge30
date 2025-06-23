@@ -12,7 +12,7 @@ type Jersey = {
   holder?: User
 }
 
-// Match jersey categories with their UUIDs (from CSV)
+// Match jersey categories with their UUIDs
 const JERSEY_ID_MAP: Record<string, string> = {
   gyldne_blaerer: "eb3ccde5-3578-49ca-8c4c-0bf216a3506d",
   sprinter: "19c27134-7ded-4a8c-afca-e654e804da36",
@@ -47,19 +47,20 @@ export default function JerseyPage() {
         if (scores[p.user_id]) {
           scores[p.user_id][p.category] += p.value
           scores[p.user_id].førertroje += p.value
-          if (p.user_id !== p.submitted_by) {
+          if (p.user_id !== p.submitted_by && scores[p.submitted_by]) {
             scores[p.submitted_by].flydende_haand += p.value
           }
         }
       }
 
-      // Assign holders
+      // Assign jerseys to top-scoring non-admins
       for (const category of JERSEY_CATEGORIES) {
         const topUser = users
-          .map(u => ({ user: u, total: scores[u.id][category] }))
+          .filter(u => !u.is_admin)
+          .map(u => ({ user: u, total: scores[u.id]?.[category] || 0 }))
           .sort((a, b) => b.total - a.total)[0]
 
-        if (!topUser) continue
+        if (!topUser || topUser.total === 0 || topUser.user.is_admin) continue
 
         const jerseyId = JERSEY_ID_MAP[category]
         await supabase.from("jerseys").update({
@@ -68,7 +69,6 @@ export default function JerseyPage() {
         }).eq("id", jerseyId)
       }
 
-      // Reload updated jersey list
       const { data: jData } = await supabase.from("jerseys").select("*")
       if (!jData) return
 
@@ -91,7 +91,9 @@ export default function JerseyPage() {
           <li key={j.id} className="bg-white p-4 rounded shadow">
             <div className="font-bold">{j.name}</div>
             <div>{j.holder?.emoji} {j.holder?.firstname || "Unknown"}</div>
-            <div className="text-sm text-gray-500">Since: {new Date(j.awarded_at).toLocaleString()}</div>
+            <div className="text-sm text-gray-500">
+              Since: {new Date(j.awarded_at).toLocaleString()}
+            </div>
           </li>
         ))}
       </ul>

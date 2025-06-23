@@ -8,13 +8,13 @@ import { User } from "@/types"
 const jerseyCategories = [
   { value: "gyldne_blaerer", label: "🥤 Gyldne Blærer" },
   { value: "sprinter", label: "⚡ Sprinter" },
-  { value: "flydende_haand", label: "🤝 Flydende Hånd" },
   { value: "førertroje", label: "🚴‍♂️ Førertrøje" },
   { value: "maane", label: "🌙 Månetrøje" },
   { value: "prikket", label: "🔴 Prikket Trøje" },
   { value: "paedofil", label: "👶 Mest Pædofil" },
   { value: "ungdom", label: "🧑‍🍼 Ungdomstrøje" },
 ]
+
 
 export default function AdminLogPage() {
   const [users, setUsers] = useState<User[]>([])

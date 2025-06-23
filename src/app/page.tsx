@@ -54,11 +54,13 @@ export default function Home() {
       const { data: users } = await supabase.from("users").select("*")
       const { data: points } = await supabase.from("points").select("*").order("created_at", { ascending: true })
       if (!users || !points) return
+      const nonAdmins = users.filter(u => !u.is_admin)
+
 
       const userMap = Object.fromEntries(users.map(u => [u.id, u]))
 
       const jerseyScores: Record<string, Record<string, number>> = {}
-      for (const u of users) {
+      for (const u of nonAdmins) {
         jerseyScores[u.id] = {
           gyldne_blaerer: 0,
           sprinter: 0,
@@ -81,7 +83,7 @@ export default function Home() {
 
       const boards: Record<string, any[]> = {}
       Object.keys(jerseyNames).forEach(category => {
-        boards[category] = users.map(u => ({
+        boards[category] = nonAdmins.map(u => ({
           user: u,
           total: jerseyScores[u.id]?.[category] || 0,
         })).sort((a, b) => b.total - a.total)
@@ -140,7 +142,7 @@ if (existingJerseys) {
           labels.push(new Date(t).toISOString())
         }
 
-        for (const u of users) {
+        for (const u of nonAdmins) {
           let cumulative = 0
           const data: number[] = []
           for (const bucketStart of bucketTimes) {
@@ -156,7 +158,7 @@ if (existingJerseys) {
         }
 
         const colors = ['hsl(327, 67%, 40%)', 'hsl(140, 75%, 47%)', 'hsl(71, 66%, 57%)', 'hsl(44, 97%, 53%)', 'hsl(16, 61%, 42%)', 'hsl(111, 74%, 56%)']
-        const datasets = users.map((u, i) => ({
+        const datasets = nonAdmins.map((u, i) => ({
           label: `${u.emoji || "👤"} ${u.firstname}`,
           data: userBuckets[u.id],
           borderColor: colors[i % colors.length],
