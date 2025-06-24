@@ -4,28 +4,40 @@ import { useEffect } from 'react'
 
 export default function NotificationManager() {
   useEffect(() => {
-    const setupPush = async () => {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+    const subscribeToPush = async () => {
+      // 1. Ensure browser supports Push
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.warn("Push notifications not supported in this browser.")
+        return
+      }
 
+      // 2. Ask for permission
       const permission = await Notification.requestPermission()
-      if (permission !== 'granted') return
+      if (permission !== 'granted') {
+        console.warn("Notification permission not granted.")
+        return
+      }
 
+      // 3. Wait for service worker to be ready
       const registration = await navigator.serviceWorker.ready
 
+      // 4. Subscribe using VAPID public key
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
       })
 
-      // Store subscription in Supabase
+      // 5. Save subscription to backend
       await fetch('/api/save-subscription', {
         method: 'POST',
-        body: JSON.stringify(subscription),
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscription)
       })
+
+      console.log('✅ Subscribed to push notifications!')
     }
 
-    setupPush()
+    subscribeToPush()
   }, [])
 
   return null
