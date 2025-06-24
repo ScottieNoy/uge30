@@ -1,5 +1,6 @@
 // app/layout.tsx
 import "./globals.css"
+import NotificationManager from "./components/NotificationManager"
 import Navbar from "./components/Navbar"
 import PwaInit from "./components/PwaInit"
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-gradient-to-b from-yellow-50 to-pink-100 min-h-screen text-gray-800 font-sans">
         <PwaInit />
+        <NotificationManager />
         <Navbar />
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-8">
           {children}
