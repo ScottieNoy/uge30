@@ -8,22 +8,39 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
   const router = useRouter()
 
   const handleLogin = async () => {
     setLoading(true)
-
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-
     setLoading(false)
 
     if (error) {
-      alert("Login failed: " + error.message)
+      setMessage("Login failed: " + error.message)
     } else {
       router.push("/my")
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setMessage("Please enter your email first.")
+      return
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://klassement.uge30.dk/update-password", // <- adjust to match your app
+      // redirectTo: "http://localhost:3000/update-password", // <- adjust to match your app
+    })
+
+    if (error) {
+      setMessage("Reset failed: " + error.message)
+    } else {
+      setMessage("Check your email for a reset link.")
     }
   }
 
@@ -40,12 +57,26 @@ export default function LoginPage() {
       />
 
       <input
-        className="w-full border p-2 mb-4"
+        className="w-full border p-2 mb-2"
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+
+      <div className="text-sm text-right mb-4">
+        <button
+          type="button"
+          className="text-blue-600 underline"
+          onClick={handleForgotPassword}
+        >
+          Forgot password?
+        </button>
+      </div>
+
+      {message && (
+        <p className="text-sm text-center text-red-600 mb-4">{message}</p>
+      )}
 
       <button
         onClick={handleLogin}
