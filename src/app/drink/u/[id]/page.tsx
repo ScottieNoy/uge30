@@ -133,6 +133,33 @@ export default function LogForUser() {
     setLastLogTime(null)
     fetchLogData()
   }
+const { error: insertError } = await supabase.from("points").insert(inserts)
+
+if (error) {
+  console.error("Insert error:", error)
+  alert("Fejl: " + error.message)
+} else {
+  alert(`✅ Du loggede ${entry.label} for ${targetUser.firstname}`)
+
+  // 👇 Send push notification if Ølbong was logged
+  if (entry.value === "funnel") {
+    await fetch("/api/send-notification", {
+      method: "POST",
+      body: JSON.stringify({
+        title: "🍻 Ølbong logget!",
+        body: `${targetUser.firstname} har lige lavet en ølbong!`,
+      }),
+      headers: { "Content-Type": "application/json" },
+    })
+  }
+
+  setLoading(true)
+  setCanLog(false)
+  setCooldownLeft(null)
+  setLastLogTime(null)
+  fetchLogData()
+}
+
 }
 
 
