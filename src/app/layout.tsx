@@ -1,15 +1,20 @@
 // app/layout.tsx
-import "./globals.css"
-import NotificationManager from "./components/NotificationManager"
-import Navbar from "./components/Navbar"
-import PwaInit from "./components/PwaInit"
+import "./globals.css";
+import NotificationManager from "../components/NotificationManager";
+import Navbar from "../components/Navbar";
+import PwaInit from "../components/PwaInit";
+import SplashScreen from "@/components/SplashScreen";
 
 export const metadata = {
   title: "UGE 30",
   description: "Classement for UGE 30",
-}
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="da">
       <head>
@@ -19,14 +24,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>
-      <body className="bg-gradient-to-b from-yellow-50 to-pink-100 min-h-screen text-gray-800 font-sans">
+      <body className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
         <PwaInit />
         <NotificationManager />
         <Navbar />
-        <main className="max-w-5xl mx-auto px-4 py-6 space-y-8">
-          {children}
-        </main>
+        <main>{children}</main>
       </body>
     </html>
-  )
+  );
 }
