@@ -1,90 +1,22 @@
-'use client'
-
-import { useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
-import { useRouter } from "next/navigation"
+"use client";
+import { useState } from "react";
+import AuthModal from "@/components/AuthModal";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
-  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogin = async () => {
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    setLoading(false)
-
-    if (error) {
-      setMessage("Login failed: " + error.message)
-    } else {
-      router.push("/my")
-    }
-  }
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setMessage("Please enter your email first.")
-      return
-    }
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://klassement.uge30.dk/update-password", // <- adjust to match your app
-      // redirectTo: "http://localhost:3000/update-password", // <- adjust to match your app
-    })
-
-    if (error) {
-      setMessage("Reset failed: " + error.message)
-    } else {
-      setMessage("Check your email for a reset link.")
-    }
-  }
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
 
   return (
-    <main className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🔐 Log In</h1>
-
-      <input
-        className="w-full border p-2 mb-4"
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <input
-        className="w-full border p-2 mb-2"
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <div className="text-sm text-right mb-4">
-        <button
-          type="button"
-          className="text-blue-600 underline"
-          onClick={handleForgotPassword}
-        >
-          Forgot password?
-        </button>
-      </div>
-
-      {message && (
-        <p className="text-sm text-center text-red-600 mb-4">{message}</p>
-      )}
-
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-500 to-pink-500">
       <button
-        onClick={handleLogin}
-        disabled={loading}
-        className="w-full bg-blue-600 text-white p-2 rounded"
+        onClick={handleOpen}
+        className="px-6 py-3 text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
       >
-        {loading ? "Logging in..." : "Log In"}
+        Open Login Modal
       </button>
-    </main>
-  )
+      <AuthModal isOpen={isOpen} onClose={handleClose} />
+    </div>
+  );
 }
