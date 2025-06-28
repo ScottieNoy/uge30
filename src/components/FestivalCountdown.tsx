@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock } from "lucide-react";
@@ -12,7 +13,7 @@ const FestivalCountdown = () => {
 
   useEffect(() => {
     // Festival end date - adjust this to your actual festival end date
-    const festivalEndDate = new Date("2024-08-04T23:59:59"); // Example: August 4th, 2024
+    const festivalEndDate = new Date("2025-07-26T18:00:00"); // Example: August 4th, 2024
 
     const calculateTimeLeft = () => {
       const now = new Date();
@@ -40,7 +41,7 @@ const FestivalCountdown = () => {
 
   return (
     <Card className="bg-white/10 backdrop-blur-md border-white/20">
-      <CardContent className="p-3">
+      <CardContent className="flex p-3 items-center justify-center h-full">
         <div className="flex items-center justify-center space-x-2 text-white">
           <Clock className="h-4 w-4 text-cyan-300" />
           <div className="flex items-center space-x-1 text-sm font-mono">

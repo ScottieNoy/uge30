@@ -13,8 +13,6 @@ export const JERSEY_CATEGORIES = [
   "ungdom", // Youth
 ] as const;
 
-export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];
-
 export const SUBCATEGORIES = [
   "beer",
   "wine",
@@ -30,7 +28,32 @@ export const SUBCATEGORIES = [
   "other",
 ] as const;
 
-export type Subcategory = (typeof SUBCATEGORIES)[number];
+export const SUBCATEGORY_POINTS: Record<Subcategory, number> = {
+  beer: 1,
+  wine: 2,
+  vodka: 3,
+  funnel: 4,
+  shot: 2,
+  beerpong: 3,
+  cornhole: 2,
+  dart: 2,
+  billiard: 2,
+  stigegolf: 2,
+  bonus: 5,
+  other: 1,
+};
+
+export type JerseyData = {
+  id: JerseyCategory;
+  name: string;
+  participants: {
+    user: User;
+    total: number;
+    rank: number;
+    trend: "up" | "down";
+    change: string;
+  }[];
+};
 
 /* ------------------------- UI CATEGORY CONFIG ------------------------- */
 
@@ -49,18 +72,52 @@ export type JerseyDisplay = JerseyCategoryConfig & {
   icon: keyof typeof Icons; // or React.ComponentType<any>
 };
 
-export type Activity = {
+export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];
+export type Subcategory = (typeof SUBCATEGORIES)[number];
+
+export interface User {
   id: string;
-  icon: keyof typeof Icons;
-  color: string; // Tailwind gradient color
-  label: string;
-  user: string; // User's name or identifier
-  target: string; // Target of the activity (e.g., another user, challenge)
-  points: number; // Points earned or associated with the activity
-  timestamp: string; // ISO date string or formatted date
-  type: Subcategory; // Type of activity (e.g., beer, wine, etc.)
-  message: string; // Description of the activity
-};
+  firstname: string;
+  lastname: string;
+  emoji: string | null;
+  is_admin?: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface UserPoint {
+  id?: string;
+  user_id: string;
+  user?: User;
+  category: JerseyCategory;
+  subcategory: Subcategory;
+  value: number; // match Supabase column
+  submitted_by?: string;
+  submitted_by_user?: User;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface LeaderboardEntry {
+  user_id: string;
+  user: User;
+  category: JerseyCategory;
+  total_points: number;
+  rank: number;
+}
+
+export interface Activity {
+  id: string;
+  icon: keyof typeof Icons; // or React.ComponentType<any> if you store the component
+  color: string;
+  user: string;
+  target: string;
+  points: number;
+  timestamp: string;
+  type: Subcategory;
+  message: string;
+  // category?: JerseyCategory; // optional
+}
 
 /* ------------------------- DOMAIN MODELS ------------------------- */
 

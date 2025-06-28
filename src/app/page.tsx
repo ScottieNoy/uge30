@@ -1,8 +1,5 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import * as Icons from "lucide-react";
 import { QrCode, Trophy, Users, Flame, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,183 +9,13 @@ import Link from "next/link";
 import ActivityFeed from "@/components/ActivityFeed";
 import JerseyShowcase from "@/components/JerseyShowcase";
 
-import {
-  JerseyCategory,
-  User,
-  UserPoint,
-  JerseyCategoryConfig,
-  jerseyConfigs,
-  JerseyDisplay,
-  Activity,
-} from "@/types"; // adjust path as needed
-import { SUBCATEGORY_META } from "@/lib/utils";
-
-// Example jerseyNames object typed
-const jerseyNames: Record<JerseyCategory, string> = {
-  gyldne_blaerer: "Gyldne Blærer",
-  sprinter: "Sprinter",
-  flydende_haand: "Flydende Hånd",
-  førertroje: "Førertøj",
-  maane: "Måne",
-  prikket: "Prikket",
-  punkttroje: "Punkttøj",
-  ungdom: "Ungdom",
-};
-
-type JerseyScoreMap = Record<string, Record<JerseyCategory, number>>;
-
-type JerseyBoardEntry = {
-  user: User;
-  total: number;
-};
-
-type JerseyBoards = Record<JerseyCategory, JerseyBoardEntry[]>;
-
-function formatCopenhagenTime(dateString: string) {
-  const utcDate = new Date(dateString);
-  const offsetMs = 2 * 60 * 60 * 1000;
-  const localTime = new Date(utcDate.getTime() + offsetMs);
-  return localTime.toLocaleTimeString("da-DK", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { JerseyCategory, jerseyConfigs, JerseyDisplay } from "@/types"; // adjust path as needed
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 export default function Home() {
-  const [activityFeed, setActivityFeed] = useState<Activity[]>([]);
-  const [participants, setParticipants] = useState<User[]>([]);
-  const [jerseyBoards, setJerseyBoards] = useState<JerseyBoards>(
-    {} as JerseyBoards
-  );
-  const [jerseyData, setJerseyData] = useState<
-    {
-      id: JerseyCategory;
-      name: string;
-      participants: {
-        user: User;
-        total: number;
-        rank: number;
-        trend: "up" | "down";
-        change: string;
-      }[];
-    }[]
-  >([]);
+  const { participants, jerseyBoards, jerseyData, activityFeed } =
+    useLeaderboard();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: users } = await supabase.from("users").select("*");
-      const { data: points } = await supabase
-        .from("points")
-        .select("*")
-        .order("created_at", { ascending: true });
-
-      if (!users || !points) return;
-
-      const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
-      setParticipants(users);
-      const nonAdmins = users.filter((u) => !u.is_admin);
-
-      // Initialize jerseyScores map with zeros
-      const jerseyScores: JerseyScoreMap = {};
-      for (const u of nonAdmins) {
-        jerseyScores[u.id] = {
-          gyldne_blaerer: 0,
-          sprinter: 0,
-          flydende_haand: 0,
-          førertroje: 0,
-          maane: 0,
-          prikket: 0,
-          punkttroje: 0,
-          ungdom: 0,
-        };
-      }
-
-      // Calculate scores
-      for (const p of points) {
-        if (jerseyScores[p.user_id]) {
-          jerseyScores[p.user_id][p.category] += p.points;
-
-          // Assuming 'førertroje' includes all points but dont add the points for 'førertroje' category twice
-          if (p.category !== "førertroje") {
-            jerseyScores[p.user_id].førertroje += p.points;
-          }
-        }
-        if (
-          p.submitted_by &&
-          p.user_id !== p.submitted_by &&
-          jerseyScores[p.submitted_by]
-        ) {
-          jerseyScores[p.submitted_by].flydende_haand += p.points;
-        }
-      }
-
-      // Build leaderboard boards
-      const boards: JerseyBoards = {} as JerseyBoards;
-      (Object.keys(jerseyNames) as JerseyCategory[]).forEach((category) => {
-        boards[category] = nonAdmins
-          .map((u) => ({
-            user: {
-              ...u,
-              emoji: u.emoji ?? "", // Ensure emoji is always a string
-              is_admin: u.is_admin === null ? undefined : u.is_admin, // Ensure is_admin is boolean | undefined
-              created_at: u.created_at ?? "", // Ensure created_at is always a string
-              updated_at: u.updated_at ?? "", // Ensure updated_at is always a string
-            },
-            total: jerseyScores[u.id][category] || 0,
-          }))
-          .sort((a, b) => b.total - a.total);
-      });
-
-      setJerseyBoards(boards);
-
-      // Transform for jerseyData state
-      setJerseyData(
-        (Object.keys(boards) as JerseyCategory[]).map((category) => ({
-          id: category,
-          name: jerseyNames[category] || "Unknown Jersey",
-          participants: boards[category].map((entry, idx) => ({
-            user: entry.user,
-            total: entry.total,
-            rank: idx + 1,
-            trend: idx < 3 ? "up" : "down",
-            change: entry.total > 0 ? `+${entry.total}` : `${entry.total}`,
-          })),
-        }))
-      );
-
-      const activityFeed = [...points]
-        .reverse()
-        .map((point) => {
-          const target = userMap[point.user_id];
-          const submitter = point.submitted_by
-            ? userMap[point.submitted_by]
-            : undefined;
-
-          const meta = SUBCATEGORY_META[point.subcategory];
-
-          return {
-            id: point.id,
-            icon: meta.icon,
-            color: meta.color,
-            label: meta.label,
-            user: `${submitter?.emoji || "👤"} ${
-              submitter?.firstname || "Ukendt"
-            }`,
-            target: `${target?.emoji || "👤"} ${target?.firstname || "Ukendt"}`,
-            points: point.points ?? 0,
-            timestamp: formatCopenhagenTime(point.created_at || ""),
-            type: point.subcategory,
-            message: `${submitter?.firstname} logged ${point.subcategory} for ${target?.firstname}`,
-          };
-        })
-        .slice(0, 10); // Limit to last 10 activities
-      setActivityFeed(activityFeed);
-    };
-
-    fetchData();
-  }, []);
-
-  // Construct jerseyDisplay for JerseyShowcase
   const jerseyDisplay = Object.entries(jerseyBoards)
     .map(([category, entries]) => {
       const topEntry = entries[0];
@@ -206,7 +33,10 @@ export default function Home() {
     })
     .filter(Boolean) as unknown as JerseyDisplay[];
 
-  console.log(jerseyBoards);
+  const jerseyItems = jerseyData.map((jersey, i) => ({
+    ...jersey,
+    animationDelay: `${i * 100}ms`,
+  }));
 
   return (
     <div>
@@ -291,12 +121,8 @@ export default function Home() {
           <p className="text-blue-100">Top performers in each category</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {jerseyData.map((jersey, i) => (
-            <div
-              key={jersey.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
+          {jerseyItems.map((jersey, i) => (
+            <div key={jersey.id} className="animate-fade-in">
               <JerseyLeaderboard
                 jersey={jerseyConfigs[jersey.id as JerseyCategory]}
                 participants={jersey.participants}

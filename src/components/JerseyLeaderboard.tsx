@@ -27,13 +27,13 @@ const JerseyLeaderboard = ({
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Icons.Crown className="h-3 w-3 text-yellow-400" />;
+        return <Icons.Crown className="h-4 w-4 text-yellow-600" />;
       case 2:
-        return <Icons.Medal className="h-3 w-3 text-gray-400" />;
+        return <Icons.Medal className="h-4 w-4 text-gray-600" />;
       case 3:
-        return <Icons.Award className="h-3 w-3 text-orange-400" />;
+        return <Icons.Award className="h-4 w-4 text-orange-600" />;
       default:
-        return <span className="text-xs font-bold text-gray-400">#{rank}</span>;
+        return <span className="text-sm font-bold text-gray-700">#{rank}</span>;
     }
   };
 
@@ -51,48 +51,52 @@ const JerseyLeaderboard = ({
             >
               <IconComponent className="h-4 w-4 text-white" />
             </div>
-            <CardTitle className="text-sm font-bold text-white">
+            <CardTitle className="text-base font-bold text-gray-800">
               {jersey.name}
             </CardTitle>
           </div>
           <Badge
-            className={`bg-gradient-to-r ${jersey.color} text-white border-0 px-2 py-1 text-xs`}
+            className={`bg-gradient-to-r ${jersey.color} text-white border-0 px-2 py-1 text-xs font-semibold`}
           >
             Top 5
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 pt-0">
-        <div className="space-y-1">
+      <CardContent className="p-4 pt-0">
+        <div className="space-y-2">
           {topParticipants.map((participant) => (
             <div
               key={participant.rank}
-              className="flex items-center justify-between p-2 rounded bg-white/5 hover:bg-white/10 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg bg-white/20 hover:bg-white/30 transition-colors border border-white/10"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 {getRankIcon(participant.rank)}
-                <div className="text-xs">{participant.user.emoji || "🙂"}</div>
+                <div className="text-lg">{participant.user.emoji || "🙂"}</div>
 
-                <div>
-                  <span className="text-white text-xs font-medium">
+                <div className="text-gray-800 text-sm font-semibold">
+                  <span>
                     {participant.user.firstname} {participant.user.lastname}
                   </span>
-                  <div className="flex items-center space-x-1 text-xs">
-                    <span className="text-gray-300">{participant.total}</span>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <span className="text-gray-700 font-medium">
+                      {participant.total} pts
+                    </span>
                     <div
-                      className={`flex items-center ${
+                      className={`flex items-center space-x-1 ${
                         participant.trend === "up"
-                          ? "text-green-400"
-                          : "text-red-400"
+                          ? "text-green-700"
+                          : "text-red-700"
                       }`}
                     >
                       {participant.trend === "up" ? (
-                        <Icons.TrendingUp className="h-2 w-2" />
+                        <Icons.TrendingUp className="h-3 w-3" />
                       ) : (
-                        <Icons.TrendingDown className="h-2 w-2" />
+                        <Icons.TrendingDown className="h-3 w-3" />
                       )}
-                      <span className="text-xs">{participant.change}</span>
+                      <span className="text-xs font-medium">
+                        {participant.change}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -100,7 +104,7 @@ const JerseyLeaderboard = ({
             </div>
           ))}
           {topParticipants.length === 0 && (
-            <div className="text-center py-4 text-gray-400 text-xs">
+            <div className="text-center py-6 text-gray-600 text-sm">
               No participants yet
             </div>
           )}

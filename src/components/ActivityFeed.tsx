@@ -72,7 +72,8 @@ const ActivityFeed = ({ activities }: { activities: Activity[] }) => {
                           <Badge
                             className={`bg-gradient-to-r ${activity.color} text-white border-0 text-xs px-2 py-1`}
                           >
-                            {activity.label}
+                            {activity.type.charAt(0).toUpperCase() +
+                              activity.type.slice(1)}
                           </Badge>
                           <span className="text-xs text-gray-400 flex items-center gap-1">
                             <Icons.Clock className="h-3 w-3" />
