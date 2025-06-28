@@ -23,6 +23,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#000000" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no"
+        />
       </head>
       <body className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
         <PwaInit />

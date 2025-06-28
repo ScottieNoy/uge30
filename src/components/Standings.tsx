@@ -47,6 +47,7 @@ export default function Standings() {
       if (!points || !users) return;
 
       setUsers(users);
+      setVisibleUsers(users.map((u) => u.id)); // Initialize with all users visible
 
       const userIds = users.map((u) => u.id);
 
