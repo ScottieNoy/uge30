@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import * as Icons from "lucide-react";
 
-import { Subcategory } from "@/types";
+import { Subcategory, User } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -57,3 +57,9 @@ export const SUBCATEGORY_META: Record<
     color: "from-gray-400 to-gray-600",
   },
 };
+
+export function formatUserName(user: Partial<User>) {
+  return `${user.emoji ?? "👤"} ${user.firstname ?? "Ukendt"} ${
+    user.lastname ?? ""
+  }`;
+}

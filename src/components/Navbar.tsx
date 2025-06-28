@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
 import {
   Menu,
   X,
@@ -13,6 +13,8 @@ import {
   LogIn,
   LogOut,
   QrCode,
+  Shield,
+  Shirt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,57 +25,110 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { formatUserName } from "@/lib/utils";
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userName, setUserName] = useState("User");
-
+  const pathname = usePathname();
   const router = useRouter();
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userName, setUserName] = useState("User");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const closeMenu = () => setIsMenuOpen(false);
+
+  // If not logged in, username is "Not logged in"
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
+    if (!isLoggedIn) {
+      setUserName("Not logged in");
+    }
+  }, [isLoggedIn]);
+
+  // 2. Get session + user on load and subscribe to auth state changes
+  useEffect(() => {
+    let isMounted = true;
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getSession();
       const sessionUser = data.session?.user;
-      setIsLoggedIn(!!sessionUser);
+
+      if (isMounted) setIsLoggedIn(!!sessionUser);
 
       if (sessionUser) {
-        const { data: userProfile } = await supabase
+        const { data: userData } = await supabase
           .from("users")
-          .select("is_admin")
+          .select("is_admin, firstname, lastname, emoji")
           .eq("id", sessionUser.id)
           .single();
 
-        setIsAdmin(userProfile?.is_admin || false);
-        setUserName(sessionUser.user_metadata?.name || "User");
-      }
-    });
+        if (isMounted) {
+          setIsAdmin(userData?.is_admin ?? false);
+          if (userData) {
+            setUserName(formatUserName(userData));
+          }
+        }
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
-      setIsLoggedIn(!!session);
-    });
+        console.log("User data fetched:", userData);
+      }
+    };
+
+    fetchUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (_, session) => {
+        const user = session?.user;
+        if (isMounted) setIsLoggedIn(!!user);
+
+        if (user) {
+          const { data: userData } = await supabase
+            .from("users")
+            .select("is_admin, firstname, lastname, emoji")
+            .eq("id", user.id)
+            .single();
+
+          if (isMounted) {
+            setIsAdmin(userData?.is_admin ?? false);
+            setUserName(userData ? formatUserName(userData) : "Unknown User");
+          }
+        } else if (isMounted) {
+          setIsAdmin(false);
+          setUserName("Not logged in");
+        }
+      }
+    );
 
     return () => {
       listener?.subscription.unsubscribe();
+      isMounted = false;
     };
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false);
-    router.push("/");
-  };
+  // 3. Handle logout
+  useEffect(() => {
+    if (pathname === "/login" && isLoggedIn) {
+      router.push("/");
+    }
+  }, [pathname, isLoggedIn, router]);
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      setUserName("Not logged in");
+      router.push("/");
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
+          {/* Left: Logo */}
+          <Link href="/" className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-black text-lg">U</span>
             </div>
@@ -85,60 +140,66 @@ export default function Navbar() {
                 Festival Battle
               </p>
             </div>
-          </div>
+          </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10 hover:text-cyan-300 transition-colors"
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              Standings
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10 hover:text-cyan-300 transition-colors"
-            >
-              <Badge className="mr-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">
-                8
-              </Badge>
-              Jerseys
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10 hover:text-cyan-300 transition-colors"
-            >
-              <User className="h-4 w-4 mr-2" />
-              My Profile
-            </Button>
+            <Link href="/">
+              <Button
+                variant="ghost"
+                className="text-white hover:text-cyan-300"
+              >
+                <Trophy className="h-4 w-4 mr-2" />
+                Standings
+              </Button>
+            </Link>
+            <Link href="/jerseys">
+              <Button
+                variant="ghost"
+                className="text-white hover:text-cyan-300"
+              >
+                <Shirt className="h-4 w-4 mr-2" />
+                Jerseys
+              </Button>
+            </Link>
+            <Link href="/my">
+              <Button
+                variant="ghost"
+                className="text-white hover:text-cyan-300"
+              >
+                <User className="h-4 w-4 mr-2" />
+                My Profile
+              </Button>
+            </Link>
+
             {isAdmin && (
               <>
                 <Link href="/add-points">
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-white/10 hover:text-green-300 transition-colors"
+                    className="text-green-400 hover:text-green-300"
                   >
+                    <Shield className="h-4 w-4 mr-2" />
                     Add Points
                   </Button>
                 </Link>
                 <Link href="/jerseys/edit">
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-white/10 hover:text-green-300 transition-colors"
+                    className="text-green-400 hover:text-green-300"
                   >
                     Edit Jerseys
                   </Button>
                 </Link>
               </>
             )}
-            {/* Scan Button - Primary Action */}
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
+
+            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
               <QrCode className="h-4 w-4 mr-2" />
               Scan
             </Button>
 
-            {/* User Menu */}
+            {/* Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -151,26 +212,29 @@ export default function Navbar() {
                   {userName}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900/95 backdrop-blur-md border-gray-700 text-white">
+              <DropdownMenuContent className="bg-gray-900/95 border border-gray-800 text-white">
                 {isLoggedIn ? (
                   <>
-                    <DropdownMenuItem className="hover:bg-gray-800">
+                    <DropdownMenuItem onClick={() => router.push("/my")}>
                       <User className="h-4 w-4 mr-2" />
                       Profile
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-700" />
-                    <DropdownMenuItem className="hover:bg-gray-800 text-red-400">
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-red-400"
+                      onClick={handleLogout}
+                    >
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout
                     </DropdownMenuItem>
                   </>
                 ) : (
                   <>
-                    <DropdownMenuItem className="hover:bg-gray-800">
+                    <DropdownMenuItem onClick={() => router.push("/login")}>
                       <LogIn className="h-4 w-4 mr-2" />
                       Login
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-gray-800">
+                    <DropdownMenuItem onClick={() => router.push("/signup")}>
                       <Users className="h-4 w-4 mr-2" />
                       Register
                     </DropdownMenuItem>
@@ -180,7 +244,7 @@ export default function Navbar() {
             </DropdownMenu>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Toggle */}
           <Button
             variant="ghost"
             size="sm"
@@ -199,54 +263,44 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden bg-black/30 backdrop-blur-md border-t border-white/10 animate-fade-in">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Button className="w-full justify-center bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-3 rounded-lg shadow-lg mb-4">
-                <QrCode className="h-5 w-5 mr-2" />
+              <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+                <QrCode className="h-4 w-4 mr-2" />
                 Scan QR Code
               </Button>
+              <Link href="/" onClick={closeMenu}>
+                <Button variant="ghost" className="w-full text-white">
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Standings
+                </Button>
+              </Link>
+              <Link href="/jerseys" onClick={closeMenu}>
+                <Button variant="ghost" className="w-full text-white">
+                  <Shirt className="h-4 w-4 mr-2" />
+                  Jerseys
+                </Button>
+              </Link>
+              <Link href="/my" onClick={closeMenu}>
+                <Button variant="ghost" className="w-full text-white">
+                  <User className="h-4 w-4 mr-2" />
+                  My Profile
+                </Button>
+              </Link>
 
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-white hover:bg-white/10 hover:text-cyan-300"
-              >
-                <Trophy className="h-4 w-4 mr-3" />
-                Standings
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-white hover:bg-white/10 hover:text-cyan-300"
-              >
-                <Badge className="mr-3 bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">
-                  8
-                </Badge>
-                Jerseys
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-white hover:bg-white/10 hover:text-cyan-300"
-              >
-                <User className="h-4 w-4 mr-3" />
-                My Profile
-              </Button>
               {isAdmin && (
                 <>
-                  <Link href="/add-points">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-white hover:bg-white/10 hover:text-green-300"
-                    >
+                  <Link href="/add-points" onClick={closeMenu}>
+                    <Button variant="ghost" className="w-full text-green-300">
                       Add Points
                     </Button>
                   </Link>
-                  <Link href="/jerseys/edit">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-white hover:bg-white/10 hover:text-green-300"
-                    >
+                  <Link href="/jerseys/edit" onClick={closeMenu}>
+                    <Button variant="ghost" className="w-full text-green-300">
                       Edit Jerseys
                     </Button>
                   </Link>
                 </>
               )}
+
               <div className="border-t border-white/10 pt-3 mt-3">
                 {isLoggedIn ? (
                   <>
@@ -258,7 +312,8 @@ export default function Navbar() {
                     </div>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-red-400 hover:bg-red-900/20"
+                      className="w-full text-red-400"
+                      onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4 mr-3" />
                       Logout
@@ -268,14 +323,16 @@ export default function Navbar() {
                   <>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-white hover:bg-white/10"
+                      className="w-full text-white"
+                      onClick={() => router.push("/login")}
                     >
                       <LogIn className="h-4 w-4 mr-3" />
                       Login
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-white hover:bg-white/10"
+                      className="w-full text-white"
+                      onClick={() => router.push("/signup")}
                     >
                       <Users className="h-4 w-4 mr-3" />
                       Register
