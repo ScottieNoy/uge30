@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import LoginForm from "./LoginForm";
 import RegisterForm, { RegisterFormData } from "./RegisterForm";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ const AuthModal = ({
 }: AuthModalProps) => {
   const [activeTab, setActiveTab] = useState<"login" | "register">(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
-
+  const supabase = createClient();
   const handleLoginSubmit = async (data: {
     email: string;
     password: string;
@@ -52,7 +52,6 @@ const AuthModal = ({
     setIsLoading(true);
     console.log("Register data:", data);
 
-    // Sign up the user with email/password
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -65,23 +64,76 @@ const AuthModal = ({
     }
 
     const userId = authData.user?.id;
-
     if (!userId) {
       console.error("No user ID returned after sign up.");
       setIsLoading(false);
       return;
     }
 
-    // Split name into firstname and lastname
-    const [firstname, ...rest] = data.name.trim().split(" ");
+    const [firstnameRaw, ...rest] = data.name.trim().split(" ");
+    const firstname = firstnameRaw || "";
     const lastname = rest.join(" ") || "";
 
-    // Insert user profile into `users` table
+    const clean = (s: string) => s.replace(/[^a-z]/gi, "").toUpperCase();
+
+    const first = clean(firstname);
+    const last = clean(lastname);
+
+    // Helper to try different combinations (e.g., JO+BR, J+OBR, etc.)
+    const generateCandidates = (first: string, last: string): string[] => {
+      const candidates = new Set<string>();
+
+      for (let i = 0; i < first.length; i++) {
+        for (let j = 0; j < last.length; j++) {
+          const a = first[i] ?? "";
+          const b = first[i + 1] ?? last[j] ?? "";
+          const c = last[j] ?? "";
+          const d = last[j + 1] ?? first[i + 1] ?? "";
+
+          const combo = `${a}${b}${c}${d}`.slice(0, 4);
+          if (combo.length === 4) {
+            candidates.add(combo);
+          }
+        }
+      }
+
+      return Array.from(candidates);
+    };
+
+    const candidates = generateCandidates(first, last);
+
+    let displayname = null;
+    for (const name of candidates) {
+      const { data: existing, error } = await supabase
+        .from("users")
+        .select("id")
+        .eq("displayname", name)
+        .limit(1);
+
+      if (error) {
+        console.error("Error checking displayname:", error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!existing || existing.length === 0) {
+        displayname = name;
+        break;
+      }
+    }
+
+    if (!displayname) {
+      console.error("Unable to generate unique displayname.");
+      setIsLoading(false);
+      return;
+    }
+
     const { error: insertError } = await supabase.from("users").insert({
       id: userId,
       firstname,
       lastname,
-      emoji: "👤", // Default emoji if you're not collecting it yet
+      displayname,
+      emoji: "👤",
     });
 
     if (insertError) {
@@ -91,8 +143,8 @@ const AuthModal = ({
     }
 
     setIsLoading(false);
-    onAuthSuccess?.(); // Optional callback
-    onClose?.(); // Close modal/dialog if needed
+    onAuthSuccess?.();
+    onClose?.();
   };
 
   // Reset tab when modal opens

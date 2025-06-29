@@ -1,4 +1,5 @@
 import * as Icons from "lucide-react";
+import { Database } from "../database.types";
 
 /* ------------------------- CONSTANT ENUMS ------------------------- */
 
@@ -79,6 +80,7 @@ export interface User {
   id: string;
   firstname: string;
   lastname: string;
+  displayname: string;
   emoji: string | null;
   is_admin?: boolean | null;
   created_at: string | null;
@@ -118,6 +120,12 @@ export interface Activity {
   message: string;
   // category?: JerseyCategory; // optional
 }
+export type AssignPoints = {
+  category: JerseyCategory;
+  subcategory: Subcategory;
+  value: number;
+  note?: string; // optional note for the points assignment
+};
 
 /* ------------------------- DOMAIN MODELS ------------------------- */
 

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient";
 import {
   User,
   UserPoint,
@@ -29,6 +29,7 @@ type JerseyBoardEntry = { user: User; total: number };
 type JerseyBoards = Record<JerseyCategory, JerseyBoardEntry[]>;
 
 export const useLeaderboard = () => {
+  const supabase = createClient();
   const [participants, setParticipants] = useState<User[]>([]);
   const [jerseyBoards, setJerseyBoards] = useState<JerseyBoards>(
     {} as JerseyBoards
@@ -59,10 +60,10 @@ export const useLeaderboard = () => {
 
       for (const point of points) {
         if (jerseyScores[point.user_id]) {
-          jerseyScores[point.user_id][point.category] += point.points;
+          jerseyScores[point.user_id][point.category] += point.value;
 
           if (point.category !== "førertroje") {
-            jerseyScores[point.user_id].førertroje += point.points;
+            jerseyScores[point.user_id].førertroje += point.value;
           }
         }
 
@@ -71,7 +72,7 @@ export const useLeaderboard = () => {
           point.user_id !== point.submitted_by &&
           jerseyScores[point.submitted_by]
         ) {
-          jerseyScores[point.submitted_by].flydende_haand += point.points;
+          jerseyScores[point.submitted_by].flydende_haand += point.value;
         }
       }
 
@@ -121,7 +122,7 @@ export const useLeaderboard = () => {
               submitter?.firstname || "Ukendt"
             }`,
             target: `${target?.emoji || "👤"} ${target?.firstname || "Ukendt"}`,
-            points: point.points ?? 0,
+            points: point.value ?? 0,
             timestamp: formatCopenhagenTime(point.created_at || ""),
             type: point.subcategory,
             message: `${submitter?.firstname || "Ukendt"} loggede ${

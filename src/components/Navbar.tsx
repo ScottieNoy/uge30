@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient";
 import {
   Menu,
   X,
@@ -32,7 +32,7 @@ import { User } from "@supabase/supabase-js";
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-
+  const supabase = createClient();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -59,25 +59,28 @@ export default function Navbar() {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      const sessionUser = data.session?.user;
+    const loadInitialSession = async () => {
+      // Supabase restores session asynchronously — wait for it!
+      const { data, error } = await supabase.auth.getUser();
 
       if (isMounted) {
-        await loadUserData(isMounted, sessionUser);
+        await loadUserData(true, data.user ?? null);
         setLoading(false);
       }
     };
 
-    fetchUser();
-
+    // Auth state change listener (for sign-in/out or session restoration)
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_, session) => {
+      async (event, session) => {
         if (isMounted) {
-          await loadUserData(isMounted, session?.user ?? null);
+          console.log("Auth event:", event);
+          await loadUserData(true, session?.user ?? null);
+          setLoading(false);
         }
       }
     );
+
+    loadInitialSession(); // Trigger session check once on mount
 
     return () => {
       isMounted = false;
@@ -203,7 +206,10 @@ export default function Navbar() {
                 </>
               )}
 
-              <Button className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
+              <Button
+                className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+                onClick={() => router.push("/scan")}
+              >
                 <QrCode className="h-4 w-4 mr-2" />
                 Scan
               </Button>

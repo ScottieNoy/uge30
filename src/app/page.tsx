@@ -1,6 +1,13 @@
 "use client";
 
-import { QrCode, Trophy, Users, Flame, Crown } from "lucide-react";
+import {
+  QrCode,
+  Trophy,
+  Users,
+  Flame,
+  Crown,
+  CalendarDays,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import JerseyLeaderboard from "@/components/JerseyLeaderboard";
@@ -11,10 +18,12 @@ import JerseyShowcase from "@/components/JerseyShowcase";
 
 import { JerseyCategory, jerseyConfigs, JerseyDisplay } from "@/types"; // adjust path as needed
 import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { participants, jerseyBoards, jerseyData, activityFeed } =
     useLeaderboard();
+  const router = useRouter();
 
   const jerseyDisplay = Object.entries(jerseyBoards)
     .map(([category, entries]) => {
@@ -59,6 +68,7 @@ export default function Home() {
             <Button
               size="lg"
               className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
+              onClick={() => router.push("/scan")}
             >
               <QrCode className="mr-3 h-6 w-6" /> Start Scanning
             </Button>
@@ -98,8 +108,8 @@ export default function Home() {
           </Card>
           <Card className="bg-white/10 text-center p-4">
             <CardContent className="p-0">
-              <Flame className="h-6 w-6 text-orange-300 mx-auto mb-2" />
-              <div className="text-xl font-bold text-white">Live</div>
+              <CalendarDays className="h-6 w-6 text-orange-300 mx-auto mb-2" />
+              <div className="text-xl font-bold text-white">Soon</div>
               <div className="text-cyan-200 text-sm">Competition</div>
             </CardContent>
           </Card>

@@ -12,10 +12,11 @@ import * as Icons from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabaseClient";
 import { JERSEY_CATEGORIES, jerseyConfigs, User } from "@/types";
 
 export default function Standings() {
+  const supabase = createClient();
   const [users, setUsers] = useState<User[]>([]);
   const [jerseyData, setJerseyData] = useState<Record<string, any[]>>({});
   const [visibleUsers, setVisibleUsers] = useState<string[]>(() =>
@@ -68,7 +69,7 @@ export default function Standings() {
         if (!byJersey[category]) byJersey[category] = {};
         if (!byJersey[category][time]) byJersey[category][time] = {};
         byJersey[category][time][p.user_id] =
-          (byJersey[category][time][p.user_id] || 0) + p.points;
+          (byJersey[category][time][p.user_id] || 0) + p.value;
       });
 
       for (const [category, timeData] of Object.entries(byJersey)) {

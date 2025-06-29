@@ -1,66 +1,67 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabaseClient";
 
 export default function AddUserPage() {
-  const [email, setEmail] = useState("")
-  const [name, setName] = useState("")
-  const [emoji, setEmoji] = useState("🍻")
-  const [password, setPassword] = useState("")
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [authorized, setAuthorized] = useState(false)
-  const router = useRouter()
+  const supabase = createClient();
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [emoji, setEmoji] = useState("🍻");
+  const [password, setPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const sessionUser = sessionData.session?.user
+      const { data: sessionData } = await supabase.auth.getSession();
+      const sessionUser = sessionData.session?.user;
 
       if (!sessionUser) {
-        router.push("/")
-        return
+        router.push("/");
+        return;
       }
 
       const { data: userData, error } = await supabase
         .from("users")
         .select("is_admin")
         .eq("id", sessionUser.id)
-        .single()
+        .single();
 
       if (error || !userData?.is_admin) {
-        router.push("/")
-        return
+        router.push("/");
+        return;
       }
 
-      setAuthorized(true)
-      setLoading(false)
-    }
+      setAuthorized(true);
+      setLoading(false);
+    };
 
-    checkAdmin()
-  }, [router])
+    checkAdmin();
+  }, [router]);
 
   const handleAddUser = async () => {
     if (!email || !name || !password) {
-      alert("All fields are required")
-      return
+      alert("All fields are required");
+      return;
     }
 
     // 1. Create user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-    })
+    });
 
     if (error || !data.user) {
-      console.error("Signup error:", error)
-      alert("Signup failed: " + error?.message)
-      return
+      console.error("Signup error:", error);
+      alert("Signup failed: " + error?.message);
+      return;
     }
 
-    const userId = data.user.id
+    const userId = data.user.id;
 
     // 2. Insert into custom users table
     const { error: profileError } = await supabase.from("users").insert([
@@ -70,23 +71,23 @@ export default function AddUserPage() {
         emoji,
         is_admin: isAdmin,
       },
-    ])
+    ]);
 
     if (profileError) {
-      console.error("Profile creation error:", profileError)
-      alert("User created, but profile insert failed.")
+      console.error("Profile creation error:", profileError);
+      alert("User created, but profile insert failed.");
     } else {
-      alert("User successfully created!")
-      setEmail("")
-      setName("")
-      setEmoji("🍻")
-      setPassword("")
-      setIsAdmin(false)
+      alert("User successfully created!");
+      setEmail("");
+      setName("");
+      setEmoji("🍻");
+      setPassword("");
+      setIsAdmin(false);
     }
-  }
+  };
 
-  if (loading) return <p className="p-4">Checking admin access...</p>
-  if (!authorized) return null
+  if (loading) return <p className="p-4">Checking admin access...</p>;
+  if (!authorized) return null;
 
   return (
     <main className="p-4 max-w-md mx-auto">
@@ -139,5 +140,5 @@ export default function AddUserPage() {
         Add User
       </button>
     </main>
-  )
+  );
 }

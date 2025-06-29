@@ -5,22 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Trophy, Beer, Zap, Star } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
-
-interface User {
-  id: string;
-  name: string;
-  avatar?: string;
-}
+import { AssignPoints, JERSEY_CATEGORIES, JerseyCategory, User } from "@/types";
 
 interface PointsAssignmentProps {
   targetUser: User;
-  currentUser: User;
+  currentUser: User | null; // Use UserType for Supabase user object
   onClose: () => void;
-  onAssignPoints: (
-    userId: string,
-    category: string,
-    points: number
-  ) => Promise<void>;
+  onAssignPoints: (assignPoints: AssignPoints) => Promise<void>;
 }
 
 const pointCategories = [
@@ -30,6 +21,7 @@ const pointCategories = [
     icon: Trophy,
     points: 50,
     color: "from-yellow-400 to-orange-500",
+    category: JERSEY_CATEGORIES[0],
   },
   {
     id: "drink",
@@ -37,6 +29,7 @@ const pointCategories = [
     icon: Beer,
     points: 10,
     color: "from-blue-400 to-cyan-400",
+    category: JERSEY_CATEGORIES[1],
   },
   {
     id: "challenge",
@@ -44,6 +37,7 @@ const pointCategories = [
     icon: Zap,
     points: 25,
     color: "from-purple-500 to-pink-500",
+    category: JERSEY_CATEGORIES[2],
   },
   {
     id: "bonus",
@@ -51,6 +45,7 @@ const pointCategories = [
     icon: Star,
     points: 15,
     color: "from-green-400 to-emerald-500",
+    category: JERSEY_CATEGORIES[3],
   },
 ];
 
@@ -64,7 +59,19 @@ const PointsAssignment = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleAssignPoints = async (category: string, points: number) => {
+  const handleAssignPoints = async (
+    category: JerseyCategory,
+    points: number
+  ) => {
+    if (!currentUser) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to assign points.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (targetUser.id === currentUser.id) {
       toast({
         title: "Error",
@@ -76,10 +83,15 @@ const PointsAssignment = ({
 
     setIsSubmitting(true);
     try {
-      await onAssignPoints(targetUser.id, category, points);
+      await onAssignPoints({
+        category: category,
+        subcategory: "beer",
+        value: points,
+        note: `Points assigned by ${currentUser.id}`,
+      });
       toast({
         title: "Points Assigned!",
-        description: `${points} points given to ${targetUser.name} for ${category}`,
+        description: `${points} points given to ${targetUser.firstname} for ${category}`,
       });
       onClose();
     } catch (error) {
@@ -112,11 +124,11 @@ const PointsAssignment = ({
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mx-auto mb-3 flex items-center justify-center">
               <span className="text-white font-bold text-xl">
-                {targetUser.name.charAt(0).toUpperCase()}
+                {targetUser.firstname.charAt(0).toUpperCase()}
               </span>
             </div>
             <h3 className="text-white font-semibold text-lg">
-              {targetUser.name}
+              {targetUser.firstname} {targetUser.lastname}
             </h3>
             <p className="text-white/60 text-sm">
               Select category to assign points
@@ -131,7 +143,7 @@ const PointsAssignment = ({
                 <Button
                   key={category.id}
                   onClick={() =>
-                    handleAssignPoints(category.id, category.points)
+                    handleAssignPoints(category.category, category.points)
                   }
                   disabled={isSubmitting}
                   className="h-auto p-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white justify-between"

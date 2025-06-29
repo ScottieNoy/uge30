@@ -1,71 +1,130 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Users, ArrowLeft } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/useToast";
 import QRScanner from "./QRScanner";
 import PointsAssignment from "./PointsAssignment";
-
-const mockCurrentUser = {
-  id: "user1",
-  name: "Alex Smith",
-};
-
-const mockUsers = [
-  { id: "user2", name: "Sarah Johnson" },
-  { id: "user3", name: "Mike Chen" },
-  { id: "user4", name: "Emma Davis" },
-];
+import { createClient } from "@/lib/supabaseClient";
+import { AssignPoints, User } from "@/types";
+import { QRCodeCanvas } from "qrcode.react";
 
 const Scan = () => {
   const { toast } = useToast();
   const router = useRouter();
+  const supabase = createClient();
+
   const [showScanner, setShowScanner] = useState(false);
   const [showPointsAssignment, setShowPointsAssignment] = useState(false);
-  const [targetUser, setTargetUser] = useState<any>(null);
+  const [targetUser, setTargetUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const handleQRScan = (qrData: string) => {
+  // Load current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (!user || userError) {
+        toast({
+          title: "Not Authenticated",
+          description: "Please log in to use the QR scanner.",
+          variant: "destructive",
+        });
+        router.push("/");
+        return;
+      }
+
+      const { data: userData, error: userDataError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!userData || userDataError) {
+        toast({
+          title: "User Not Found",
+          description: "Your user data could not be found.",
+          variant: "destructive",
+        });
+        router.push("/");
+        return;
+      }
+
+      setCurrentUser(userData);
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Handle QR result
+  const handleQRScan = async (qrData: string) => {
     console.log("QR Code scanned:", qrData);
+    const match = qrData.match(/^user:([a-zA-Z0-9-]+)$/);
 
-    // Parse QR code to find user
-    // For now, simulate finding a user
-    const foundUser = mockUsers.find((user) => qrData.includes(user.id));
-
-    if (foundUser) {
-      setTargetUser(foundUser);
-      setShowScanner(false);
-      setShowPointsAssignment(true);
-    } else {
+    if (!match) {
       toast({
-        title: "User Not Found",
-        description: "The scanned QR code doesn't match any user.",
+        title: "Invalid QR Code",
+        description: "This QR code doesn't look right.",
         variant: "destructive",
       });
       setShowScanner(false);
+      return;
     }
+
+    const userId = match[1];
+
+    const { data: foundUser, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (!foundUser || error) {
+      toast({
+        title: "User Not Found",
+        description: "The scanned QR code does not match any user.",
+        variant: "destructive",
+      });
+      setShowScanner(false);
+      return;
+    }
+
+    setTargetUser(foundUser);
+    setShowScanner(false);
+    setShowPointsAssignment(true);
   };
 
-  const handleAssignPoints = async (
-    userId: string,
-    category: string,
-    points: number
-  ) => {
-    // This would connect to Supabase to actually assign points
-    console.log("Assigning points:", { userId, category, points });
+  const handleAssignPoints = async (assignPoints: AssignPoints) => {
+    if (!currentUser || !targetUser) return;
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const { error } = await supabase.from("points").insert({
+      user_id: targetUser.id,
+      category: assignPoints.category,
+      subcategory: assignPoints.subcategory,
+      value: assignPoints.value,
+      note: assignPoints.note || null,
+      submitted_by: currentUser.id,
+    });
 
-    // Here you would call your Supabase function to add points
-    // await supabase.from('points').insert({ user_id: userId, category, points, assigned_by: currentUser.id });
-  };
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign points.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: `You gave ${assignPoints.value} points to ${targetUser.firstname}`,
+      });
+    }
 
-  const generateMyQRCode = () => {
-    // Generate QR code data for current user
-    return `user:${mockCurrentUser.id}`;
+    setShowPointsAssignment(false);
   };
 
   return (
@@ -86,12 +145,11 @@ const Scan = () => {
             <h1 className="text-3xl font-bold text-white">QR Scanner</h1>
             <p className="text-blue-100">Give points to other participants</p>
           </div>
-          <div className="w-16" /> {/* Spacer for centering */}
+          <div className="w-16" /> {/* Spacer */}
         </div>
 
-        {/* Main Actions */}
         <div className="space-y-6">
-          {/* Scan QR Code */}
+          {/* Scan QR */}
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
               <CardTitle className="text-white flex items-center space-x-3">
@@ -101,8 +159,7 @@ const Scan = () => {
             </CardHeader>
             <CardContent>
               <p className="text-white/80 mb-4">
-                Scan another participant's QR code to give them points for
-                competitions, drinks, or challenges.
+                Scan another participant's QR code to assign them points.
               </p>
               <Button
                 onClick={() => setShowScanner(true)}
@@ -114,7 +171,7 @@ const Scan = () => {
             </CardContent>
           </Card>
 
-          {/* My QR Code */}
+          {/* My QR */}
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
               <CardTitle className="text-white flex items-center space-x-3">
@@ -122,23 +179,14 @@ const Scan = () => {
                 <span>My QR Code</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col items-center">
               <p className="text-white/80 mb-4">
-                Show this QR code to other participants so they can give you
-                points.
+                Show this QR code to let others give you points.
               </p>
-              <div className="bg-white p-6 rounded-lg text-center">
-                <div className="w-48 h-48 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                  <div className="text-center">
-                    <QrCode className="h-16 w-16 mx-auto mb-2 text-gray-600" />
-                    <p className="text-sm text-gray-600">QR Code Here</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {generateMyQRCode()}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-gray-800 font-medium">
-                  {mockCurrentUser.name}
+              <div className="flex flex-col items-center w-fit justify-center bg-white p-6 rounded-lg text-center">
+                <QRCodeCanvas value={`user:${currentUser?.id}`} size={180} />
+                <p className="text-gray-800 font-medium mt-3">
+                  {currentUser?.displayname || "Loading..."}
                 </p>
               </div>
             </CardContent>
@@ -157,7 +205,7 @@ const Scan = () => {
       {showPointsAssignment && targetUser && (
         <PointsAssignment
           targetUser={targetUser}
-          currentUser={mockCurrentUser}
+          currentUser={currentUser}
           onClose={() => setShowPointsAssignment(false)}
           onAssignPoints={handleAssignPoints}
         />
