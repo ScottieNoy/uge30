@@ -9,7 +9,7 @@ import {
   X,
   Trophy,
   Users,
-  User,
+  User as UserIcon,
   LogIn,
   LogOut,
   QrCode,
@@ -27,12 +27,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatUserName } from "@/lib/utils";
 import AuthModal from "./AuthModal";
+import { User } from "@supabase/supabase-js";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("User");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -54,70 +56,61 @@ export default function Navbar() {
     setAuthModalOpen(false);
   };
 
-  // If not logged in, username is "Not logged in"
-  useEffect(() => {
-    if (!isLoggedIn) {
-      setUserName("Not logged in");
-    }
-  }, [isLoggedIn]);
-
-  // 2. Get session + user on load and subscribe to auth state changes
   useEffect(() => {
     let isMounted = true;
+
     const fetchUser = async () => {
       const { data } = await supabase.auth.getSession();
       const sessionUser = data.session?.user;
 
-      if (isMounted) setIsLoggedIn(!!sessionUser);
-
-      if (sessionUser) {
-        const { data: userData } = await supabase
-          .from("users")
-          .select("is_admin, firstname, lastname, emoji")
-          .eq("id", sessionUser.id)
-          .single();
-
-        if (isMounted) {
-          setIsAdmin(userData?.is_admin ?? false);
-          if (userData) {
-            setUserName(formatUserName(userData));
-          }
-        }
-
-        console.log("User data fetched:", userData);
+      if (isMounted) {
+        await loadUserData(isMounted, sessionUser);
+        setLoading(false);
       }
     };
 
     fetchUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_, session) => {
-        const user = session?.user;
-        if (isMounted) setIsLoggedIn(!!user);
-
-        if (user) {
-          const { data: userData } = await supabase
-            .from("users")
-            .select("is_admin, firstname, lastname, emoji")
-            .eq("id", user.id)
-            .single();
-
-          if (isMounted) {
-            setIsAdmin(userData?.is_admin ?? false);
-            setUserName(userData ? formatUserName(userData) : "Unknown User");
-          }
-        } else if (isMounted) {
-          setIsAdmin(false);
-          setUserName("Not logged in");
+        if (isMounted) {
+          await loadUserData(isMounted, session?.user ?? null);
         }
       }
     );
 
     return () => {
-      listener?.subscription.unsubscribe();
       isMounted = false;
+      authListener?.subscription.unsubscribe();
     };
   }, []);
+
+  const loadUserData = async (
+    isMounted: boolean,
+    sessionUser?: User | null
+  ) => {
+    if (isMounted) setIsLoggedIn(!!sessionUser);
+
+    if (sessionUser) {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("is_admin, firstname, lastname, emoji")
+        .eq("id", sessionUser.id)
+        .single();
+
+      if (isMounted) {
+        setIsAdmin(userData?.is_admin ?? false);
+        setUserName(userData ? formatUserName(userData) : "Unknown User");
+      }
+
+      console.log("User data fetched:", userData);
+    } else {
+      if (isMounted) {
+        setIsAdmin(false);
+        setUserName("Not logged in");
+      }
+    }
+  };
 
   // 3. Handle logout
   useEffect(() => {
@@ -183,7 +176,7 @@ export default function Navbar() {
                   variant="ghost"
                   className="text-white hover:text-cyan-300"
                 >
-                  <User className="h-4 w-4 mr-2" />
+                  <UserIcon className="h-4 w-4 mr-2" />
                   My Profile
                 </Button>
               </Link>
@@ -216,48 +209,49 @@ export default function Navbar() {
               </Button>
 
               {/* User Menu */}
-              {isLoggedIn ? (
-                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
+              {!loading &&
+                (isLoggedIn ? (
+                  <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                        <UserIcon className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="text-white font-medium truncate">
+                        {userName || "User"}
+                      </span>
+                      <Badge className="bg-cyan-500 text-white font-semibold">
+                        {isAdmin ? "Admin" : "User"}
+                      </Badge>
                     </div>
-                    <span className="text-white font-medium truncate">
-                      {userName || "User"}
-                    </span>
-                    <Badge className="bg-cyan-500 text-white font-semibold">
-                      {isAdmin ? "Admin" : "User"}
-                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-white/20 hover:text-red-300 transition-colors p-2"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/20 hover:text-red-300 transition-colors p-2"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    className="text-white hover:bg-white/10"
-                    onClick={() => openAuthModal("login")}
-                  >
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-white/30 text-white hover:bg-white/10"
-                    onClick={() => openAuthModal("register")}
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Register
-                  </Button>
-                </div>
-              )}
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:bg-white/10"
+                      onClick={() => openAuthModal("login")}
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Login
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-white/30 text-white hover:bg-white/10"
+                      onClick={() => openAuthModal("register")}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Register
+                    </Button>
+                  </div>
+                ))}
             </div>
 
             {/* Mobile Toggle */}
@@ -297,7 +291,7 @@ export default function Navbar() {
                 </Link>
                 <Link href="/my" onClick={closeMenu}>
                   <Button variant="ghost" className="w-full text-white">
-                    <User className="h-4 w-4 mr-2" />
+                    <UserIcon className="h-4 w-4 mr-2" />
                     My Profile
                   </Button>
                 </Link>
@@ -318,48 +312,49 @@ export default function Navbar() {
                 )}
 
                 <div className="border-t border-white/10 pt-3 mt-3">
-                  {isLoggedIn ? (
-                    <>
-                      <div className="flex items-center px-3 py-2 text-white">
-                        <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                          <User className="h-4 w-4 text-white" />
+                  {!loading &&
+                    (isLoggedIn ? (
+                      <>
+                        <div className="flex items-center px-3 py-2 text-white">
+                          <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                            <UserIcon className="h-4 w-4 text-white" />
+                          </div>
+                          <span className="text-white font-medium">
+                            {userName || "User"}
+                          </span>
+                          <Badge className="ml-2 bg-cyan-500 text-white font-semibold">
+                            {isAdmin ? "Admin" : "User"}
+                          </Badge>
                         </div>
-                        <span className="text-white font-medium">
-                          {userName || "User"}
-                        </span>
-                        <Badge className="ml-2 bg-cyan-500 text-white font-semibold">
-                          {isAdmin ? "Admin" : "User"}
-                        </Badge>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-red-400 hover:bg-red-900/20"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="h-4 w-4 mr-3" />
-                        Logout
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-white hover:bg-white/10"
-                        onClick={() => openAuthModal("login")}
-                      >
-                        <LogIn className="h-4 w-4 mr-3" />
-                        Login
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-white hover:bg-white/10"
-                        onClick={() => openAuthModal("register")}
-                      >
-                        <Users className="h-4 w-4 mr-3" />
-                        Register
-                      </Button>
-                    </>
-                  )}
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-red-400 hover:bg-red-900/20"
+                          onClick={handleLogout}
+                        >
+                          <LogOut className="h-4 w-4 mr-3" />
+                          Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-white hover:bg-white/10"
+                          onClick={() => openAuthModal("login")}
+                        >
+                          <LogIn className="h-4 w-4 mr-3" />
+                          Login
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-white hover:bg-white/10"
+                          onClick={() => openAuthModal("register")}
+                        >
+                          <Users className="h-4 w-4 mr-3" />
+                          Register
+                        </Button>
+                      </>
+                    ))}
                 </div>
               </div>
             </div>
