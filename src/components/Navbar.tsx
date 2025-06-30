@@ -215,10 +215,12 @@ export default function Navbar({ session, userData }: NavbarProps) {
         {isMenuOpen && (
           <div className="md:hidden bg-black/30 backdrop-blur-md border-t border-white/10 animate-fade-in">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
-                <QrCode className="h-4 w-4 mr-2" />
-                Scan QR Code
-              </Button>
+              <Link href="/scan" onClick={closeMenu}>
+                <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+                  <QrCode className="h-4 w-4 mr-2" />
+                  Scan QR Code
+                </Button>
+              </Link>
               <Link href="/" onClick={closeMenu}>
                 <Button variant="ghost" className="w-full text-white">
                   <Trophy className="h-4 w-4 mr-2" />
