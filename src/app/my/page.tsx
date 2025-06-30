@@ -55,17 +55,6 @@ export default function MyPage() {
           const total = pointLogs.reduce((sum, p) => sum + (p.value || 0), 0);
           setPoints(total);
         }
-
-        // 3. Get jersey
-        const { data: jerseyData } = await supabase
-          .from("jerseys")
-          .select("name")
-          .eq("holder_id", userId);
-
-        if (jerseyData && jerseyData.length > 0) {
-          const names = jerseyData.map((j) => j.name).join(", ");
-          setJersey(names);
-        }
       } catch (e) {
         setError("Der opstod en fejl ved indlæsning af din profil.");
       } finally {

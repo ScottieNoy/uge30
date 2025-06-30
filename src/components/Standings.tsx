@@ -2,11 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+
 import * as Icons from "lucide-react";
 
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
@@ -192,51 +188,48 @@ export default function Standings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-6 pt-0">
-                <ChartContainer className="h-48 sm:h-64" config={chartConfig}>
-                  <LineChart
-                    data={jerseyData[j]}
-                    margin={{
-                      top: 5,
-                      right: (windowWidth ?? 1024) < 640 ? 10 : 20,
-                      left: (windowWidth ?? 1024) < 640 ? 10 : 20,
-                      bottom: 5,
-                    }}
-                  >
-                    <XAxis
-                      dataKey="time"
-                      stroke="#94a3b8"
-                      fontSize={(windowWidth ?? 1024) < 640 ? 10 : 12}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      stroke="#94a3b8"
-                      fontSize={(windowWidth ?? 1024) < 640 ? 10 : 12}
-                      tickLine={false}
-                      axisLine={false}
-                      width={(windowWidth ?? 1024) < 640 ? 30 : 60}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
+                <LineChart
+                  data={jerseyData[j]}
+                  margin={{
+                    top: 5,
+                    right: (windowWidth ?? 1024) < 640 ? 10 : 20,
+                    left: (windowWidth ?? 1024) < 640 ? 10 : 20,
+                    bottom: 5,
+                  }}
+                >
+                  <XAxis
+                    dataKey="time"
+                    stroke="#94a3b8"
+                    fontSize={(windowWidth ?? 1024) < 640 ? 10 : 12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#94a3b8"
+                    fontSize={(windowWidth ?? 1024) < 640 ? 10 : 12}
+                    tickLine={false}
+                    axisLine={false}
+                    width={(windowWidth ?? 1024) < 640 ? 30 : 60}
+                  />
 
-                    {users.map((u) =>
-                      visibleUsers.includes(u.id) ? (
-                        <Line
-                          key={u.id}
-                          type="monotone"
-                          dataKey={u.id}
-                          stroke={getColorForUser(u.id)}
-                          strokeWidth={(windowWidth ?? 1024) < 640 ? 1.5 : 2}
-                          dot={{
-                            fill: getColorForUser(u.id),
-                            strokeWidth: 2,
-                            r: (windowWidth ?? 1024) < 640 ? 3 : 4,
-                          }}
-                          isAnimationActive={false}
-                        />
-                      ) : null
-                    )}
-                  </LineChart>
-                </ChartContainer>
+                  {users.map((u) =>
+                    visibleUsers.includes(u.id) ? (
+                      <Line
+                        key={u.id}
+                        type="monotone"
+                        dataKey={u.id}
+                        stroke={getColorForUser(u.id)}
+                        strokeWidth={(windowWidth ?? 1024) < 640 ? 1.5 : 2}
+                        dot={{
+                          fill: getColorForUser(u.id),
+                          strokeWidth: 2,
+                          r: (windowWidth ?? 1024) < 640 ? 3 : 4,
+                        }}
+                        isAnimationActive={false}
+                      />
+                    ) : null
+                  )}
+                </LineChart>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {users.map((user) => {
                     const isActive = visibleUsers.includes(user.id);
