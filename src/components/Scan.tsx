@@ -5,15 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Users, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/useToast";
 import QRScanner from "./QRScanner";
 import PointsAssignment from "./PointsAssignment";
 import { createClient } from "@/lib/supabaseClient";
 import { AssignPoints, User } from "@/types";
 import { QRCodeCanvas } from "qrcode.react";
+import { toast } from "sonner";
 
 const Scan = () => {
-  const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
 
@@ -30,11 +29,7 @@ const Scan = () => {
         error: userError,
       } = await supabase.auth.getUser();
       if (!user || userError) {
-        toast({
-          title: "Not Authenticated",
-          description: "Please log in to use the QR scanner.",
-          variant: "destructive",
-        });
+        toast("You must be logged in to access this page.");
         router.push("/");
         return;
       }
@@ -46,11 +41,7 @@ const Scan = () => {
         .single();
 
       if (!userData || userDataError) {
-        toast({
-          title: "User Not Found",
-          description: "Your user data could not be found.",
-          variant: "destructive",
-        });
+        toast("User not found. Please create a profile first.");
         router.push("/");
         return;
       }
@@ -67,11 +58,7 @@ const Scan = () => {
     const match = qrData.match(/^([a-zA-Z0-9-]+)$/);
 
     if (!match) {
-      toast({
-        title: "Invalid QR Code",
-        description: "This QR code doesn't look right.",
-        variant: "destructive",
-      });
+      toast("Invalid QR Code");
       setShowScanner(false);
       return;
     }
@@ -85,11 +72,7 @@ const Scan = () => {
       .single();
 
     if (!foundUser || error) {
-      toast({
-        title: "User Not Found",
-        description: "The scanned QR code does not match any user.",
-        variant: "destructive",
-      });
+      toast("User not found. Please ensure the QR code is valid.");
       setShowScanner(false);
       return;
     }
@@ -112,16 +95,9 @@ const Scan = () => {
     });
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to assign points.",
-        variant: "destructive",
-      });
+      toast("Error assigning points: " + error.message);
     } else {
-      toast({
-        title: "Success",
-        description: `You gave ${assignPoints.value} points to ${targetUser.firstname}`,
-      });
+      toast("Points assigned successfully!");
     }
 
     setShowPointsAssignment(false);

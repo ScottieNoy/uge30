@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Shield, Plus, Minus } from "lucide-react";
-import { useToast } from "@/hooks/useToast";
 import { User } from "@/types";
+import { toast } from "sonner";
 
 interface AdminPointsAssignmentProps {
   users: User[];
@@ -38,7 +38,6 @@ const AdminPointsAssignment = ({
   const [category, setCategory] = useState<string>("admin");
   const [reason, setReason] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const categories = [
     { id: "admin", name: "Admin Adjustment" },
@@ -51,20 +50,12 @@ const AdminPointsAssignment = ({
 
   const handleAssignPoints = async () => {
     if (!selectedUser) {
-      toast({
-        title: "Error",
-        description: "Please select a user",
-        variant: "destructive",
-      });
+      toast("Error");
       return;
     }
 
     if (pointsAmount === 0) {
-      toast({
-        title: "Error",
-        description: "Please enter a point amount",
-        variant: "destructive",
-      });
+      toast("Please enter a valid points amount");
       return;
     }
 
@@ -76,12 +67,14 @@ const AdminPointsAssignment = ({
         users.find((u) => u.id === selectedUser)?.firstname || "User";
       const action = pointsAmount > 0 ? "added" : "deducted";
 
-      toast({
-        title: "Points Assigned!",
-        description: `${Math.abs(pointsAmount)} points ${action} ${
-          pointsAmount > 0 ? "to" : "from"
-        } ${selectedUserName}`,
-      });
+      toast(
+        `Successfully ${action} ${Math.abs(
+          pointsAmount
+        )} points to ${selectedUserName}.`,
+        {
+          description: reason ? `Reason: ${reason}` : "No reason provided",
+        }
+      );
 
       // Reset form
       setSelectedUser("");
@@ -89,11 +82,11 @@ const AdminPointsAssignment = ({
       setReason("");
       setCategory("admin");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to assign points. Please try again.",
-        variant: "destructive",
-      });
+      toast(
+        `Error assigning points: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     } finally {
       setIsSubmitting(false);
     }
