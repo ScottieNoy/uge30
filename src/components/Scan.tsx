@@ -64,7 +64,7 @@ const Scan = () => {
   // Handle QR result
   const handleQRScan = async (qrData: string) => {
     console.log("QR Code scanned:", qrData);
-    const match = qrData.match(/^user:([a-zA-Z0-9-]+)$/);
+    const match = qrData.match(/^([a-zA-Z0-9-]+)$/);
 
     if (!match) {
       toast({
@@ -76,12 +76,12 @@ const Scan = () => {
       return;
     }
 
-    const userId = match[1];
+    const displayName = match[1];
 
     const { data: foundUser, error } = await supabase
       .from("users")
       .select("*")
-      .eq("id", userId)
+      .eq("displayname", displayName)
       .single();
 
     if (!foundUser || error) {
@@ -184,7 +184,7 @@ const Scan = () => {
                 Show this QR code to let others give you points.
               </p>
               <div className="flex flex-col items-center w-fit justify-center bg-white p-6 rounded-lg text-center">
-                <QRCodeCanvas value={`user:${currentUser?.id}`} size={180} />
+                <QRCodeCanvas value={`${currentUser?.displayname}`} size={180} />
                 <p className="text-gray-800 font-medium mt-3">
                   {currentUser?.displayname || "Loading..."}
                 </p>

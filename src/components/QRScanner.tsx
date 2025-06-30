@@ -48,6 +48,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                 <Scanner
                   onScan={(codes) => {
                     if (codes[0]?.rawValue) onScan(codes[0].rawValue);
+                    console.log("Scanned codes:", codes);
                   }}
                   onError={(e) => setError((e as Error).message)}
                   constraints={{ facingMode: "environment" }}
@@ -63,6 +64,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                 <Button
                   onClick={() => {
                     const code = prompt("Enter QR code manually:");
+                    // console.log("Manual code entry:", code);
                     if (code) onScan(code);
                   }}
                   variant="outline"
