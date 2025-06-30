@@ -52,18 +52,31 @@ export default function Home() {
       {/* Hero Section */}
       <section className="px-4 pt-20 pb-8 text-center">
         <div className="max-w-4xl mx-auto">
-          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
-            <span className="text-white font-black text-3xl">U</span>
+          <div className="w-40 h-40 mx-auto mb-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            {/* <span className="text-white font-black text-3xl">U</span> */}
+            <img
+              src="/uge30-logo.png"
+              alt="UGE Icon"
+              className="object-contain"
+            />
           </div>
-          <h1 className="text-5xl font-black text-white mb-4">
+          {/* <h1 className="text-5xl font-black text-white mb-4">
             UGE{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
               30
             </span>
+          </h1> */}
+          {/* <img
+            src="/tropical-logo.png"
+            alt="UGE 30 Logo"
+            className="mx-auto mb-4 w-48 sm:w-64"
+          /> */}
+          <h1 className="text-3xl font-black text-white mb-4">
+            Scan, Drik,{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+            Gentag!
+          </span>
           </h1>
-          <p className="text-xl text-blue-100 mb-8">
-            Scan, Compete, Conquer the Festival!
-          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
