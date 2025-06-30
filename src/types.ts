@@ -81,6 +81,7 @@ export interface User {
   firstname: string;
   lastname: string;
   displayname: string;
+  avatar?: string | null;
   emoji: string | null;
   is_admin?: boolean | null;
   created_at: string | null;
@@ -134,6 +135,7 @@ export interface User {
   id: string;
   firstname: string;
   lastname: string;
+  avatar?: string | null; // optional avatar URL
   emoji: string | null; // optional emoji
   is_admin?: boolean | null; // optional admin flag
   created_at: string | null; // optional created date

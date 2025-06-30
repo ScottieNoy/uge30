@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       points: {
@@ -101,6 +76,7 @@ export type Database = {
       }
       users: {
         Row: {
+          avatar: string | null
           created_at: string | null
           displayname: string
           emoji: string | null
@@ -111,6 +87,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          avatar?: string | null
           created_at?: string | null
           displayname: string
           emoji?: string | null
@@ -121,6 +98,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          avatar?: string | null
           created_at?: string | null
           displayname?: string
           emoji?: string | null
@@ -307,9 +285,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       jersey_category: [
@@ -339,4 +314,3 @@ export const Constants = {
     },
   },
 } as const
-

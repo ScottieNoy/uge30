@@ -4,6 +4,7 @@ import NotificationManager from "../components/NotificationManager";
 import Navbar from "../components/Navbar";
 import PwaInit from "../components/PwaInit";
 import SplashScreen from "@/components/SplashScreen";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata = {
   title: "UGE 30",
@@ -36,6 +37,7 @@ export default function RootLayout({
         <NotificationManager />
         <Navbar />
         <main>{children}</main>
+        <Toaster />
       </body>
     </html>
   );

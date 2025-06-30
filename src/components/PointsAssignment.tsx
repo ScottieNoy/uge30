@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Trophy, Beer, Zap, Star } from "lucide-react";
-import { useToast } from "@/hooks/useToast";
 import { AssignPoints, JERSEY_CATEGORIES, JerseyCategory, User } from "@/types";
+import { toast } from "sonner";
 
 interface PointsAssignmentProps {
   targetUser: User;
@@ -57,27 +57,18 @@ const PointsAssignment = ({
 }: PointsAssignmentProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const handleAssignPoints = async (
     category: JerseyCategory,
     points: number
   ) => {
     if (!currentUser) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to assign points.",
-        variant: "destructive",
-      });
+      toast("You must be logged in to assign points.");
       return;
     }
 
     if (targetUser.id === currentUser.id) {
-      toast({
-        title: "Error",
-        description: "You cannot give points to yourself!",
-        variant: "destructive",
-      });
+      toast("You cannot assign points to yourself.");
       return;
     }
 
@@ -89,17 +80,10 @@ const PointsAssignment = ({
         value: points,
         note: `Points assigned by ${currentUser.id}`,
       });
-      toast({
-        title: "Points Assigned!",
-        description: `${points} points given to ${targetUser.firstname} for ${category}`,
-      });
+      toast("Points assigned successfully!");
       onClose();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to assign points. Please try again.",
-        variant: "destructive",
-      });
+      toast("Error assigning points: " + (error as Error).message);
     } finally {
       setIsSubmitting(false);
     }
