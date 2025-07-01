@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 
+
 export default function PwaInit() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {

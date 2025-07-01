@@ -6,6 +6,8 @@ import PwaInit from "../components/PwaInit";
 import SplashScreen from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { createClient } from "@/lib/supabaseServer";
+import NotificationGate from '@/components/NotificationGate'
+
 
 export const metadata = {
   title: "UGE 30",
@@ -54,6 +56,7 @@ export default async function RootLayout({
       <body className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
         <PwaInit />
         <NotificationManager />
+        <NotificationGate />
         <Navbar session={session} userData={userData} />
         <main>{children}</main>
         <Toaster />
