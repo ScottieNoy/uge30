@@ -18,129 +18,58 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { formatUserName } from "@/lib/utils";
 import AuthModal from "./AuthModal";
-import { User } from "@supabase/supabase-js";
+import { formatUserName } from "@/lib/utils";
+import { Session } from "@supabase/supabase-js";
+import { User } from "@/types";
 
-export default function Navbar() {
+interface NavbarProps {
+  session: Session | null;
+  userData: User | null;
+}
+
+export default function Navbar({ session, userData }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState("User");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">(
     "login"
   );
+
+  const isLoggedIn = !!session;
+  const isAdmin = userData?.is_admin ?? false;
+  const userName = userData ? formatUserName(userData) : "Not logged in";
+  const avatarUrl = userData?.avatar || null;
+
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const closeMenu = () => setIsMenuOpen(false);
-
   const openAuthModal = (tab: "login" | "register") => {
     setAuthModalTab(tab);
     setAuthModalOpen(true);
-    setIsMenuOpen(false); // Close mobile menu if open
+    setIsMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsMenuOpen(false);
+    router.push("/"); // immediate redirect
+    router.refresh(); // triggers layout reload (gets fresh server session)
   };
 
   const handleAuthSuccess = () => {
-    setIsLoggedIn(true);
     setAuthModalOpen(false);
+    router.refresh(); // re-fetch server components (including layout)
   };
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadInitialSession = async () => {
-      // Supabase restores session asynchronously — wait for it!
-      const { data, error } = await supabase.auth.getUser();
-
-      if (isMounted) {
-        await loadUserData(true, data.user ?? null);
-        setLoading(false);
-      }
-    };
-
-    // Auth state change listener (for sign-in/out or session restoration)
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (isMounted) {
-          console.log("Auth event:", event);
-          await loadUserData(true, session?.user ?? null);
-          setLoading(false);
-        }
-      }
-    );
-
-    loadInitialSession(); // Trigger session check once on mount
-
-    return () => {
-      isMounted = false;
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
-
-  const loadUserData = async (
-    isMounted: boolean,
-    sessionUser?: User | null
-  ) => {
-    if (isMounted) setIsLoggedIn(!!sessionUser);
-
-    if (sessionUser) {
-      const { data: userData } = await supabase
-        .from("users")
-        .select("is_admin, firstname, lastname, emoji, avatar")
-        .eq("id", sessionUser.id)
-        .single();
-
-      if (isMounted) {
-        setIsAdmin(userData?.is_admin ?? false);
-        setUserName(userData ? formatUserName(userData) : "Unknown User");
-        setAvatarUrl(
-          userData?.avatar ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              userName
-            )}&background=random`
-        );
-      }
-
-      console.log("User data fetched:", userData);
-    } else {
-      if (isMounted) {
-        setIsAdmin(false);
-        setUserName("Not logged in");
-      }
-    }
-  };
-
-  // 3. Handle logout
+  // Optional: redirect logged-in user away from /login
   useEffect(() => {
     if (pathname === "/login" && isLoggedIn) {
       router.push("/");
     }
   }, [pathname, isLoggedIn, router]);
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setIsLoggedIn(false);
-      setIsAdmin(false);
-      setUserName("Not logged in");
-      router.push("/");
-    } catch (err) {
-      console.error("Logout error", err);
-    }
-  };
 
   return (
     <>
@@ -223,8 +152,7 @@ export default function Navbar() {
               </Button>
 
               {/* User Menu */}
-              {!loading &&
-                (isLoggedIn ? (
+              {isLoggedIn ? (
                   <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
                     <div className="flex items-center space-x-2">
                       {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
@@ -276,7 +204,7 @@ export default function Navbar() {
                       Register
                     </Button>
                   </div>
-                ))}
+                )}
             </div>
 
             {/* Mobile Toggle */}
@@ -339,8 +267,7 @@ export default function Navbar() {
                 )}
 
                 <div className="border-t border-white/10 pt-3 mt-3">
-                  {!loading &&
-                    (isLoggedIn ? (
+                  {isLoggedIn ? (
                       <>
                         <div className="flex items-center px-3 py-2 text-white">
                           {avatarUrl ? (
@@ -389,7 +316,7 @@ export default function Navbar() {
                           Register
                         </Button>
                       </>
-                    ))}
+                    )}
                 </div>
               </div>
             </div>
