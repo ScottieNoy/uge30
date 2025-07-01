@@ -9,6 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      events: {
+        Row: {
+          id: string;
+          stage_id: string;
+          title: string;
+          description: string | null;
+          emoji: string | null;
+          location: string | null;
+          time: string; // ISO 8601 timestamp
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          stage_id: string;
+          title: string;
+          description?: string | null;
+          emoji?: string | null;
+          location?: string | null;
+          time: string;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          stage_id?: string;
+          title?: string;
+          description?: string | null;
+          emoji?: string | null;
+          location?: string | null;
+          time?: string;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "events_stage_id_fkey";
+            columns: ["stage_id"];
+            isOneToOne: false;
+            referencedRelation: "stages";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      stages: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          emoji: string | null;
+          position: number;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          emoji?: string | null;
+          position?: number;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          emoji?: string | null;
+          position?: number;
+          created_at?: string | null;
+        };
+        Relationships: [];
+      };
+
       points: {
         Row: {
           category: Database["public"]["Enums"]["jersey_category"];
