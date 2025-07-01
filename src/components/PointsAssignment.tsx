@@ -90,7 +90,6 @@ const PointsAssignment = ({
         } just gave you ${points} points for ${category.toLowerCase()}.`,
         url: "/my", // or link to scoreboard/profile/etc
       });
-      toast("Points assigned successfully!");
       onClose();
     } catch (error) {
       toast("Error assigning points: " + (error as Error).message);
