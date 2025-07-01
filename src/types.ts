@@ -4,14 +4,14 @@ import { Database } from "../database.types";
 /* ------------------------- CONSTANT ENUMS ------------------------- */
 
 export const JERSEY_CATEGORIES = [
-  "gyldne_blaerer", // Golden Bladders
-  "sprinter", // Sprint
-  "flydende_haand", // Flowing Hand
   "førertroje", // Leader Jersey
-  "maane", // Moon
+  "gyldne_blaerer", // Golden Bladders
+  "flydende_haand", // Flowing Hand
+  "sprinter", // Sprint
   "prikket", // Dotted
-  "punkttroje", // Points Jersey
   "ungdom", // Youth
+  "punkttroje", // Points Jersey
+  "maane", // Moon
 ] as const;
 
 export const SUBCATEGORIES = [
@@ -59,8 +59,8 @@ export type JerseyData = {
 /* ------------------------- UI CATEGORY CONFIG ------------------------- */
 
 export type JerseyCategoryConfig = {
-  id: string;
-  name: JerseyCategory;
+  id: JerseyCategory;
+  name: string;
   icon: keyof typeof Icons;
   color: string;
   bgColor: string;
@@ -166,68 +166,73 @@ export interface LeaderboardEntry {
 }
 
 export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
-  gyldne_blaerer: {
-    id: "gyldne_blaerer",
-    name: "gyldne_blaerer",
-    icon: "Trophy",
+  førertroje: {
+    id: "førertroje",
+    name: "Maillot Jaune",
+    icon: "FlagTriangleLeft",
     color: "from-yellow-400 to-yellow-500",
     bgColor: "bg-yellow-100",
     borderColor: "border-yellow-200",
   },
-  sprinter: {
-    id: "sprinter",
-    name: "sprinter",
-    icon: "CloudLightning",
-    color: "from-blue-400 to-blue-500",
-    bgColor: "bg-blue-100",
-    borderColor: "border-blue-200",
-  },
-  flydende_haand: {
-    id: "flydende_haand",
-    name: "flydende_haand",
-    icon: "Hand",
-    color: "from-green-400 to-green-500",
-    bgColor: "bg-green-100",
-    borderColor: "border-green-200",
-  },
-  førertroje: {
-    id: "førertroje",
-    name: "førertroje",
-    icon: "FlagTriangleLeft",
-    color: "from-red-400 to-red-500",
-    bgColor: "bg-red-100",
-    borderColor: "border-red-200",
-  },
-  maane: {
-    id: "maane",
-    name: "maane",
-    icon: "Moon",
-    color: "from-purple-400 to-purple-500",
-    bgColor: "bg-purple-100",
-    borderColor: "border-purple-200",
-  },
-  prikket: {
-    id: "prikket",
-    name: "prikket",
-    icon: "CircleDot",
-    color: "from-pink-400 to-pink-500",
-    bgColor: "bg-pink-100",
-    borderColor: "border-pink-200",
-  },
-  punkttroje: {
-    id: "punkttroje",
-    name: "punkttroje",
-    icon: "Baby",
+  gyldne_blaerer: {
+    id: "gyldne_blaerer",
+    name: "Den gyldne blære",
+    icon: "Trophy",
     color: "from-orange-400 to-orange-500",
     bgColor: "bg-orange-100",
     borderColor: "border-orange-200",
   },
+  flydende_haand: {
+    id: "flydende_haand",
+    name: "Den flydende hånd",
+    icon: "Hand",
+    color: "from-blue-400 to-blue-500",
+    bgColor: "bg-blue-100",
+    borderColor: "border-blue-200",
+  },
+  sprinter: {
+    id: "sprinter",
+    name: "Maillot Vert",
+    icon: "CloudLightning",
+    color: "from-green-400 to-green-500",
+    bgColor: "bg-green-100",
+    borderColor: "border-green-200",
+  },
+  prikket: {
+    id: "prikket",
+    name: "Maillot à Pois Rouges",
+    icon: "CircleDot",
+    color: "from-red-400 to-red-500",
+    bgColor: "bg-red-100",
+    borderColor: "border-red-200",
+  },
   ungdom: {
     id: "ungdom",
-    name: "ungdom",
+    name: "Maillot Blanc",
     icon: "WheatIcon",
-    color: "from-teal-400 to-teal-500",
-    bgColor: "bg-teal-100",
-    borderColor: "border-teal-200",
+    color: "from-gray-400 to-gray-500",
+    bgColor: "bg-gray-100",
+    borderColor: "border-gray-200",
   },
+  punkttroje: {
+    id: "punkttroje",
+    name: "Le Plus Pédophile",
+    icon: "Baby",
+    color: "from-pink-400 to-pink-500",
+    bgColor: "bg-pink-100",
+    borderColor: "border-pink-200",
+  },
+  
+  
+  maane: {
+    id: "maane",
+    name: "Maillot Lune",
+    icon: "Moon",
+    color: "from-blue-600 to-blue-700",
+    bgColor: "bg-blue-300",
+    borderColor: "border-blue-400",
+  },
+  
+  
+  
 };

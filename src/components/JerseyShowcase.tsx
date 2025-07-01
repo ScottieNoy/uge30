@@ -4,7 +4,7 @@ import * as Icons from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { JerseyCategoryConfig, JerseyDisplay } from "@/types";
+import { JerseyCategoryConfig, jerseyConfigs, JerseyDisplay } from "@/types";
 
 const JerseyShowcase = ({
   jerseyDisplay,
@@ -39,29 +39,30 @@ const JerseyShowcase = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {jerseyDisplay.map((jersey, index) => {
+            const config = jerseyConfigs[jersey.id];
             const IconComponent = Icons[
-              jersey.icon as keyof typeof Icons
+              config.icon as keyof typeof Icons
             ] as React.FC<React.SVGProps<SVGSVGElement>>;
             return (
               <Card
                 key={jersey.id}
-                className={`${jersey.bgColor} ${jersey.borderColor} border-2 backdrop-blur-md hover:scale-105 transform transition-all duration-300 hover:shadow-xl animate-fade-in`}
+                className={`${config.bgColor} ${config.borderColor} border-2 backdrop-blur-md hover:scale-105 transform transition-all duration-300 hover:shadow-xl animate-fade-in`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <CardContent className="p-4 text-center">
                   <div
-                    className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r ${jersey.color} flex items-center justify-center shadow-lg`}
+                    className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r ${config.color} flex items-center justify-center shadow-lg`}
                   >
                     <IconComponent className="h-6 w-6 text-white" />
                   </div>
 
                   <h3 className="text-sm font-bold mb-2 leading-tight">
-                    {jersey.name}
+                    {config.name}
                   </h3>
 
                   <div className="mb-2">
                     <Badge
-                      className={`bg-gradient-to-r ${jersey.color} text-white border-0 px-2 py-1 text-xs`}
+                      className={`bg-gradient-to-r ${config.color} text-white border-0 px-2 py-1 text-xs`}
                     >
                       #{index + 1}
                     </Badge>
