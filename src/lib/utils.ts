@@ -59,7 +59,7 @@ export const SUBCATEGORY_META: Record<
 };
 
 export function formatUserName(user: Partial<User>) {
-  return `${user.emoji ?? "👤"} ${user.firstname ?? "Ukendt"} ${
+  return `${user.firstname ?? "Ukendt"} ${
     user.lastname ?? ""
   }`;
 }

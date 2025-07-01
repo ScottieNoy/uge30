@@ -9,11 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, Eye, EyeOff } from "lucide-react";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal"; // Adjust path as needed
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
+
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -24,6 +26,8 @@ interface LoginFormProps {
 
 const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showForgotPassword, setShowForgotPassword] = React.useState(false);
+
 
   const {
     register,
@@ -109,14 +113,19 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
           </Button>
 
           <div className="text-center mt-4">
-            <a
-              href="#"
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
               className="text-cyan-600 hover:text-cyan-700 text-sm font-medium"
             >
               Forgot your password?
-            </a>
+            </button>
           </div>
         </form>
+        <ForgotPasswordModal
+          isOpen={showForgotPassword}
+          onClose={() => setShowForgotPassword(false)}
+        />
       </CardContent>
     </Card>
   );

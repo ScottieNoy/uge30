@@ -33,10 +33,12 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("User");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">(
@@ -97,13 +99,19 @@ export default function Navbar() {
     if (sessionUser) {
       const { data: userData } = await supabase
         .from("users")
-        .select("is_admin, firstname, lastname, emoji")
+        .select("is_admin, firstname, lastname, emoji, avatar")
         .eq("id", sessionUser.id)
         .single();
 
       if (isMounted) {
         setIsAdmin(userData?.is_admin ?? false);
         setUserName(userData ? formatUserName(userData) : "Unknown User");
+        setAvatarUrl(
+          userData?.avatar ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              userName
+            )}&background=random`
+        );
       }
 
       console.log("User data fetched:", userData);
@@ -219,9 +227,20 @@ export default function Navbar() {
                 (isLoggedIn ? (
                   <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                      {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
-                      </div>
+                      </div> */}
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt="User Avatar"
+                          className="w-8 h-8 rounded-full object-cover mr-3"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                          <UserIcon className="h-4 w-4 text-white" />
+                        </div>
+                      )}
                       <span className="text-white font-medium truncate">
                         {userName || "User"}
                       </span>
@@ -279,7 +298,6 @@ export default function Navbar() {
           {isMenuOpen && (
             <div className="md:hidden bg-black/30 backdrop-blur-md border-t border-white/10 animate-fade-in">
               <div className="px-2 pt-2 pb-3 space-y-1">
-              
                 <Link href="/scan" onClick={closeMenu}>
                   <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
                     <QrCode className="h-4 w-4 mr-2" />
@@ -325,9 +343,17 @@ export default function Navbar() {
                     (isLoggedIn ? (
                       <>
                         <div className="flex items-center px-3 py-2 text-white">
-                          <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                            <UserIcon className="h-4 w-4 text-white" />
-                          </div>
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt="User Avatar"
+                              className="w-8 h-8 rounded-full object-cover mr-3"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                              <UserIcon className="h-4 w-4 text-white" />
+                            </div>
+                          )}
                           <span className="text-white font-medium">
                             {userName || "User"}
                           </span>

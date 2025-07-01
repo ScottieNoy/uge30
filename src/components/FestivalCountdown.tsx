@@ -13,7 +13,7 @@ const FestivalCountdown = () => {
 
   useEffect(() => {
     // Festival end date - adjust this to your actual festival end date
-    const festivalEndDate = new Date("2025-07-26T18:00:00"); // Example: August 4th, 2024
+    const festivalEndDate = new Date("2025-07-21T12:00:00"); // Example: August 4th, 2024
 
     const calculateTimeLeft = () => {
       const now = new Date();
