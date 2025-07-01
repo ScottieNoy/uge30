@@ -18,17 +18,18 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import AuthModal from "./AuthModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { formatUserName } from "@/lib/utils";
-import { Session } from "@supabase/supabase-js";
-import { User } from "@/types";
+import AuthModal from "./AuthModal";
+import { User } from "@supabase/supabase-js";
 
-interface NavbarProps {
-  session: Session | null;
-  userData: User | null;
-}
-
-export default function Navbar({ session, userData }: NavbarProps) {
+export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -43,27 +44,17 @@ export default function Navbar({ session, userData }: NavbarProps) {
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">(
     "login"
   );
-
-  const isLoggedIn = !!session;
-  const isAdmin = userData?.is_admin ?? false;
-  const userName = userData ? formatUserName(userData) : "Not logged in";
-
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const closeMenu = () => setIsMenuOpen(false);
+
   const openAuthModal = (tab: "login" | "register") => {
     setAuthModalTab(tab);
     setAuthModalOpen(true);
-    setIsMenuOpen(false);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsMenuOpen(false);
-    router.push("/"); // immediate redirect
-    router.refresh(); // triggers layout reload (gets fresh server session)
+    setIsMenuOpen(false); // Close mobile menu if open
   };
 
   const handleAuthSuccess = () => {
+    setIsLoggedIn(true);
     setAuthModalOpen(false);
   };
 
@@ -108,13 +99,19 @@ export default function Navbar({ session, userData }: NavbarProps) {
     if (sessionUser) {
       const { data: userData } = await supabase
         .from("users")
-        .select("is_admin, firstname, lastname, emoji")
+        .select("is_admin, firstname, lastname, emoji, avatar")
         .eq("id", sessionUser.id)
         .single();
 
       if (isMounted) {
         setIsAdmin(userData?.is_admin ?? false);
         setUserName(userData ? formatUserName(userData) : "Unknown User");
+        setAvatarUrl(
+          userData?.avatar ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              userName
+            )}&background=random`
+        );
       }
 
       console.log("User data fetched:", userData);
@@ -132,6 +129,18 @@ export default function Navbar({ session, userData }: NavbarProps) {
       router.push("/");
     }
   }, [pathname, isLoggedIn, router]);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      setUserName("Not logged in");
+      router.push("/");
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   return (
     <>
@@ -218,9 +227,20 @@ export default function Navbar({ session, userData }: NavbarProps) {
                 (isLoggedIn ? (
                   <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                      {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
-                      </div>
+                      </div> */}
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt="User Avatar"
+                          className="w-8 h-8 rounded-full object-cover mr-3"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                          <UserIcon className="h-4 w-4 text-white" />
+                        </div>
+                      )}
                       <span className="text-white font-medium truncate">
                         {userName || "User"}
                       </span>
@@ -273,13 +293,11 @@ export default function Navbar({ session, userData }: NavbarProps) {
               )}
             </Button>
           </div>
-        </div>
 
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden bg-black/30 backdrop-blur-md border-t border-white/10 animate-fade-in">
               <div className="px-2 pt-2 pb-3 space-y-1">
-              
                 <Link href="/scan" onClick={closeMenu}>
                   <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
                     <QrCode className="h-4 w-4 mr-2" />
@@ -305,29 +323,37 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   </Button>
                 </Link>
 
-              {isAdmin && (
-                <>
-                  <Link href="/add-points" onClick={closeMenu}>
-                    <Button variant="ghost" className="w-full text-green-300">
-                      Add Points
-                    </Button>
-                  </Link>
-                  <Link href="/jerseys/edit" onClick={closeMenu}>
-                    <Button variant="ghost" className="w-full text-green-300">
-                      Edit Jerseys
-                    </Button>
-                  </Link>
-                </>
-              )}
+                {isAdmin && (
+                  <>
+                    <Link href="/add-points" onClick={closeMenu}>
+                      <Button variant="ghost" className="w-full text-green-300">
+                        Add Points
+                      </Button>
+                    </Link>
+                    <Link href="/jerseys/edit" onClick={closeMenu}>
+                      <Button variant="ghost" className="w-full text-green-300">
+                        Edit Jerseys
+                      </Button>
+                    </Link>
+                  </>
+                )}
 
                 <div className="border-t border-white/10 pt-3 mt-3">
                   {!loading &&
                     (isLoggedIn ? (
                       <>
                         <div className="flex items-center px-3 py-2 text-white">
-                          <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                            <UserIcon className="h-4 w-4 text-white" />
-                          </div>
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt="User Avatar"
+                              className="w-8 h-8 rounded-full object-cover mr-3"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                              <UserIcon className="h-4 w-4 text-white" />
+                            </div>
+                          )}
                           <span className="text-white font-medium">
                             {userName || "User"}
                           </span>
