@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Trophy, Beer, Zap, Star } from "lucide-react";
 import { AssignPoints, JERSEY_CATEGORIES, JerseyCategory, User } from "@/types";
 import { toast } from "sonner";
+import { sendNotificationToUser } from "@/lib/sendNotification";
 
 interface PointsAssignmentProps {
   targetUser: User;
@@ -79,6 +80,15 @@ const PointsAssignment = ({
         subcategory: "beer",
         value: points,
         note: `Points assigned by ${currentUser.id}`,
+      });
+
+      await sendNotificationToUser({
+        userId: targetUser.id,
+        title: "💥 Point Received!",
+        body: `${
+          currentUser.firstname
+        } just gave you ${points} points for ${category.toLowerCase()}.`,
+        url: "/my", // or link to scoreboard/profile/etc
       });
       toast("Points assigned successfully!");
       onClose();
