@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Bell, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { subscribeToPush } from '@/lib/subscribeToPush'
 
 interface NotificationPromptModalProps {
   isOpen: boolean
@@ -18,21 +19,27 @@ const NotificationPromptModal = ({
   const [loading, setLoading] = useState(false)
 
   const handleAllow = async () => {
-    setLoading(true)
-    try {
-      const permission = await Notification.requestPermission()
-      if (permission === 'granted') {
+  setLoading(true)
+  try {
+    const permission = await Notification.requestPermission()
+    if (permission === 'granted') {
+      const success = await subscribeToPush()
+      if (success) {
         toast.success('🔔 Notifikationer aktiveret!')
       } else {
-        toast.error('Du afviste notifikationer.')
+        toast.error('Kunne ikke aktivere notifikationer.')
       }
-    } catch (error) {
-      toast.error('Der opstod en fejl ved anmodning om tilladelse.')
-    } finally {
-      setLoading(false)
-      onClose()
+    } else {
+      toast.error('Du afviste notifikationer.')
     }
+  } catch (error) {
+    toast.error('Der opstod en fejl ved anmodning om tilladelse.')
+  } finally {
+    setLoading(false)
+    onClose()
   }
+}
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
