@@ -78,7 +78,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
           <div className="flex items-center justify-between h-16">
             {/* Left: Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+              {/* <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-black text-lg">U</span>
               </div>
               <div className="hidden sm:block truncate">
@@ -88,7 +88,17 @@ export default function Navbar({ session, userData }: NavbarProps) {
                 <p className="text-xs text-cyan-300 font-medium -mt-1">
                   Festival Battle
                 </p>
+              </div> */}
+              {/* <div className="h-12 w-auto bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg"> */}
+              <div className="p-2 rounded-2xl bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-yellow-300 shadow-lg">
+                <img
+                  src="/app-logo.png"
+                  alt="UGE30 Logo"
+                  className="h-8 w-auto"
+                />
               </div>
+
+              {/* </div> */}
             </Link>
 
             {/* Desktop Nav */}
@@ -153,58 +163,58 @@ export default function Navbar({ session, userData }: NavbarProps) {
 
               {/* User Menu */}
               {isLoggedIn ? (
-                  <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-                    <div className="flex items-center space-x-2">
-                      {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+                  <div className="flex items-center space-x-2">
+                    {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
                       </div> */}
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt="User Avatar"
-                          className="w-8 h-8 rounded-full object-cover mr-3"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                          <UserIcon className="h-4 w-4 text-white" />
-                        </div>
-                      )}
-                      <span className="text-white font-medium truncate">
-                        {userName || "User"}
-                      </span>
-                      <Badge className="bg-cyan-500 text-white font-semibold">
-                        {isAdmin ? "Admin" : "User"}
-                      </Badge>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:bg-white/20 hover:text-red-300 transition-colors p-2"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4" />
-                    </Button>
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="User Avatar"
+                        className="w-8 h-8 rounded-full object-cover mr-3"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                        <UserIcon className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    <span className="text-white font-medium truncate">
+                      {userName || "User"}
+                    </span>
+                    <Badge className="bg-cyan-500 text-white font-semibold">
+                      {isAdmin ? "Admin" : "User"}
+                    </Badge>
                   </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      className="text-white hover:bg-white/10"
-                      onClick={() => openAuthModal("login")}
-                    >
-                      <LogIn className="h-4 w-4 mr-2" />
-                      Login
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-white/30 text-white hover:bg-white/10"
-                      onClick={() => openAuthModal("register")}
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      Register
-                    </Button>
-                  </div>
-                )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20 hover:text-red-300 transition-colors p-2"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-white/10"
+                    onClick={() => openAuthModal("login")}
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Login
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10"
+                    onClick={() => openAuthModal("register")}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Register
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Mobile Toggle */}
@@ -268,55 +278,55 @@ export default function Navbar({ session, userData }: NavbarProps) {
 
                 <div className="border-t border-white/10 pt-3 mt-3">
                   {isLoggedIn ? (
-                      <>
-                        <div className="flex items-center px-3 py-2 text-white">
-                          {avatarUrl ? (
-                            <img
-                              src={avatarUrl}
-                              alt="User Avatar"
-                              className="w-8 h-8 rounded-full object-cover mr-3"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                              <UserIcon className="h-4 w-4 text-white" />
-                            </div>
-                          )}
-                          <span className="text-white font-medium">
-                            {userName || "User"}
-                          </span>
-                          <Badge className="ml-2 bg-cyan-500 text-white font-semibold">
-                            {isAdmin ? "Admin" : "User"}
-                          </Badge>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-red-400 hover:bg-red-900/20"
-                          onClick={handleLogout}
-                        >
-                          <LogOut className="h-4 w-4 mr-3" />
-                          Logout
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-white hover:bg-white/10"
-                          onClick={() => openAuthModal("login")}
-                        >
-                          <LogIn className="h-4 w-4 mr-3" />
-                          Login
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-white hover:bg-white/10"
-                          onClick={() => openAuthModal("register")}
-                        >
-                          <Users className="h-4 w-4 mr-3" />
-                          Register
-                        </Button>
-                      </>
-                    )}
+                    <>
+                      <div className="flex items-center px-3 py-2 text-white">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt="User Avatar"
+                            className="w-8 h-8 rounded-full object-cover mr-3"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                            <UserIcon className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                        <span className="text-white font-medium">
+                          {userName || "User"}
+                        </span>
+                        <Badge className="ml-2 bg-cyan-500 text-white font-semibold">
+                          {isAdmin ? "Admin" : "User"}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-red-400 hover:bg-red-900/20"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-4 w-4 mr-3" />
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white hover:bg-white/10"
+                        onClick={() => openAuthModal("login")}
+                      >
+                        <LogIn className="h-4 w-4 mr-3" />
+                        Login
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white hover:bg-white/10"
+                        onClick={() => openAuthModal("register")}
+                      >
+                        <Users className="h-4 w-4 mr-3" />
+                        Register
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
