@@ -15,6 +15,7 @@ import {
   QrCode,
   Shield,
   Shirt,
+  Bike,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -112,24 +113,15 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   Standings
                 </Button>
               </Link>
-              <Link href="/jerseys">
+              <Link href="/stages">
                 <Button
                   variant="ghost"
                   className="text-white hover:text-cyan-300"
                 >
-                  <Shirt className="h-4 w-4 mr-2" />
-                  Jerseys
+                  <Bike className="h-4 w-4 mr-2" />
+                  Stages
                 </Button>
               </Link>
-              {/* <Link href="/my">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-cyan-300"
-                >
-                  <UserIcon className="h-4 w-4 mr-2" />
-                  My Profile
-                </Button>
-              </Link> */}
 
               {isAdmin && (
                 <>
@@ -148,6 +140,14 @@ export default function Navbar({ session, userData }: NavbarProps) {
                       className="text-green-400 hover:text-green-300"
                     >
                       Edit Jerseys
+                    </Button>
+                  </Link>
+                  <Link href="/admin/stages">
+                    <Button
+                      variant="ghost"
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      Manage Stages
                     </Button>
                   </Link>
                 </>
@@ -252,18 +252,12 @@ export default function Navbar({ session, userData }: NavbarProps) {
                     Standings
                   </Button>
                 </Link>
-                <Link href="/jerseys" onClick={closeMenu}>
+                <Link href="/stages" onClick={closeMenu}>
                   <Button variant="ghost" className="w-full text-white">
-                    <Shirt className="h-4 w-4 mr-2" />
-                    Jerseys
+                    <Bike className="h-4 w-4 mr-2" />
+                    Stages
                   </Button>
                 </Link>
-                {/* <Link href="/my" onClick={closeMenu}>
-                  <Button variant="ghost" className="w-full text-white">
-                    <UserIcon className="h-4 w-4 mr-2" />
-                    My Profile
-                  </Button>
-                </Link> */}
 
                 {isAdmin && (
                   <>
@@ -275,6 +269,11 @@ export default function Navbar({ session, userData }: NavbarProps) {
                     <Link href="/jerseys/edit" onClick={closeMenu}>
                       <Button variant="ghost" className="w-full text-green-300">
                         Edit Jerseys
+                      </Button>
+                    </Link>
+                    <Link href="/admin/stages" onClick={closeMenu}>
+                      <Button variant="ghost" className="w-full text-green-300">
+                        Manage Stages
                       </Button>
                     </Link>
                   </>
