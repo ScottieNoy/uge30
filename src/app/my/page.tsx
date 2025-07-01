@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
 import { User } from "@/types";
-import EnableNotifications from "@/components/EnableNotifications";
+import EnableNotifications from "@/components/EnableNotificationsButton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Save, User as UserIcon, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -274,7 +274,7 @@ export default function MyPage() {
                 <CardTitle className="text-white">Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 text-sm">
+                <div className="space-y-3 text-sm mb-4">
                   <div className="flex justify-between items-center">
                     <span className="text-white/80">Competition Win</span>
                     <span className="text-green-400 font-semibold">
@@ -291,6 +291,10 @@ export default function MyPage() {
                       +10 pts
                     </span>
                   </div>
+                </div>
+
+                <div className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+                  <EnableNotifications />
                 </div>
               </CardContent>
             </Card>
