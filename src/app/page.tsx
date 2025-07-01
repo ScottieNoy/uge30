@@ -54,23 +54,11 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="w-40 h-40 mx-auto mb-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
             {/* <span className="text-white font-black text-3xl">U</span> */}
-            <img
-              src="/uge30-logo.png"
+            <img className="h-30 w-30 object-contain"
+              src="/uge30-logo.webp"
               alt="UGE Icon"
-              className="object-contain"
             />
           </div>
-          {/* <h1 className="text-5xl font-black text-white mb-4">
-            UGE{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-              30
-            </span>
-          </h1> */}
-          {/* <img
-            src="/tropical-logo.png"
-            alt="UGE 30 Logo"
-            className="mx-auto mb-4 w-48 sm:w-64"
-          /> */}
           <h1 className="text-3xl font-black text-white mb-4">
             Scan, Drik,{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">

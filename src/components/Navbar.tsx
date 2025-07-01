@@ -92,7 +92,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
               {/* <div className="h-12 w-auto bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg"> */}
               <div className="p-2 rounded-2xl bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-yellow-300 shadow-lg">
                 <img
-                  src="/app-logo.png"
+                  src="/app-logo-white.webp"
                   alt="UGE30 Logo"
                   className="h-8 w-auto"
                 />
