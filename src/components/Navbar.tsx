@@ -121,7 +121,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   Jerseys
                 </Button>
               </Link>
-              <Link href="/my">
+              {/* <Link href="/my">
                 <Button
                   variant="ghost"
                   className="text-white hover:text-cyan-300"
@@ -129,7 +129,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   <UserIcon className="h-4 w-4 mr-2" />
                   My Profile
                 </Button>
-              </Link>
+              </Link> */}
 
               {isAdmin && (
                 <>
@@ -163,7 +163,9 @@ export default function Navbar({ session, userData }: NavbarProps) {
 
               {/* User Menu */}
               {isLoggedIn ? (
-                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+                <>
+                <Link href="/my" onClick={closeMenu}>
+                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 hover:bg-white/20 transition-colors">
                   <div className="flex items-center space-x-2">
                     {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
@@ -186,7 +188,9 @@ export default function Navbar({ session, userData }: NavbarProps) {
                       {isAdmin ? "Admin" : "User"}
                     </Badge>
                   </div>
-                  <Button
+                </div>
+                </Link>
+                <Button
                     variant="ghost"
                     size="sm"
                     className="text-white hover:bg-white/20 hover:text-red-300 transition-colors p-2"
@@ -194,7 +198,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   >
                     <LogOut className="h-4 w-4" />
                   </Button>
-                </div>
+                </>
               ) : (
                 <div className="flex items-center space-x-2">
                   <Button
@@ -254,12 +258,12 @@ export default function Navbar({ session, userData }: NavbarProps) {
                     Jerseys
                   </Button>
                 </Link>
-                <Link href="/my" onClick={closeMenu}>
+                {/* <Link href="/my" onClick={closeMenu}>
                   <Button variant="ghost" className="w-full text-white">
                     <UserIcon className="h-4 w-4 mr-2" />
                     My Profile
                   </Button>
-                </Link>
+                </Link> */}
 
                 {isAdmin && (
                   <>
@@ -277,7 +281,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
                 )}
 
                 <div className="border-t border-white/10 pt-3 mt-3">
-                  {isLoggedIn ? (
+                  {/* {isLoggedIn ? (
                     <>
                       <div className="flex items-center px-3 py-2 text-white">
                         {avatarUrl ? (
@@ -308,6 +312,64 @@ export default function Navbar({ session, userData }: NavbarProps) {
                       </Button>
                     </>
                   ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white hover:bg-white/10"
+                        onClick={() => openAuthModal("login")}
+                      >
+                        <LogIn className="h-4 w-4 mr-3" />
+                        Login
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white hover:bg-white/10"
+                        onClick={() => openAuthModal("register")}
+                      >
+                        <Users className="h-4 w-4 mr-3" />
+                        Register
+                      </Button>
+                    </>
+                  )} */}
+                  {/* User Menu */}
+              {isLoggedIn ? (
+                <>
+                <Link href="/my" onClick={closeMenu}>
+                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+                  <div className="flex items-center space-x-2">
+                    {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                        <UserIcon className="h-4 w-4 text-white" />
+                      </div> */}
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="User Avatar"
+                        className="w-8 h-8 rounded-full object-cover mr-3"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                        <UserIcon className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    <span className="text-white font-medium truncate">
+                      {userName || "User"}
+                    </span>
+                    <Badge className="bg-cyan-500 text-white font-semibold">
+                      {isAdmin ? "Admin" : "User"}
+                    </Badge>
+                  </div>
+                </div>
+                </Link>
+                <Button
+                        variant="ghost"
+                        className="w-full justify-start text-red-400 hover:bg-red-900/20"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-4 w-4 mr-3" />
+                        Logout
+                      </Button>
+                </>
+              ) : (
                     <>
                       <Button
                         variant="ghost"
