@@ -113,6 +113,15 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   Standings
                 </Button>
               </Link>
+              <Link href="/social">
+                <Button
+                  variant="ghost"
+                  className="text-white hover:text-cyan-300"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Social
+                </Button>
+              </Link>
               <Link href="/stages">
                 <Button
                   variant="ghost"
@@ -165,33 +174,33 @@ export default function Navbar({ session, userData }: NavbarProps) {
               {/* User Menu */}
               {isLoggedIn ? (
                 <>
-                <Link href="/my" onClick={closeMenu}>
-                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 hover:bg-white/20 transition-colors">
-                  <div className="flex items-center space-x-2">
-                    {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                  <Link href="/my" onClick={closeMenu}>
+                    <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 hover:bg-white/20 transition-colors">
+                      <div className="flex items-center space-x-2">
+                        {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
                       </div> */}
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt="User Avatar"
-                        className="w-8 h-8 rounded-full object-cover mr-3"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                        <UserIcon className="h-4 w-4 text-white" />
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt="User Avatar"
+                            className="w-8 h-8 rounded-full object-cover mr-3"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                            <UserIcon className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                        <span className="text-white font-medium truncate">
+                          {userName || "User"}
+                        </span>
+                        <Badge className="bg-cyan-500 text-white font-semibold">
+                          {isAdmin ? "Admin" : "User"}
+                        </Badge>
                       </div>
-                    )}
-                    <span className="text-white font-medium truncate">
-                      {userName || "User"}
-                    </span>
-                    <Badge className="bg-cyan-500 text-white font-semibold">
-                      {isAdmin ? "Admin" : "User"}
-                    </Badge>
-                  </div>
-                </div>
-                </Link>
-                <Button
+                    </div>
+                  </Link>
+                  <Button
                     variant="ghost"
                     size="sm"
                     className="text-white hover:bg-white/20 hover:text-red-300 transition-colors p-2"
@@ -251,6 +260,15 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   <Button variant="ghost" className="w-full text-white">
                     <Trophy className="h-4 w-4 mr-2" />
                     Standings
+                  </Button>
+                </Link>
+                <Link href="/social" onClick={closeMenu}>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-white/10 hover:text-cyan-300 transition-colors w-full"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Social
                   </Button>
                 </Link>
                 <Link href="/stages" onClick={closeMenu}>
@@ -333,35 +351,35 @@ export default function Navbar({ session, userData }: NavbarProps) {
                     </>
                   )} */}
                   {/* User Menu */}
-              {isLoggedIn ? (
-                <>
-                <Link href="/my" onClick={closeMenu}>
-                <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-                  <div className="flex items-center space-x-2">
-                    {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                  {isLoggedIn ? (
+                    <>
+                      <Link href="/my" onClick={closeMenu}>
+                        <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+                          <div className="flex items-center space-x-2">
+                            {/* <div className="w-8 h-8 bg-gradient-to-w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-centerr from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
                         <UserIcon className="h-4 w-4 text-white" />
                       </div> */}
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt="User Avatar"
-                        className="w-8 h-8 rounded-full object-cover mr-3"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                        <UserIcon className="h-4 w-4 text-white" />
-                      </div>
-                    )}
-                    <span className="text-white font-medium truncate">
-                      {userName || "User"}
-                    </span>
-                    <Badge className="bg-cyan-500 text-white font-semibold">
-                      {isAdmin ? "Admin" : "User"}
-                    </Badge>
-                  </div>
-                </div>
-                </Link>
-                <Button
+                            {avatarUrl ? (
+                              <img
+                                src={avatarUrl}
+                                alt="User Avatar"
+                                className="w-8 h-8 rounded-full object-cover mr-3"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
+                                <UserIcon className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                            <span className="text-white font-medium truncate">
+                              {userName || "User"}
+                            </span>
+                            <Badge className="bg-cyan-500 text-white font-semibold">
+                              {isAdmin ? "Admin" : "User"}
+                            </Badge>
+                          </div>
+                        </div>
+                      </Link>
+                      <Button
                         variant="ghost"
                         className="w-full justify-start text-red-400 hover:bg-red-900/20"
                         onClick={handleLogout}
@@ -369,8 +387,8 @@ export default function Navbar({ session, userData }: NavbarProps) {
                         <LogOut className="h-4 w-4 mr-3" />
                         Logout
                       </Button>
-                </>
-              ) : (
+                    </>
+                  ) : (
                     <>
                       <Button
                         variant="ghost"
