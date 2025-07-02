@@ -1,10 +1,11 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { CalendarDays, Clock, MapPin } from 'lucide-react';
-import { createClient } from '@/lib/supabaseClient';
-import { format } from 'date-fns';
-import { da } from 'date-fns/locale';
+"use client";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { CalendarDays, Clock, MapPin } from "lucide-react";
+import { createClient } from "@/lib/supabaseClient";
+import { format } from "date-fns";
+import { da } from "date-fns/locale";
+import Link from "next/link";
 
 interface Event {
   id: string;
@@ -12,6 +13,7 @@ interface Event {
   time: string; // ISO 8601 string
   emoji?: string;
   location?: string;
+  stage_id?: string; // Assuming stage_id is a string
 }
 
 const FestivalCountdown = () => {
@@ -27,12 +29,12 @@ const FestivalCountdown = () => {
   useEffect(() => {
     const fetchNextEvent = async () => {
       const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('time', { ascending: true });
+        .from("events")
+        .select("*")
+        .order("time", { ascending: true });
 
       if (error) {
-        console.error('Failed to fetch events:', error.message);
+        console.error("Failed to fetch events:", error.message);
         return;
       }
 
@@ -45,6 +47,7 @@ const FestivalCountdown = () => {
           time: upcoming.time,
           emoji: upcoming.emoji ?? undefined,
           location: upcoming.location ?? undefined,
+          stage_id: upcoming.stage_id ?? undefined, // Ensure stage_id is included
         });
         updateCountdown(new Date(upcoming.time));
       }
@@ -77,48 +80,48 @@ const FestivalCountdown = () => {
     return () => clearInterval(timer);
   }, [nextEvent]);
 
-  return (
+  return nextEvent && nextEvent.stage_id ? (
+    <Card className="bg-white/10 text-center col-span-2 p-4 cursor-pointer">
+      <Link href={`/stages/${nextEvent.stage_id}`}>
+        <CardContent className="p-0 space-y-2 text-white">
+          <div className="uppercase text-xs font-semibold tracking-wide text-cyan-400 mb-2">
+            Næste aktivitet
+          </div>
+          <div className="text-xl font-bold">
+            {nextEvent.emoji} {nextEvent.title}
+          </div>
+
+          <div className="text-sm text-cyan-200 flex items-center justify-center gap-2">
+            <CalendarDays className="h-4 w-4" />
+            {format(new Date(nextEvent.time), "EEEE 'kl.' HH:mm", {
+              locale: da,
+            })}
+          </div>
+
+          {nextEvent.location && (
+            <div className="text-sm text-white/70 flex items-center justify-center gap-1">
+              <MapPin className="h-4 w-4 text-cyan-400" />
+              {nextEvent.location}
+            </div>
+          )}
+
+          <div className="flex justify-center space-x-4 font-mono text-sm pt-1">
+            <div className="flex items-center space-x-2">
+              <TimeBlock label="dage" value={timeLeft.days} />
+              <TimeBlock label="timer" value={timeLeft.hours} />
+              <TimeBlock label="min" value={timeLeft.minutes} />
+              <TimeBlock label="sek" value={timeLeft.seconds} />
+            </div>
+          </div>
+        </CardContent>
+      </Link>
+    </Card>
+  ) : (
     <Card className="bg-white/10 text-center col-span-2 p-4">
-  <CardContent className="p-0 space-y-2 text-white">
-    {nextEvent ? (
-      <>
-        <div className="uppercase text-xs font-semibold tracking-wide text-cyan-400 mb-2">
-          Næste aktivitet
-        </div>
-        <div className="text-xl font-bold">
-          {nextEvent.emoji} {nextEvent.title}
-        </div>
-
-        <div className="text-sm text-cyan-200 flex items-center justify-center gap-2">
-          <CalendarDays className="h-4 w-4" />
-          {format(new Date(nextEvent.time), "EEEE 'kl.' HH:mm", { locale: da })}
-        </div>
-
-        
-
-        {nextEvent.location && (
-          <div className="text-sm text-white/70 flex items-center justify-center gap-1">
-            <MapPin className="h-4 w-4 text-cyan-400" />
-            {nextEvent.location}
-          </div>
-        )}
-
-        <div className="flex justify-center space-x-4 font-mono text-sm pt-1">
-          {/* <Clock className="h-4 w-4 text-cyan-300" /> */}
-          <div className="flex items-center space-x-2">
-            <TimeBlock label="dage" value={timeLeft.days} />
-            <TimeBlock label="timer" value={timeLeft.hours} />
-            <TimeBlock label="min" value={timeLeft.minutes} />
-            <TimeBlock label="sek" value={timeLeft.seconds} />
-          </div>
-        </div>
-      </>
-    ) : (
-      <div className="text-white/80 text-sm">Ingen kommende events</div>
-    )}
-  </CardContent>
-</Card>
-
+      <CardContent className="p-0 space-y-2 text-white">
+        <div className="text-white/80 text-sm">Ingen kommende events</div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -129,7 +132,9 @@ type TimeBlockProps = {
 
 const TimeBlock: React.FC<TimeBlockProps> = ({ label, value }) => (
   <div className="flex flex-col items-center">
-    <span className="text-lg font-bold">{value.toString().padStart(2, '0')}</span>
+    <span className="text-lg font-bold">
+      {value.toString().padStart(2, "0")}
+    </span>
     <span className="text-xs text-cyan-400">{label}</span>
   </div>
 );

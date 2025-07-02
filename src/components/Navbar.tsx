@@ -253,7 +253,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
                 <Link href="/scan" onClick={closeMenu}>
                   <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
                     <QrCode className="h-4 w-4 mr-2" />
-                    Scan QR Code
+                    Vis/Scan QR-Kode
                   </Button>
                 </Link>
                 <Link href="/" onClick={closeMenu}>

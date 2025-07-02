@@ -125,7 +125,7 @@ export default function WelcomeModal() {
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault(); // Prevent the browser's default install prompt
-      console.log("PWA install prompt captured"); // Log to confirm the event is fired
+      // console.log("PWA install prompt captured"); // Log to confirm the event is fired
       setInstallPwaPrompt(e); // Store the event for later use
     };
 
@@ -142,7 +142,9 @@ export default function WelcomeModal() {
   // Modal steps
   const steps = [
     {
-      title: isIos ? "Installér UGE30 på din homescreen 📱" : "Installér UGE30 på din homescreen (via Install Button) 📱",
+      title: isIos
+        ? "Installér UGE30 på din homescreen 📱"
+        : "Installér UGE30 på din homescreen (via Install Button) 📱",
       content: (
         <div className="text-center space-y-4">
           <p className="text-white text-lg">
@@ -165,7 +167,8 @@ export default function WelcomeModal() {
             </Button>
           ) : (
             <p className="text-white">
-              På iOS: Åben Safari, tryk på delingsikonet og vælg 'Tilføj til hjemmeskærm'
+              På iOS: Åben Safari, tryk på delingsikonet og vælg 'Tilføj til
+              hjemmeskærm'
             </p>
           )}
         </div>
@@ -175,8 +178,9 @@ export default function WelcomeModal() {
       title: "Velkommen til UGE30 🎉",
       content: (
         <p className="text-white text-lg">
-          Du er nu en del af det største drukbattle i Danmark. Klar på at vinde
-          trøjen?
+          Du er nu en del af UGE30! Den bedste uge i året, hvor vi mødes i
+          sommerhuset for at være sammen, drikke øl og have det sjovt. Følg
+          denne guide for at komme i gang med at bruge appen.
         </p>
       ),
     },
@@ -196,7 +200,7 @@ export default function WelcomeModal() {
       ),
     },
     {
-      title: "Vælg et navn som vi kan kende dig ved",
+      title: "Vælg et kort, unikt navn, som vil blive vist i appen",
       content: (
         <div className="space-y-2">
           <Label className="text-white">Navn</Label>
@@ -220,12 +224,23 @@ export default function WelcomeModal() {
       ),
     },
     {
-      title: "Regler og tips 🧠",
+      title: "Hvordan bruger du appen?",
       content: (
         <ul className="list-disc list-inside text-white space-y-2">
-          <li>Log dine øl og points i appen</li>
-          <li>Følg med i ranglisten</li>
-          <li>Respektér crewet og dine medspillere 🍻</li>
+          <li>
+            Scan andres QR-koder for at tracke deres drikkevarer, ikke din egen.
+          </li>
+          <li>
+            Deltag i konkurrencer og optjen point for både Sprinter og Prikket
+            Trøje.
+          </li>
+          <li>På hovedsiden kan du se stillingen og kommende events.</li>
+          <li>
+            Brug UGE30 Social til at chatte, dele information, kommentere og like andres indlæg.
+          </li>
+          <li>
+            Se hele ugeoversigten med alle etaper og events under "Etaper".
+          </li>
         </ul>
       ),
     },
@@ -233,7 +248,7 @@ export default function WelcomeModal() {
 
   const isLastStep = step === steps.length - 1;
   const isNextDisabled =
-    (step === 3 && (!avatarUrl || isCheckingName || !isNameValid)); 
+    step === 3 && (!avatarUrl || isCheckingName || !isNameValid);
 
   // Make sure step is within bounds
   const currentStep = steps[step] || {

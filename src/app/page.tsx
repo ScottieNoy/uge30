@@ -76,7 +76,7 @@ export default function Home() {
               className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
               onClick={() => router.push("/scan")}
             >
-              <QrCode className="mr-3 h-6 w-6" /> Start Scanning
+              <QrCode className="mr-3 h-6 w-6" /> Vis/Scan QR-Kode
             </Button>
             <Link href="/standings">
               <Button
