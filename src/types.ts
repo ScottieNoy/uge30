@@ -14,35 +14,67 @@ export const JERSEY_CATEGORIES = [
   "maane", // Moon
 ] as const;
 
-export const SUBCATEGORIES = [
-  "beer",
-  "wine",
-  "vodka",
-  "funnel",
-  "shot",
-  "beerpong",
-  "cornhole",
-  "dart",
-  "billiard",
-  "stigegolf",
-  "bonus",
-  "other",
-] as const;
-
-export const SUBCATEGORY_POINTS: Record<Subcategory, number> = {
-  beer: 1,
-  wine: 2,
-  vodka: 3,
-  funnel: 4,
-  shot: 2,
-  beerpong: 3,
-  cornhole: 2,
-  dart: 2,
-  billiard: 2,
-  stigegolf: 2,
-  bonus: 5,
-  other: 1,
+export const JERSEY_SUBCATEGORIES: Record<JerseyCategory, Subcategory[]> = {
+  førertroje: ["competition", "bonus"], // Maillot Jaune
+  gyldne_blaerer: ["beer", "ølbong", "shot", "wine", "vodkadrink"], // Golden Bladders
+  flydende_haand: ["bonus", "other"], // Flowing Hand
+  sprinter: ["stigegolf", "beerpong", "dart"], // Sprint
+  prikket: ["challenge", "bonus"], // Dotted
+  ungdom: ["bonus", "other"], // Youth
+  punkttroje: ["beer", "wine", "beerpong", "dart", "billiard", "stigegolf", "cornhole", "other"], // Points Jersey
+  maane: ["bonus", "other"], // Moon
 };
+
+export const JERSEY_SUBCATEGORY_POINTS: Record<JerseyCategory, Partial<Record<Subcategory, number>>> = {
+  førertroje: {
+    competition: 5,
+    bonus: 3,
+  },
+  gyldne_blaerer: {
+    beer: 1,
+    ølbong: 3,
+    shot: 2,
+    wine: 1,
+    vodkadrink: 2,
+  },
+  flydende_haand: {
+    bonus: 5,
+    other: 1,
+  },
+  sprinter: {
+    stigegolf: 4,
+    beerpong: 3,
+    dart: 2,
+  },
+  prikket: {
+    challenge: 5,
+    bonus: 3,
+  },
+  ungdom: {
+    bonus: 5,
+    other: 1,
+  },
+  punkttroje: {
+    beer: 1,
+    wine: 2,
+    beerpong: 3,
+    dart: 2,
+    billiard: 2,
+    stigegolf: 4,
+    cornhole: 3,
+    other: 1,
+  },
+  maane: {
+    bonus: 5,
+    other: 1,
+  },
+};
+
+
+export interface JerseyBoardEntry {
+  user: User; // User information
+  total: number; // Total points for the user in this jersey category
+}
 
 export type JerseyData = {
   id: JerseyCategory;
@@ -65,6 +97,7 @@ export type JerseyCategoryConfig = {
   color: string;
   bgColor: string;
   borderColor: string;
+  subcategories: Subcategory[]; // List of subcategories that contribute to this jersey
 };
 
 export type JerseyDisplay = JerseyCategoryConfig & {
@@ -76,7 +109,8 @@ export type JerseyDisplay = JerseyCategoryConfig & {
 };
 
 export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];
-export type Subcategory = (typeof SUBCATEGORIES)[number];
+export type Subcategory = "vodkadrink" | "beer" | "ølbong" | "shot" | "beerpong" | "stigegolf" | "dart" | "challenge" | "bonus" | "other" | "competition" | "wine" | "billiard" | "cornhole"; // Define all possible subcategories
+
 
 export interface User {
   id: string;
@@ -167,6 +201,7 @@ export interface LeaderboardEntry {
   rank: number;
 }
 
+// Jersey configuration for displaying information
 export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
   førertroje: {
     id: "førertroje",
@@ -175,6 +210,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-yellow-400 to-yellow-500",
     bgColor: "bg-yellow-100",
     borderColor: "border-yellow-200",
+    subcategories: JERSEY_SUBCATEGORIES["førertroje"], // Reference subcategories here
   },
   gyldne_blaerer: {
     id: "gyldne_blaerer",
@@ -183,6 +219,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-orange-400 to-orange-500",
     bgColor: "bg-orange-100",
     borderColor: "border-orange-200",
+    subcategories: JERSEY_SUBCATEGORIES["gyldne_blaerer"], // Reference subcategories here
   },
   flydende_haand: {
     id: "flydende_haand",
@@ -191,6 +228,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-blue-400 to-blue-500",
     bgColor: "bg-blue-100",
     borderColor: "border-blue-200",
+    subcategories: JERSEY_SUBCATEGORIES["flydende_haand"], // Reference subcategories here
   },
   sprinter: {
     id: "sprinter",
@@ -199,6 +237,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-green-400 to-green-500",
     bgColor: "bg-green-100",
     borderColor: "border-green-200",
+    subcategories: JERSEY_SUBCATEGORIES["sprinter"], // Reference subcategories here
   },
   prikket: {
     id: "prikket",
@@ -207,6 +246,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-red-400 to-red-500",
     bgColor: "bg-red-100",
     borderColor: "border-red-200",
+    subcategories: JERSEY_SUBCATEGORIES["prikket"], // Reference subcategories here
   },
   ungdom: {
     id: "ungdom",
@@ -215,6 +255,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-gray-400 to-gray-500",
     bgColor: "bg-gray-100",
     borderColor: "border-gray-200",
+    subcategories: JERSEY_SUBCATEGORIES["ungdom"], // Reference subcategories here
   },
   punkttroje: {
     id: "punkttroje",
@@ -223,9 +264,8 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-pink-400 to-pink-500",
     bgColor: "bg-pink-100",
     borderColor: "border-pink-200",
+    subcategories: JERSEY_SUBCATEGORIES["punkttroje"], // Reference subcategories here
   },
-  
-  
   maane: {
     id: "maane",
     name: "Maillot Lune",
@@ -233,8 +273,6 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     color: "from-blue-600 to-blue-700",
     bgColor: "bg-blue-300",
     borderColor: "border-blue-400",
+    subcategories: JERSEY_SUBCATEGORIES["maane"], // Reference subcategories here
   },
-  
-  
-  
 };

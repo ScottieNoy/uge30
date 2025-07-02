@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import QRScanner from "./QRScanner";
 import PointsAssignment from "./PointsAssignment";
 import { createClient } from "@/lib/supabaseClient";
-import { AssignPoints, User } from "@/types";
+import { AssignPoints, JERSEY_CATEGORIES, JERSEY_SUBCATEGORIES, User } from "@/types";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 
@@ -93,6 +93,21 @@ const Scan = () => {
       note: assignPoints.note || null,
       submitted_by: currentUser.id,
     });
+
+    // Validate category and subcategory
+    if (!JERSEY_CATEGORIES.includes(assignPoints.category)) {
+      toast("Invalid category selected.");
+      return;
+    }
+
+    if (
+      !JERSEY_SUBCATEGORIES[assignPoints.category].includes(
+      assignPoints.subcategory
+      )
+    ) {
+      toast("Invalid subcategory for the selected category.");
+      return;
+    }
 
     if (error) {
       toast("Error assigning points: " + error.message);

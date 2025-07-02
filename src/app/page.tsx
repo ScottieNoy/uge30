@@ -38,9 +38,8 @@ export default function Home() {
           displayName: topEntry.user.displayname || `${topEntry.user.firstname} ${topEntry.user.lastname}`,
         },
 
-        points: topEntry.total,
+        points: topEntry.total,  // Ensure points are passed correctly
         icon: jerseyConfig.icon,
-        // Ensure name is the category key, not the display string
         name: category as JerseyCategory,
       };
     })
@@ -57,7 +56,6 @@ export default function Home() {
       <section className="px-4 pt-20 pb-8 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="w-40 h-40 mx-auto mb-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
-            {/* <span className="text-white font-black text-3xl">U</span> */}
             <img
               className="h-30 w-30 object-contain"
               src="/uge30-logo.webp"

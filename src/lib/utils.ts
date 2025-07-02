@@ -18,12 +18,6 @@ export const SUBCATEGORY_META: Record<
 > = {
   beer: { icon: "Beer", label: "Beer", color: "from-yellow-400 to-amber-500" },
   wine: { icon: "Wine", label: "Wine", color: "from-purple-400 to-pink-400" },
-  vodka: { icon: "Flame", label: "Vodka", color: "from-red-500 to-orange-400" },
-  funnel: {
-    icon: "Shield",
-    label: "Funnel",
-    color: "from-blue-400 to-cyan-400",
-  },
   shot: { icon: "Flame", label: "Shot", color: "from-red-500 to-yellow-400" },
   beerpong: {
     icon: "Gamepad2",
@@ -55,6 +49,26 @@ export const SUBCATEGORY_META: Record<
     icon: "CircleDot",
     label: "Other",
     color: "from-gray-400 to-gray-600",
+  },
+  ølbong: {
+    icon: "Funnel",
+    label: "Ølbong",
+    color: "from-yellow-500 to-orange-500",
+  },
+  vodkadrink: {
+    icon: "Martini",
+    label: "Vodkadrink",
+    color: "from-blue-500 to-purple-500",
+  },
+  competition: {
+    icon: "Trophy",
+    label: "Competition",
+    color: "from-yellow-500 to-orange-500",
+  },
+  challenge: {
+    icon: "Zap",
+    label: "Challenge",
+    color: "from-red-500 to-pink-500",
   },
 };
 

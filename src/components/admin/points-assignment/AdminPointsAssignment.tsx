@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Shield, Plus, Minus } from "lucide-react";
-import { User } from "@/types";
+import { User, JERSEY_CATEGORIES, JERSEY_SUBCATEGORIES, Subcategory, AssignPoints, JerseyCategory } from "@/types";
 import { toast } from "sonner";
 
 interface AdminPointsAssignmentProps {
@@ -20,10 +20,11 @@ interface AdminPointsAssignmentProps {
   currentUser: User | null;
   onClose: () => void;
   onAssignPoints: (
-    userId: string,
-    category: string,
-    points: number,
-    reason?: string
+    userId: string,                // User ID to whom the points will be assigned
+    category: JerseyCategory,      // Category (e.g., "gyldne_blaerer", "sprinter")
+    subcategory: Subcategory,      // Subcategory (e.g., "beer", "ølbong")
+    points: number,                // Number of points to assign
+    reason?: string                // Optional reason for the point assignment
   ) => Promise<void>;
 }
 
@@ -35,22 +36,15 @@ const AdminPointsAssignment = ({
 }: AdminPointsAssignmentProps) => {
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [pointsAmount, setPointsAmount] = useState<number>(0);
-  const [category, setCategory] = useState<string>("admin");
+  const [category, setCategory] = useState<JerseyCategory | "">("");  // category is now typed as JerseyCategory or empty string
+  const [subcategory, setSubcategory] = useState<Subcategory | "">("");
   const [reason, setReason] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories = [
-    { id: "admin", name: "Admin Adjustment" },
-    { id: "competition", name: "Competition" },
-    { id: "drink", name: "Drink" },
-    { id: "challenge", name: "Challenge" },
-    { id: "bonus", name: "Bonus" },
-    { id: "penalty", name: "Penalty" },
-  ];
-
+  // Handle points assignment
   const handleAssignPoints = async () => {
     if (!selectedUser) {
-      toast("Error");
+      toast("Error: No user selected");
       return;
     }
 
@@ -59,9 +53,14 @@ const AdminPointsAssignment = ({
       return;
     }
 
+    if (!category) {
+      toast("Please select a category");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onAssignPoints(selectedUser, category, pointsAmount, reason);
+      await onAssignPoints(selectedUser, category as JerseyCategory, subcategory as Subcategory, pointsAmount, reason);
 
       const selectedUserName =
         users.find((u) => u.id === selectedUser)?.firstname || "User";
@@ -80,7 +79,8 @@ const AdminPointsAssignment = ({
       setSelectedUser("");
       setPointsAmount(0);
       setReason("");
-      setCategory("admin");
+      setCategory("");
+      setSubcategory("");
     } catch (error) {
       toast(
         `Error assigning points: ${
@@ -95,6 +95,19 @@ const AdminPointsAssignment = ({
   const adjustPoints = (delta: number) => {
     setPointsAmount((prev) => Math.max(-1000, Math.min(1000, prev + delta)));
   };
+
+  // Dynamic subcategory options based on selected category
+  const categorySubcategories =
+    category && JERSEY_SUBCATEGORIES[category as keyof typeof JERSEY_SUBCATEGORIES]
+      ? JERSEY_SUBCATEGORIES[category as keyof typeof JERSEY_SUBCATEGORIES]
+      : [];
+
+  useEffect(() => {
+    // Reset subcategory when category changes
+    if (!categorySubcategories.length) {
+      setSubcategory("");
+    }
+  }, [category]);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -133,24 +146,45 @@ const AdminPointsAssignment = ({
             </Select>
           </div>
 
-          {/* Category Selection */}
+          {/* Category Selection - Using JERSEY_CATEGORIES dynamically */}
           <div className="space-y-2">
             <Label htmlFor="category-select" className="text-white">
               Category
             </Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(value) => setCategory(value as JerseyCategory | "")}>
               <SelectTrigger className="bg-white/10 border-white/20 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                {JERSEY_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* Subcategory Selection */}
+          {category && categorySubcategories.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="subcategory-select" className="text-white">
+                Subcategory
+              </Label>
+              <Select value={subcategory} onValueChange={(value) => setSubcategory(value as Subcategory | "")}>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectValue placeholder="Choose a subcategory..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categorySubcategories.map((sub) => (
+                    <SelectItem key={sub} value={sub}>
+                      {sub}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Points Amount */}
           <div className="space-y-2">

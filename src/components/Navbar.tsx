@@ -104,7 +104,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/">
+              <Link href="/standings">
                 <Button
                   variant="ghost"
                   className="text-white hover:text-cyan-300"
@@ -256,7 +256,7 @@ export default function Navbar({ session, userData }: NavbarProps) {
                     Vis/Scan QR-Kode
                   </Button>
                 </Link>
-                <Link href="/" onClick={closeMenu}>
+                <Link href="/standings" onClick={closeMenu}>
                   <Button variant="ghost" className="w-full text-white">
                     <Trophy className="h-4 w-4 mr-2" />
                     Standings
@@ -294,6 +294,12 @@ export default function Navbar({ session, userData }: NavbarProps) {
                       <Button variant="ghost" className="w-full text-green-300">
                         <Shield className="h-4 w-4 mr-2" />
                         Administrer Etaper
+                      </Button>
+                    </Link>
+                    <Link href="/admin/points-assignment" onClick={closeMenu}>
+                      <Button variant="ghost" className="w-full text-green-300">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Administrer Point
                       </Button>
                     </Link>
                   </>

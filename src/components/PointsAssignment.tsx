@@ -3,52 +3,17 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Trophy, Beer, Zap, Star } from "lucide-react";
-import { AssignPoints, JERSEY_CATEGORIES, JerseyCategory, User } from "@/types";
+import { X, Beer } from "lucide-react";
+import { AssignPoints, JERSEY_CATEGORIES, JerseyCategory, User, JERSEY_SUBCATEGORIES, Subcategory, JERSEY_SUBCATEGORY_POINTS } from "@/types";
 import { toast } from "sonner";
 import { sendNotificationToUser } from "@/lib/sendNotification";
 
 interface PointsAssignmentProps {
   targetUser: User;
-  currentUser: User | null; // Use UserType for Supabase user object
+  currentUser: User | null;
   onClose: () => void;
   onAssignPoints: (assignPoints: AssignPoints) => Promise<void>;
 }
-
-const pointCategories = [
-  {
-    id: "competition",
-    name: "Competition",
-    icon: Trophy,
-    points: 50,
-    color: "from-yellow-400 to-orange-500",
-    category: JERSEY_CATEGORIES[0],
-  },
-  {
-    id: "drink",
-    name: "Drink",
-    icon: Beer,
-    points: 10,
-    color: "from-blue-400 to-cyan-400",
-    category: JERSEY_CATEGORIES[1],
-  },
-  {
-    id: "challenge",
-    name: "Challenge",
-    icon: Zap,
-    points: 25,
-    color: "from-purple-500 to-pink-500",
-    category: JERSEY_CATEGORIES[2],
-  },
-  {
-    id: "bonus",
-    name: "Bonus",
-    icon: Star,
-    points: 15,
-    color: "from-green-400 to-emerald-500",
-    category: JERSEY_CATEGORIES[3],
-  },
-];
 
 const PointsAssignment = ({
   targetUser,
@@ -56,11 +21,15 @@ const PointsAssignment = ({
   onClose,
   onAssignPoints,
 }: PointsAssignmentProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Only show the subcategories that apply to "gyldne_blaerer"
+  const gyldneBlaererSubcategories: Subcategory[] = JERSEY_SUBCATEGORIES["gyldne_blaerer"];
+
+  // Handle assigning points, now with dynamic points for each subcategory
   const handleAssignPoints = async (
     category: JerseyCategory,
+    subcategory: Subcategory, // Now it's based on the subcategory dynamically selected
     points: number
   ) => {
     if (!currentUser) {
@@ -77,7 +46,7 @@ const PointsAssignment = ({
     try {
       await onAssignPoints({
         category: category,
-        subcategory: "beer",
+        subcategory: subcategory,
         value: points,
         note: `Points assigned by ${currentUser.id}`,
       });
@@ -85,10 +54,8 @@ const PointsAssignment = ({
       await sendNotificationToUser({
         userId: targetUser.id,
         title: "💥 Point Received!",
-        body: `${
-          currentUser.firstname
-        } just gave you ${points} points for ${category.toLowerCase()}.`,
-        url: "/my", // or link to scoreboard/profile/etc
+        body: `${currentUser.firstname} just gave you ${points} points for ${category.toLowerCase()}.`,
+        url: "/my", // link to profile or scoreboard
       });
       onClose();
     } catch (error) {
@@ -124,19 +91,19 @@ const PointsAssignment = ({
               {targetUser.firstname} {targetUser.lastname}
             </h3>
             <p className="text-white/60 text-sm">
-              Select category to assign points
+              Select subcategory to assign points
             </p>
           </div>
 
-          {/* Point Categories */}
+          {/* Point Categories for Gyldne Blåre */}
           <div className="grid grid-cols-1 gap-3">
-            {pointCategories.map((category) => {
-              const IconComponent = category.icon;
+            {gyldneBlaererSubcategories.map((subcategory) => {
+              const points = JERSEY_SUBCATEGORY_POINTS["gyldne_blaerer"][subcategory] || 0; // Fetch points value for subcategory
               return (
                 <Button
-                  key={category.id}
+                  key={subcategory}
                   onClick={() =>
-                    handleAssignPoints(category.category, category.points)
+                    handleAssignPoints("gyldne_blaerer", subcategory, points) // Pass dynamic points value
                   }
                   disabled={isSubmitting}
                   className="h-auto p-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white justify-between"
@@ -144,19 +111,19 @@ const PointsAssignment = ({
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-10 h-10 rounded-full bg-gradient-to-r ${category.color} flex items-center justify-center`}
+                      className={`w-10 h-10 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 flex items-center justify-center`}
                     >
-                      <IconComponent className="h-5 w-5 text-white" />
+                      <Beer className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <div className="font-medium">{category.name}</div>
+                      <div className="font-medium">{subcategory}</div>
                       <div className="text-sm text-white/60">Tap to assign</div>
                     </div>
                   </div>
                   <Badge
-                    className={`bg-gradient-to-r ${category.color} text-white border-0`}
+                    className={`bg-gradient-to-r from-orange-400 to-orange-500 text-white border-0`}
                   >
-                    +{category.points}
+                    +{points}
                   </Badge>
                 </Button>
               );

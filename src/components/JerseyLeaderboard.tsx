@@ -41,26 +41,16 @@ const JerseyLeaderboard = ({
   const topParticipants = participants.slice(0, 5);
 
   return (
-    <Card
-      className={`${jersey.bgColor} ${jersey.borderColor} border backdrop-blur-md`}
-    >
+    <Card className={`${jersey.bgColor} ${jersey.borderColor} border backdrop-blur-md`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div
-              className={`w-8 h-8 rounded-full bg-gradient-to-r ${jersey.color} flex items-center justify-center shadow-md`}
-            >
+            <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${jersey.color} flex items-center justify-center shadow-md`}>
               <IconComponent className="h-4 w-4 text-white" />
             </div>
-            <CardTitle className="text-base font-bold text-gray-800">
-              {jersey.name}
-            </CardTitle>
+            <CardTitle className="text-base font-bold text-gray-800">{jersey.name}</CardTitle>
           </div>
-          <Badge
-            className={`bg-gradient-to-r ${jersey.color} text-white border-0 px-2 py-1 text-xs font-semibold`}
-          >
-            Top 5
-          </Badge>
+          <Badge className={`bg-gradient-to-r ${jersey.color} text-white border-0 px-2 py-1 text-xs font-semibold`}>Top 4</Badge>
         </div>
       </CardHeader>
 
@@ -73,53 +63,35 @@ const JerseyLeaderboard = ({
             >
               <div className="flex items-center space-x-3">
                 {getRankIcon(participant.rank)}
-                {/* <div className="text-lg">{participant.user.emoji || "🙂"}</div> */}
-
-                {/* <div className="text-gray-800 text-sm font-semibold"> */}
-                  <span>
-                    {/* {participant.user.firstname} {participant.user.lastname} */}
-                  </span>
+                <span>
                   <div className="flex items-center justify-center space-x-2">
-                        {participant.user.avatar ? (
-                          <img
-                            src={participant.user.avatar}
-                            alt={participant.user.displayname}
-                            className="w-7 h-7 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
-                            <UserIcon className="h-4 w-4 text-white" />
-                          </div>
-                        )}
-                        <span className="text-sm font-semibold truncate">
-                          {participant.user.displayname}
-                        </span>
+                    {participant.user.avatar ? (
+                      <img
+                        src={participant.user.avatar}
+                        alt={participant.user.displayname}
+                        className="w-7 h-7 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                        <UserIcon className="h-4 w-4 text-white" />
                       </div>
-                   
-                  <div className="flex items-center space-x-2 text-sm">
-                    <span className="text-gray-700 font-medium">
-                      {participant.total} pts
-                    </span>
-                    <div
-                      className={`flex items-center space-x-1 ${
-                        participant.trend === "up"
-                          ? "text-green-700"
-                          : "text-red-700"
-                      }`}
-                    >
-                      {participant.trend === "up" ? (
-                        <Icons.TrendingUp className="h-3 w-3" />
-                      ) : (
-                        <Icons.TrendingDown className="h-3 w-3" />
-                      )}
-                      <span className="text-xs font-medium">
-                        {participant.change}
-                      </span>
-                    </div>
+                    )}
+                    <span className="text-sm font-semibold truncate">{participant.user.displayname}</span>
+                  </div>
+                </span>
+                <div className="flex items-center space-x-2 text-sm">
+                  <span className="text-gray-700 font-medium">{participant.total} pts</span>
+                  <div className={`flex items-center space-x-1 ${participant.trend === "up" ? "text-green-700" : "text-red-700"}`}>
+                    {participant.trend === "up" ? (
+                      <Icons.TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <Icons.TrendingDown className="h-3 w-3" />
+                    )}
+                    <span className="text-xs font-medium">{participant.change}</span>
                   </div>
                 </div>
               </div>
-            // </div>
+            </div>
           ))}
           {topParticipants.length === 0 && (
             <div className="text-center py-6 text-gray-600 text-sm">
@@ -131,5 +103,6 @@ const JerseyLeaderboard = ({
     </Card>
   );
 };
+
 
 export default JerseyLeaderboard;

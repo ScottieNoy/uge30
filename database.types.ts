@@ -280,7 +280,11 @@ export type Database = {
             referencedColumns: ["id"];
           }
         ];
+        SubcategoryPoints: Partial<
+          Record<Database["public"]["Enums"]["subcategory"], number>
+        >; // Allow missing subcategory points for specific jerseys
       };
+
       users: {
         Row: {
           avatar: string | null;
@@ -415,17 +419,19 @@ export type Database = {
         | "ungdom";
       subcategory:
         | "beer"
-        | "wine"
-        | "vodka"
-        | "funnel"
+        | "ølbong"
         | "shot"
         | "beerpong"
-        | "cornhole"
-        | "dart"
-        | "billiard"
         | "stigegolf"
+        | "dart"
+        | "challenge"
         | "bonus"
-        | "other";
+        | "other"
+        | "competition"
+        | "wine"
+        | "billiard"
+        | "cornhole" // Define all possible subcategories
+        | "vodkadrink"; // Vodka drink subcategory
     };
     CompositeTypes: {
       [_ in never]: never;
