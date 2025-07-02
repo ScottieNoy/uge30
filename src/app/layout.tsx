@@ -41,7 +41,7 @@ export default async function RootLayout({
     <html lang="da">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/Uge30gul-512.jpg" />
+        <link rel="apple-touch-icon" href="/uge30gul-180.png" />
         <meta name="theme-color" content="#000000" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
