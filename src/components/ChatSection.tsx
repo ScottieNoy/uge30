@@ -210,7 +210,7 @@ const ChatSection = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/60 text-base"
+                className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/60"
               />
               <Button
                 type="submit"
