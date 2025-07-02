@@ -66,6 +66,7 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
               Full Name
             </Label>
             <Input
+            textColor="black"
               id="name"
               type="text"
               placeholder="Enter your full name"
@@ -84,6 +85,7 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
               Email
             </Label>
             <Input
+            textColor="black"
               id="email"
               type="email"
               placeholder="Enter your email"
@@ -105,6 +107,7 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
             </Label>
             <div className="relative">
               <Input
+              textColor="black"
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Create a password"
@@ -141,6 +144,7 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
             </Label>
             <div className="relative">
               <Input
+              textColor="black"
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm your password"

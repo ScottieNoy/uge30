@@ -56,6 +56,7 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
               Email
             </Label>
             <Input
+            textColor="black"
               id="email"
               type="email"
               placeholder="Enter your email"
@@ -77,6 +78,7 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
             </Label>
             <div className="relative">
               <Input
+                textColor="black"
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
