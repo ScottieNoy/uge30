@@ -12,14 +12,14 @@ import { Input } from "./ui/input";
 export default function WelcomeModal() {
   const supabase = createClient();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(0); // Default to 0 for the first step
-  const [avatarUrl, setAvatarUrl] = useState(""); // Avatar URL to track if uploaded
+  const [step, setStep] = useState(0);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [displayname, setDisplayname] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [installPwaPrompt, setInstallPwaPrompt] = useState<any>(null);
-  const [isIos, setIsIos] = useState(false); // Track iOS device
-  const [isAppInstalled, setIsAppInstalled] = useState(false); // Track if the app is installed
+  const [isIos, setIsIos] = useState(false);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
 
   // Validation for username
   const [isCheckingName, setIsCheckingName] = useState(false);
@@ -30,15 +30,15 @@ export default function WelcomeModal() {
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
-      setIsIos(true); // Set iOS flag
+      setIsIos(true);
     }
   }, []);
 
   // Check if the app is in standalone mode (already installed as a PWA)
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsAppInstalled(true); // Mark the app as installed if it's running in standalone mode
-      setStep(1); // Skip the PWA install step and go straight to the profile setup
+      setIsAppInstalled(true);
+      setStep(1);
     }
   }, []);
 
@@ -48,7 +48,7 @@ export default function WelcomeModal() {
       const { data } = await supabase.auth.getUser();
       const user = data.user;
       if (user && !user.user_metadata?.profile_complete) {
-        setOpen(true); // Show modal if profile is incomplete
+        setOpen(true);
         setUserId(user.id);
       }
     };
@@ -92,7 +92,7 @@ export default function WelcomeModal() {
   const handleComplete = async () => {
     if (!userId) return;
 
-    setLoading(true); // Start loading state
+    setLoading(true);
 
     const { error: authError } = await supabase.auth.updateUser({
       data: {
@@ -114,19 +114,18 @@ export default function WelcomeModal() {
       toast.error("Fejl ved opdatering af profil");
     } else {
       toast.success("Velkommen til UGE30 🎉");
-      setOpen(false); // Close modal after completion
-      setStep(1); // Move to the next step (Profile Setup)
+      setOpen(false);
+      setStep(1);
     }
 
-    setLoading(false); // End loading state
+    setLoading(false);
   };
 
   // Check for PWA installation support
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault(); // Prevent the browser's default install prompt
-      // console.log("PWA install prompt captured"); // Log to confirm the event is fired
-      setInstallPwaPrompt(e); // Store the event for later use
+      e.preventDefault();
+      setInstallPwaPrompt(e);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -139,37 +138,38 @@ export default function WelcomeModal() {
     };
   }, []);
 
-  // Modal steps
   const steps = [
     {
       title: isIos
         ? "Installér UGE30 på din homescreen 📱"
         : "Installér UGE30 på din homescreen (via Install Button) 📱",
       content: (
-        <div className="text-center space-y-4">
-          <p className="text-white text-lg">
+        <div className="text-center space-y-6">
+          <p className="text-white/90 text-lg leading-relaxed">
             Nu kan du installere UGE30 på din homescreen for en bedre oplevelse!
           </p>
           {installPwaPrompt ? (
             <Button
               onClick={() => {
-                installPwaPrompt.prompt(); // Show the install prompt
+                installPwaPrompt.prompt();
                 installPwaPrompt.userChoice.then((choiceResult: any) => {
                   if (choiceResult.outcome === "accepted") {
                     toast.success("UGE30 installeret på homescreen!");
-                    setStep(1); // Proceed to the next step after installation
+                    setStep(1);
                   }
                 });
               }}
-              className="bg-green-600 text-white hover:bg-green-700"
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               Installer UGE30
             </Button>
           ) : (
-            <p className="text-white">
-              På iOS: Åben Safari, tryk på delingsikonet og vælg 'Tilføj til
-              hjemmeskærm'
-            </p>
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+              <p className="text-white/80 text-sm leading-relaxed">
+                På iOS: Åben Safari, tryk på delingsikonet og vælg 'Tilføj til
+                hjemmeskærm'
+              </p>
+            </div>
           )}
         </div>
       ),
@@ -177,71 +177,109 @@ export default function WelcomeModal() {
     {
       title: "Velkommen til UGE30 🎉",
       content: (
-        <p className="text-white text-lg">
-          Du er nu en del af UGE30! Den bedste uge i året, hvor vi mødes i
-          sommerhuset for at være sammen, drikke øl og have det sjovt. Følg
-          denne guide for at komme i gang med at bruge appen.
-        </p>
+        <div className="space-y-6">
+          <p className="text-white/90 text-lg leading-relaxed">
+            Du er nu en del af UGE30! Den bedste uge i året, hvor vi mødes i
+            sommerhuset for at være sammen, drikke øl og have det sjovt.
+          </p>
+          <p className="text-white/80 text-base">
+            Følg denne guide for at komme i gang med at bruge appen.
+          </p>
+        </div>
       ),
     },
     {
       title: "Upload dit avatar",
       content: (
-        <div className="flex flex-col items-center space-y-4">
+        <div className="flex flex-col items-center space-y-6">
           {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt="Avatar Preview"
-              className="h-24 w-24 rounded-full border-4 border-white mb-6"
-            />
+            <div className="relative group">
+              <img
+                src={avatarUrl}
+                alt="Avatar Preview"
+                className="h-28 w-28 rounded-full border-4 border-white/30 shadow-xl transition-transform group-hover:scale-105"
+              />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/30 to-transparent" />
+            </div>
           )}
-          <AvatarUpload onUpload={setAvatarUrl} key={userId!} />
+          <AvatarUpload onUpload={setAvatarUrl} />
         </div>
       ),
     },
     {
-      title: "Vælg et kort, unikt navn, som vil blive vist i appen",
+      title: "Vælg et kort, unikt navn",
       content: (
-        <div className="space-y-2">
-          <Label className="text-white">Navn</Label>
-          <Input
-            value={displayname}
-            onChange={(e) => setDisplayname(e.target.value)}
-            placeholder="F.eks. Stiv-Martin"
-            textColor="white"
-            className="input-lg"
-          />
-          {isCheckingName && (
-            <p className="text-xs text-blue-400">Tjekker navn...</p>
-          )}
-          {nameError && !isCheckingName && (
-            <p className="text-xs text-red-500">{nameError}</p>
-          )}
-          {isNameValid && !isCheckingName && (
-            <p className="text-xs text-green-500">Navnet er ledigt ✔</p>
-          )}
+        <div className="space-y-4">
+          <p className="text-white/80 text-sm">
+            Dette navn vil blive vist i appen
+          </p>
+          <div className="space-y-3">
+            <Label className="text-white/90 font-medium">Navn</Label>
+            <Input
+              value={displayname}
+              onChange={(e) => setDisplayname(e.target.value)}
+              placeholder="F.eks. Stiv-Martin"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-white/40 focus:ring-white/20 transition-all duration-200"
+            />
+            {isCheckingName && (
+              <p className="text-xs text-blue-400 flex items-center gap-2">
+                <span className="animate-spin">⏳</span> Tjekker navn...
+              </p>
+            )}
+            {nameError && !isCheckingName && (
+              <p className="text-xs text-red-400 bg-red-500/10 px-3 py-2 rounded-lg border border-red-500/20">
+                {nameError}
+              </p>
+            )}
+            {isNameValid && !isCheckingName && (
+              <p className="text-xs text-green-400 bg-green-500/10 px-3 py-2 rounded-lg border border-green-500/20">
+                ✔ Navnet er ledigt
+              </p>
+            )}
+          </div>
         </div>
       ),
     },
     {
       title: "Hvordan bruger du appen?",
       content: (
-        <ul className="list-disc list-inside text-white space-y-2">
-          <li>
-            Scan andres QR-koder for at tracke deres drikkevarer, ikke din egen.
-          </li>
-          <li>
-            Deltag i konkurrencer og optjen point for både Sprinter og Prikket
-            Trøje.
-          </li>
-          <li>På hovedsiden kan du se stillingen og kommende events.</li>
-          <li>
-            Brug UGE30 Social til at chatte, dele information, kommentere og like andres indlæg.
-          </li>
-          <li>
-            Se hele ugeoversigten med alle etaper og events under "Etaper".
-          </li>
-        </ul>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+          <ul className="space-y-4 text-white/90 text-sm">
+            <li className="flex items-start gap-3">
+              <span className="text-cyan-400 mt-1 text-lg">•</span>
+              <span className="leading-relaxed">
+                Scan andres QR-koder for at tracke deres drikkevarer, ikke din
+                egen.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-cyan-400 mt-1 text-lg">•</span>
+              <span className="leading-relaxed">
+                Deltag i konkurrencer og optjen point for både Sprinter og
+                Prikket Trøje.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-cyan-400 mt-1 text-lg">•</span>
+              <span className="leading-relaxed">
+                På hovedsiden kan du se stillingen og kommende events.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-cyan-400 mt-1 text-lg">•</span>
+              <span className="leading-relaxed">
+                Brug UGE30 Social til at chatte, dele information, kommentere og
+                like andres indlæg.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-cyan-400 mt-1 text-lg">•</span>
+              <span className="leading-relaxed">
+                Se hele ugeoversigten med alle etaper og events under "Etaper".
+              </span>
+            </li>
+          </ul>
+        </div>
       ),
     },
   ];
@@ -250,7 +288,6 @@ export default function WelcomeModal() {
   const isNextDisabled =
     step === 3 && (!avatarUrl || isCheckingName || !isNameValid);
 
-  // Make sure step is within bounds
   const currentStep = steps[step] || {
     title: "Error",
     content: <div>Error loading step...</div>,
@@ -258,19 +295,21 @@ export default function WelcomeModal() {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md w-full my-2 p-6 bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
-        <DialogTitle className="text-lg text-white flex items-center gap-2">
+      <DialogContent className="sm:max-w-md w-full my-2 p-8 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+        <DialogTitle className="text-xl font-bold text-white mb-6 text-center">
           {currentStep.title}
         </DialogTitle>
 
-        <div>{currentStep.content}</div>
+        <div className="min-h-[250px] flex flex-col justify-center">
+          {currentStep.content}
+        </div>
 
-        <div className="flex justify-between gap-4 mt-6">
+        <div className="flex justify-between gap-4 mt-8 pt-6 border-t border-white/10">
           {step > 0 && (
             <Button
               variant="outline"
               onClick={() => setStep(step - 1)}
-              className="text-white hover:bg-white/10"
+              className="border-white/30 text-white hover:bg-white/10 hover:border-white/40 transition-all duration-200"
             >
               Tilbage
             </Button>
@@ -278,17 +317,16 @@ export default function WelcomeModal() {
           {!isLastStep ? (
             <Button
               onClick={() => {
-                // Ensure that the avatar is uploaded before moving to the next step
                 if (step === 2 && avatarUrl) {
-                  setStep(step + 1); // Only move to the next step if the avatar is uploaded
+                  setStep(step + 1);
                 } else if (step !== 2) {
-                  setStep(step + 1); // Move to the next step if it's not the avatar step
+                  setStep(step + 1);
                 } else {
                   toast.error("Upload dit avatar for at fortsætte");
                 }
               }}
               disabled={isNextDisabled}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg transform hover:scale-105 transition-all duration-200 ml-auto"
             >
               {loading ? "Laster..." : "Næste"}
             </Button>
@@ -296,7 +334,7 @@ export default function WelcomeModal() {
             <Button
               onClick={handleComplete}
               disabled={loading}
-              className="bg-green-600 text-white hover:bg-green-700"
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-lg transform hover:scale-105 transition-all duration-200 ml-auto"
             >
               {loading ? "Kommer i gang..." : "Kom i gang 🚀"}
             </Button>
