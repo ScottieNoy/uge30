@@ -119,13 +119,13 @@ export default function Navbar({ session, userData }: NavbarProps) {
                   className="text-white hover:text-cyan-300"
                 >
                   <Bike className="h-4 w-4 mr-2" />
-                  Stages
+                  Etaper
                 </Button>
               </Link>
 
               {isAdmin && (
                 <>
-                  <Link href="/add-points">
+                  {/* <Link href="/add-points">
                     <Button
                       variant="ghost"
                       className="text-green-400 hover:text-green-300"
@@ -141,13 +141,14 @@ export default function Navbar({ session, userData }: NavbarProps) {
                     >
                       Edit Jerseys
                     </Button>
-                  </Link>
+                  </Link> */}
                   <Link href="/admin/stages">
                     <Button
                       variant="ghost"
                       className="text-green-400 hover:text-green-300"
                     >
-                      Manage Stages
+                      <Shield className="h-4 w-4 mr-2" />
+                      Administrer Etaper
                     </Button>
                   </Link>
                 </>
@@ -255,25 +256,26 @@ export default function Navbar({ session, userData }: NavbarProps) {
                 <Link href="/stages" onClick={closeMenu}>
                   <Button variant="ghost" className="w-full text-white">
                     <Bike className="h-4 w-4 mr-2" />
-                    Stages
+                    Etaper
                   </Button>
                 </Link>
 
                 {isAdmin && (
                   <>
-                    <Link href="/add-points" onClick={closeMenu}>
+                    {/* <Link href="/add-points" onClick={closeMenu}>
                       <Button variant="ghost" className="w-full text-green-300">
                         Add Points
                       </Button>
-                    </Link>
-                    <Link href="/jerseys/edit" onClick={closeMenu}>
+                    </Link> */}
+                    {/* <Link href="/jerseys/edit" onClick={closeMenu}>
                       <Button variant="ghost" className="w-full text-green-300">
                         Edit Jerseys
                       </Button>
-                    </Link>
+                    </Link> */}
                     <Link href="/admin/stages" onClick={closeMenu}>
                       <Button variant="ghost" className="w-full text-green-300">
-                        Manage Stages
+                        <Shield className="h-4 w-4 mr-2" />
+                        Administrer Etaper
                       </Button>
                     </Link>
                   </>
