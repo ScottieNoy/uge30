@@ -9,6 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          user_id: string;
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          user_id: string;
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          user_id?: string;
+          content?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      post_likes: {
+        Row: {
+          post_id: string;
+          user_id: string;
+          created_at: string | null;
+        };
+        Insert: {
+          post_id: string;
+          user_id: string;
+          created_at?: string | null;
+        };
+        Update: {
+          post_id?: string;
+          user_id?: string;
+          created_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "post_likes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
+      posts: {
+        Row: {
+          id: string;
+          user_id: string;
+          content: string;
+          pinned: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          content: string;
+          pinned?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          content?: string;
+          pinned?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "posts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
       events: {
         Row: {
           id: string;
@@ -246,8 +353,27 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      fetch_posts_with_likes_and_counts: {
+  Args: {
+    current_user_id: string;
+  };
+  Returns: {
+    id: string;
+    content: string;
+    created_at: string;
+    pinned: boolean;
+    user_id: string;
+    displayname: string;
+    avatar: string | null;
+    emoji: string | null;
+    like_count: number;
+    liked_by_user: boolean;
+    comment_count: number;
+  }[];
+};
+
     };
+
     Enums: {
       jersey_category:
         | "gyldne_blaerer"
