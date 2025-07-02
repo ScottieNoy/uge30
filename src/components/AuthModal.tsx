@@ -7,6 +7,8 @@ import { X } from "lucide-react";
 import LoginForm from "./LoginForm";
 import RegisterForm, { RegisterFormData } from "./RegisterForm";
 import { createClient } from "@/lib/supabaseClient";
+import { toast } from "sonner";
+import { profile } from "console";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -24,29 +26,29 @@ const AuthModal = ({
   const [activeTab, setActiveTab] = useState<"login" | "register">(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
-  const handleLoginSubmit = async (data: {
-    email: string;
-    password: string;
-  }) => {
-    setIsLoading(true);
-    console.log("Login data:", data);
+  const handleLoginSubmit = async (data: { email: string; password: string; }) => {
+  setIsLoading(true);
+  console.log("Login data:", data);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
+  const { error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password,
+  });
 
-    setIsLoading(false);
+  setIsLoading(false);
 
-    if (error) {
-      console.error("Login failed:", error.message);
-      // Optionally show error to user
-      return;
-    }
+  if (error) {
+    console.error("Login failed:", error.message);
+    return;
+  }
 
-    onAuthSuccess?.(); // Optional callback
-    onClose(); // Close modal or drawer
-  };
+  onAuthSuccess?.(); // Optional callback
+  onClose(); // Close modal or drawer
+  
+  // Full page reload to apply changes
+  window.location.reload();
+};
+
 
   const handleRegisterSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
@@ -55,6 +57,11 @@ const AuthModal = ({
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
+      options: {
+        data: {
+          profileComplete: false, // Initially set to false
+        },
+      },
     });
 
     if (authError) {
@@ -81,23 +88,19 @@ const AuthModal = ({
 
     // Helper to try different combinations (e.g., JO+BR, J+OBR, etc.)
     const generateCandidates = (first: string, last: string): string[] => {
-      const candidates = new Set<string>();
+      const capitalize = (s: string) => s.toUpperCase();
 
-      for (let i = 0; i < first.length; i++) {
-        for (let j = 0; j < last.length; j++) {
-          const a = first[i] ?? "";
-          const b = first[i + 1] ?? last[j] ?? "";
-          const c = last[j] ?? "";
-          const d = last[j + 1] ?? first[i + 1] ?? "";
+      const capitalizedFirst = capitalize(first);
+      const capitalizedLast = capitalize(last);
 
-          const combo = `${a}${b}${c}${d}`.slice(0, 4);
-          if (combo.length === 4) {
-            candidates.add(combo);
-          }
-        }
-      }
+      const candidates = [
+        capitalizedFirst,
+        `${capitalizedFirst}${capitalizedLast.charAt(0)}`,
+        `${capitalizedFirst}${capitalizedLast}`,
+        `${capitalizedFirst.charAt(0)}${capitalizedLast}`,
+      ];
 
-      return Array.from(candidates);
+      return candidates.filter((name) => name.length > 0);
     };
 
     const candidates = generateCandidates(first, last);
@@ -143,6 +146,7 @@ const AuthModal = ({
     }
 
     setIsLoading(false);
+    toast.success("Account created successfully! Please check your email to verify your account.");
     onAuthSuccess?.();
     onClose?.();
   };

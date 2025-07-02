@@ -25,7 +25,7 @@ self.addEventListener('push', function (event) {
   const title = data.title || 'UGE30'
   const options = {
     body: data.body || '',
-    icon: '/Uge30Blaa.png',
+    icon: '/Uge30gul-192.jpg',
     badge: '/icons/badge-72x72.png', // Optional: add a smaller monochrome badge icon
     data: {
       url: data.url || '/' // Used when clicking the notification

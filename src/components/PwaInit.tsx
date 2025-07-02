@@ -8,8 +8,6 @@ export default function PwaInit() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
-          console.log('✅ Service Worker registered:', registration)
-
           // Optional: handle updates
           registration.onupdatefound = () => {
             const newWorker = registration.installing
@@ -17,9 +15,9 @@ export default function PwaInit() {
               newWorker.onstatechange = () => {
                 if (newWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    console.log('🔄 New content available, will be used on next reload.')
+                    // console.log('🔄 New content available, will be used on next reload.')
                   } else {
-                    console.log('🎉 Content cached for offline use.')
+                    // console.log('🎉 Content cached for offline use.')
                   }
                 }
               }
@@ -27,7 +25,7 @@ export default function PwaInit() {
           }
         })
         .catch((error) => {
-          console.error('❌ Service Worker registration failed:', error)
+          // console.error('❌ Service Worker registration failed:', error)
         })
     }
   }, [])

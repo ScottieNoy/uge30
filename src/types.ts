@@ -61,7 +61,6 @@ export type JerseyData = {
 export type JerseyCategoryConfig = {
   id: JerseyCategory;
   name: string;
-  avatar?: string | null; // optional avatar URL
   icon: keyof typeof Icons;
   color: string;
   bgColor: string;
@@ -71,6 +70,7 @@ export type JerseyCategoryConfig = {
 export type JerseyDisplay = JerseyCategoryConfig & {
   holder: string;
   points: number;
+  displayName: string; // full name of the holder
   icon: keyof typeof Icons; // or React.ComponentType<any>
   avatar?: string | null; // optional avatar URL
 };
@@ -171,7 +171,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
   førertroje: {
     id: "førertroje",
     name: "Maillot Jaune",
-    icon: "FlagTriangleLeft",
+    icon: "Trophy",
     color: "from-yellow-400 to-yellow-500",
     bgColor: "bg-yellow-100",
     borderColor: "border-yellow-200",
@@ -179,7 +179,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
   gyldne_blaerer: {
     id: "gyldne_blaerer",
     name: "Den gyldne blære",
-    icon: "Trophy",
+    icon: "Beer",
     color: "from-orange-400 to-orange-500",
     bgColor: "bg-orange-100",
     borderColor: "border-orange-200",
@@ -195,7 +195,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
   sprinter: {
     id: "sprinter",
     name: "Maillot Vert",
-    icon: "CloudLightning",
+    icon: "Bike",
     color: "from-green-400 to-green-500",
     bgColor: "bg-green-100",
     borderColor: "border-green-200",
@@ -211,7 +211,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
   ungdom: {
     id: "ungdom",
     name: "Maillot Blanc",
-    icon: "WheatIcon",
+    icon: "User",
     color: "from-gray-400 to-gray-500",
     bgColor: "bg-gray-100",
     borderColor: "border-gray-200",

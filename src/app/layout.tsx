@@ -7,6 +7,7 @@ import SplashScreen from "@/components/SplashScreen";
 import { Toaster } from "@/components/ui/sonner";
 import { createClient } from "@/lib/supabaseServer";
 import NotificationGate from "@/components/NotificationGate";
+import ClientRoot from "@/components/ClientRoot";
 
 export const metadata = {
   title: "UGE 30",
@@ -40,7 +41,7 @@ export default async function RootLayout({
     <html lang="da">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/Uge30Blaa.png" />
+        <link rel="apple-touch-icon" href="/Uge30gul-512.jpg" />
         <meta name="theme-color" content="#000000" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -58,6 +59,8 @@ export default async function RootLayout({
         {/* <NotificationManager /> */}
         <NotificationGate />
         <Navbar session={session} userData={userData} />
+        <ClientRoot />
+
         <main>{children}</main>
         <Toaster />
       </body>

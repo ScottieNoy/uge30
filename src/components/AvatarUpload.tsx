@@ -65,14 +65,22 @@ export default function AvatarUpload({ onUpload }: AvatarUploadProps) {
   };
 
   return (
-    <div className="mt-2">
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="text-white"
-      />
-    </div>
+    <div className="mt-4 flex justify-center">
+  <label
+    htmlFor="avatar-upload"
+    className="bg-cyan-500 text-white py-2 px-4 rounded-md shadow-lg cursor-pointer hover:bg-cyan-600 transition-colors duration-200"
+  >
+    Upload Avatar
+  </label>
+  <input
+    id="avatar-upload"
+    ref={inputRef}
+    type="file"
+    accept="image/*"
+    onChange={handleFileSelect}
+    className="hidden"
+  />
+</div>
+
   );
 }

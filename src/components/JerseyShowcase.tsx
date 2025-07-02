@@ -30,9 +30,9 @@ const JerseyShowcase = ({
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-            Festival{" "}
+            UGE30{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-              Jerseys
+              Trøjer
             </span>
           </h2>
           <p className="text-blue-100">Current jersey holders</p>
@@ -46,6 +46,7 @@ const JerseyShowcase = ({
             ] as React.FC<React.SVGProps<SVGSVGElement>>;
             const holder = jersey.holder as unknown as {
               name: string;
+              displayName: string;
               avatar: string | null;
             };
 
@@ -89,12 +90,12 @@ const JerseyShowcase = ({
                           </div>
                         )}
                         <span className="text-sm font-semibold truncate">
-                          {holder.name}
+                          {holder.displayName}
                         </span>
                       </div>
                     ) : (
                       <p className="font-semibold text-sm">
-                        No Holder
+                        Ingen har denne trøje endnu
                       </p>
                     )}
                   </div>

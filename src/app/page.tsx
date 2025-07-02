@@ -35,6 +35,7 @@ export default function Home() {
         holder: {
           name: `${topEntry.user.firstname} ${topEntry.user.lastname}`,
           avatar: topEntry.user.avatar, // assumes .avatar contains image URL
+          displayName: topEntry.user.displayname || `${topEntry.user.firstname} ${topEntry.user.lastname}`,
         },
 
         points: topEntry.total,
