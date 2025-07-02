@@ -32,8 +32,11 @@ export default function Home() {
       const jerseyConfig = jerseyConfigs[category as JerseyCategory];
       return {
         ...jerseyConfig,
-        holder: `${topEntry.user.emoji}
-          ${topEntry.user.firstname} ${topEntry.user.lastname}`,
+        holder: {
+          name: `${topEntry.user.firstname} ${topEntry.user.lastname}`,
+          avatar: topEntry.user.avatar, // assumes .avatar contains image URL
+        },
+
         points: topEntry.total,
         icon: jerseyConfig.icon,
         // Ensure name is the category key, not the display string

@@ -61,6 +61,7 @@ export type JerseyData = {
 export type JerseyCategoryConfig = {
   id: JerseyCategory;
   name: string;
+  avatar?: string | null; // optional avatar URL
   icon: keyof typeof Icons;
   color: string;
   bgColor: string;
@@ -71,6 +72,7 @@ export type JerseyDisplay = JerseyCategoryConfig & {
   holder: string;
   points: number;
   icon: keyof typeof Icons; // or React.ComponentType<any>
+  avatar?: string | null; // optional avatar URL
 };
 
 export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];

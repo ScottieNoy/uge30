@@ -5,6 +5,7 @@ import * as Icons from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { JerseyCategoryConfig, jerseyConfigs, JerseyDisplay } from "@/types";
+import { User as UserIcon } from "lucide-react";
 
 const JerseyShowcase = ({
   jerseyDisplay,
@@ -43,6 +44,11 @@ const JerseyShowcase = ({
             const IconComponent = Icons[
               config.icon as keyof typeof Icons
             ] as React.FC<React.SVGProps<SVGSVGElement>>;
+            const holder = jersey.holder as unknown as {
+              name: string;
+              avatar: string | null;
+            };
+
             return (
               <Card
                 key={jersey.id}
@@ -53,7 +59,7 @@ const JerseyShowcase = ({
                   <div
                     className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r ${config.color} flex items-center justify-center shadow-lg`}
                   >
-                    <IconComponent className="h-6 w-6 text-white" />
+                    <IconComponent className="h-6 w-6" />
                   </div>
 
                   <h3 className="text-sm font-bold mb-2 leading-tight">
@@ -62,21 +68,41 @@ const JerseyShowcase = ({
 
                   <div className="mb-2">
                     <Badge
-                      className={`bg-gradient-to-r ${config.color} text-white border-0 px-2 py-1 text-xs`}
+                      className={`bg-gradient-to-r ${config.color} border-0 px-2 py-1 text-xs`}
                     >
                       #{index + 1}
                     </Badge>
                   </div>
 
-                  <div>
-                    <p className="font-semibold text-sm mb-1">
-                      {jersey.points > 0 ? jersey.holder : "No Holder"}
-                    </p>
-                    <p className="text-lg font-bold bg-clip-text bg-gradient-to-r from-white to-gray-300">
-                      {jersey.points.toLocaleString()}
-                    </p>
-                    <p className="text-xs ">points</p>
+                  <div className="mb-1">
+                    {jersey.points > 0 ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        {holder.avatar ? (
+                          <img
+                            src={holder.avatar}
+                            alt={holder.name}
+                            className="w-7 h-7 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                            <UserIcon className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                        <span className="text-sm font-semibold truncate">
+                          {holder.name}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="font-semibold text-sm">
+                        No Holder
+                      </p>
+                    )}
                   </div>
+
+                  <p className="text-lg font-bold bg-clip-text bg-gradient-to-r from-white to-gray-300">
+                    {jersey.points.toLocaleString()}
+                  </p>
+                  <p className="text-xs">points</p>
                 </CardContent>
               </Card>
             );

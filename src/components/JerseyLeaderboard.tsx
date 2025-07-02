@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import * as Icons from "lucide-react";
 import { Tables } from "../../database.types";
 import { JerseyCategoryConfig, User } from "@/types";
+import { UserIcon } from "lucide-react";
 
 interface JerseyLeaderboardProps {
   jersey: JerseyCategoryConfig;
@@ -72,12 +73,29 @@ const JerseyLeaderboard = ({
             >
               <div className="flex items-center space-x-3">
                 {getRankIcon(participant.rank)}
-                <div className="text-lg">{participant.user.emoji || "🙂"}</div>
+                {/* <div className="text-lg">{participant.user.emoji || "🙂"}</div> */}
 
-                <div className="text-gray-800 text-sm font-semibold">
+                {/* <div className="text-gray-800 text-sm font-semibold"> */}
                   <span>
-                    {participant.user.firstname} {participant.user.lastname}
+                    {/* {participant.user.firstname} {participant.user.lastname} */}
                   </span>
+                  <div className="flex items-center justify-center space-x-2">
+                        {participant.user.avatar ? (
+                          <img
+                            src={participant.user.avatar}
+                            alt={participant.user.displayname}
+                            className="w-7 h-7 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                            <UserIcon className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                        <span className="text-sm font-semibold truncate">
+                          {participant.user.displayname}
+                        </span>
+                      </div>
+                   
                   <div className="flex items-center space-x-2 text-sm">
                     <span className="text-gray-700 font-medium">
                       {participant.total} pts
@@ -101,7 +119,7 @@ const JerseyLeaderboard = ({
                   </div>
                 </div>
               </div>
-            </div>
+            // </div>
           ))}
           {topParticipants.length === 0 && (
             <div className="text-center py-6 text-gray-600 text-sm">
