@@ -1,16 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PostCreation from "@/components/PostCreation";
 import SocialFeed from "@/components/SocialFeed";
 import ChatSection from "@/components/ChatSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const Social = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const initialTab = searchParams.get("tab") === "chat" ? "chat" : "feed";
   const [activeTab, setActiveTab] = useState<"feed" | "chat">("feed");
   const [showPostCreation, setShowPostCreation] = useState(false);
+
+  useEffect(() => {
+    const newTab = searchParams.get("tab");
+    if (newTab === "chat" || newTab === "feed") {
+      setActiveTab(newTab);
+    }
+  }, [searchParams]);
 
   return (
     <div className="pt-20 px-4 pb-8">
@@ -18,12 +30,12 @@ const Social = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Social{" "}
+            UGE30{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-              Hub
+              Social
             </span>
           </h1>
-          <p className="text-blue-100">Connect with fellow festival-goers</p>
+          {/* <p className="text-blue-100">Når du skriver her får alle besked</p> */}
         </div>
 
         {/* Tab Navigation */}
@@ -31,7 +43,7 @@ const Social = () => {
           <div className="bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20">
             <Button
               variant={activeTab === "feed" ? "default" : "ghost"}
-              onClick={() => setActiveTab("feed")}
+              onClick={() => router.push("/social?tab=feed")}
               className={`rounded-full px-6 ${
                 activeTab === "feed"
                   ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
@@ -43,7 +55,7 @@ const Social = () => {
             </Button>
             <Button
               variant={activeTab === "chat" ? "default" : "ghost"}
-              onClick={() => setActiveTab("chat")}
+              onClick={() => router.push("/social?tab=chat")}
               className={`rounded-full px-6 ${
                 activeTab === "chat"
                   ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
