@@ -137,7 +137,7 @@ export default function StageDetailPage() {
                   {stage.emoji && (
                     <span className="text-4xl shrink-0">{stage.emoji}</span>
                   )}
-                  <h1 className="text-gray-900 font-bold leading-tight break-words">
+                  <h1 className="self-center text-gray-900 font-bold leading-tight break-words">
                     {stage.title}
                   </h1>
                 </div>
@@ -185,11 +185,9 @@ export default function StageDetailPage() {
                             {event.emoji}
                           </span>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-gray-900 font-semibold leading-tight break-words">
-                            {event.title}
-                          </h3>
-                        </div>
+                        <h3 className="self-center text-gray-900 font-semibold leading-tight break-words">
+                          {event.title}
+                        </h3>
                       </div>
                     </CardTitle>
                   </CardHeader>
