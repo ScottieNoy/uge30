@@ -46,6 +46,7 @@ export default function StageFormModal({ existingStage, onClose, onSaved }: any)
     } else {
       await supabase.from('stages').insert(payload)
     }
+    toast.success(existingStage ? 'Etape opdateret' : 'Etape oprettet')
 
     setLoading(false)
     onSaved()
@@ -77,6 +78,7 @@ export default function StageFormModal({ existingStage, onClose, onSaved }: any)
   const handleDeleteEvent = async (id: string) => {
     await supabase.from('events').delete().eq('id', id)
     setEvents(events.filter((e) => e.id !== id))
+    toast.success('Event slettet')
   }
 
   const handleUpdateEvent = async (event: any) => {

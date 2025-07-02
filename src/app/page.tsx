@@ -54,16 +54,17 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="w-40 h-40 mx-auto mb-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-2xl">
             {/* <span className="text-white font-black text-3xl">U</span> */}
-            <img className="h-30 w-30 object-contain"
+            <img
+              className="h-30 w-30 object-contain"
               src="/uge30-logo.webp"
               alt="UGE Icon"
             />
           </div>
           <h1 className="text-3xl font-black text-white mb-4">
             Scan, Drik,{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-            Gentag!
-          </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+              Gentag!
+            </span>
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -89,6 +90,8 @@ export default function Home() {
       {/* Stats + Countdown */}
       <section className="px-4 py-6">
         <div className="max-w-4xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <FestivalCountdown />
+
           <Card className="bg-white/10 text-center p-4">
             <CardContent className="p-0">
               <Users className="h-6 w-6 text-cyan-300 mx-auto mb-2" />
@@ -107,14 +110,6 @@ export default function Home() {
               <div className="text-cyan-200 text-sm">Jerseys</div>
             </CardContent>
           </Card>
-          <Card className="bg-white/10 text-center p-4">
-            <CardContent className="p-0">
-              <CalendarDays className="h-6 w-6 text-orange-300 mx-auto mb-2" />
-              <div className="text-xl font-bold text-white">Soon</div>
-              <div className="text-cyan-200 text-sm">Competition</div>
-            </CardContent>
-          </Card>
-          <FestivalCountdown />
         </div>
       </section>
 

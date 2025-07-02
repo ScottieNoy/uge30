@@ -1,9 +1,22 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Clock } from "lucide-react";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { CalendarDays, Clock, MapPin } from 'lucide-react';
+import { createClient } from '@/lib/supabaseClient';
+import { format } from 'date-fns';
+import { da } from 'date-fns/locale';
+
+interface Event {
+  id: string;
+  title: string;
+  time: string; // ISO 8601 string
+  emoji?: string;
+  location?: string;
+}
 
 const FestivalCountdown = () => {
+  const supabase = createClient();
+  const [nextEvent, setNextEvent] = useState<Event | null>(null);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -12,71 +25,113 @@ const FestivalCountdown = () => {
   });
 
   useEffect(() => {
-    // Festival end date - adjust this to your actual festival end date
-    const festivalEndDate = new Date("2025-07-21T12:00:00"); // Example: August 4th, 2024
+    const fetchNextEvent = async () => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('time', { ascending: true });
 
-    const calculateTimeLeft = () => {
+      if (error) {
+        console.error('Failed to fetch events:', error.message);
+        return;
+      }
+
       const now = new Date();
-      const difference = festivalEndDate.getTime() - now.getTime();
+      const upcoming = data?.find((event) => new Date(event.time) > now);
+      if (upcoming) {
+        setNextEvent({
+          id: upcoming.id,
+          title: upcoming.title,
+          time: upcoming.time,
+          emoji: upcoming.emoji ?? undefined,
+          location: upcoming.location ?? undefined,
+        });
+        updateCountdown(new Date(upcoming.time));
+      }
+    };
+
+    const updateCountdown = (targetDate: Date) => {
+      const now = new Date();
+      const difference = targetDate.getTime() - now.getTime();
 
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor(
-            (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-          ),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / (1000 * 60)) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
         });
       } else {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
 
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
+    fetchNextEvent();
+
+    const timer = setInterval(() => {
+      if (nextEvent) {
+        updateCountdown(new Date(nextEvent.time));
+      }
+    }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [nextEvent]);
 
   return (
-    <Card className="bg-white/10 backdrop-blur-md border-white/20">
-      <CardContent className="flex p-3 items-center justify-center h-full">
-        <div className="flex items-center justify-center space-x-2 text-white">
-          <Clock className="h-4 w-4 text-cyan-300" />
-          <div className="flex items-center space-x-1 text-sm font-mono">
-            <div className="text-center">
-              <div className="font-bold">
-                {timeLeft.days.toString().padStart(2, "0")}
-              </div>
-              <div className="text-xs text-cyan-200">days</div>
-            </div>
-            <span className="text-cyan-300">:</span>
-            <div className="text-center">
-              <div className="font-bold">
-                {timeLeft.hours.toString().padStart(2, "0")}
-              </div>
-              <div className="text-xs text-cyan-200">hrs</div>
-            </div>
-            <span className="text-cyan-300">:</span>
-            <div className="text-center">
-              <div className="font-bold">
-                {timeLeft.minutes.toString().padStart(2, "0")}
-              </div>
-              <div className="text-xs text-cyan-200">min</div>
-            </div>
-            <span className="text-cyan-300">:</span>
-            <div className="text-center">
-              <div className="font-bold">
-                {timeLeft.seconds.toString().padStart(2, "0")}
-              </div>
-              <div className="text-xs text-cyan-200">sec</div>
-            </div>
+    <Card className="bg-white/10 text-center col-span-2 p-4">
+  <CardContent className="p-0 space-y-2 text-white">
+    {nextEvent ? (
+      <>
+        <div className="uppercase text-xs font-semibold tracking-wide text-cyan-400 mb-2">
+          Næste aktivitet
+        </div>
+        <div className="text-xl font-bold">
+          {nextEvent.emoji} {nextEvent.title}
+        </div>
+
+        <div className="text-sm text-cyan-200 flex items-center justify-center gap-2">
+          <CalendarDays className="h-4 w-4" />
+          {format(new Date(nextEvent.time), "EEEE 'kl.' HH:mm", { locale: da })}
+        </div>
+
+        
+
+        {nextEvent.location && (
+          <div className="text-sm text-white/70 flex items-center justify-center gap-1">
+            <MapPin className="h-4 w-4 text-cyan-400" />
+            {nextEvent.location}
+          </div>
+        )}
+
+        <div className="flex justify-center space-x-4 font-mono text-sm pt-1">
+          {/* <Clock className="h-4 w-4 text-cyan-300" /> */}
+          <div className="flex items-center space-x-2">
+            <TimeBlock label="dage" value={timeLeft.days} />
+            <TimeBlock label="timer" value={timeLeft.hours} />
+            <TimeBlock label="min" value={timeLeft.minutes} />
+            <TimeBlock label="sek" value={timeLeft.seconds} />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </>
+    ) : (
+      <div className="text-white/80 text-sm">Ingen kommende events</div>
+    )}
+  </CardContent>
+</Card>
+
   );
 };
+
+type TimeBlockProps = {
+  label: string;
+  value: number;
+};
+
+const TimeBlock: React.FC<TimeBlockProps> = ({ label, value }) => (
+  <div className="flex flex-col items-center">
+    <span className="text-lg font-bold">{value.toString().padStart(2, '0')}</span>
+    <span className="text-xs text-cyan-400">{label}</span>
+  </div>
+);
 
 export default FestivalCountdown;
