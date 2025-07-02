@@ -124,7 +124,7 @@ export default function StageFormModal({
         {/* Stage Details */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-white mb-1">Titel</label>
+            <label className="block text-white mb-1">Titel</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -133,7 +133,7 @@ export default function StageFormModal({
           </div>
 
           <div>
-            <label className="block text-sm text-white mb-1">Beskrivelse</label>
+            <label className="block text-white mb-1">Beskrivelse</label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -142,7 +142,7 @@ export default function StageFormModal({
           </div>
 
           <div>
-            <label className="block text-sm text-white mb-1">Emoji</label>
+            <label className="block text-white mb-1">Emoji</label>
             <Input
               value={emoji}
               onChange={(e) => setEmoji(e.target.value)}
@@ -246,7 +246,7 @@ export default function StageFormModal({
 
                   <div className="flex justify-between gap-2">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => handleUpdateEvent(event)}
                       className="flex-1"
                     >
