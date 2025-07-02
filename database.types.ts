@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          id: string;
+          user_id: string;
+          message: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          message: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          message?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+
       comments: {
         Row: {
           id: string;
@@ -354,24 +384,23 @@ export type Database = {
     };
     Functions: {
       fetch_posts_with_likes_and_counts: {
-  Args: {
-    current_user_id: string;
-  };
-  Returns: {
-    id: string;
-    content: string;
-    created_at: string;
-    pinned: boolean;
-    user_id: string;
-    displayname: string;
-    avatar: string | null;
-    emoji: string | null;
-    like_count: number;
-    liked_by_user: boolean;
-    comment_count: number;
-  }[];
-};
-
+        Args: {
+          current_user_id: string;
+        };
+        Returns: {
+          id: string;
+          content: string;
+          created_at: string;
+          pinned: boolean;
+          user_id: string;
+          displayname: string;
+          avatar: string | null;
+          emoji: string | null;
+          like_count: number;
+          liked_by_user: boolean;
+          comment_count: number;
+        }[];
+      };
     };
 
     Enums: {
