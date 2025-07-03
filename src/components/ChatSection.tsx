@@ -154,7 +154,10 @@ const ChatSection = () => {
           </CardHeader>
 
           {/* Scrollable Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4">
+          <div
+            className="flex-1 overflow-y-auto px-4 py-2 space-y-4"
+            ref={scrollRef}
+          >
             {messages.map((m) => {
               const isMe = m.user_id === currentUserId;
               return (
@@ -222,21 +225,6 @@ const ChatSection = () => {
           </div>
         </Card>
       </div>
-
-      {/* Online Users Placeholder */}
-      {/* <div className="lg:col-span-1">
-        <Card className="bg-white/10 backdrop-blur-md border-white/20 h-[600px]">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <UsersIcon className="h-5 w-5 mr-2" />
-              Online (–)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge className="text-sm text-white/60">Coming soon…</Badge>
-          </CardContent>
-        </Card>
-      </div> */}
     </div>
   );
 };
