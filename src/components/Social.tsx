@@ -67,7 +67,7 @@ const Social = () => {
   </div>
 
   {/* Content */}
-  <div className="flex-1 overflow-hidden">
+  <div className="flex-1 overflow-auto">
     {activeTab === "feed" && (
       <div className="space-y-6 overflow-auto pr-2">
         {showPostCreation && (

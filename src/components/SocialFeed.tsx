@@ -199,7 +199,7 @@ export default function SocialFeed() {
     if (error) {
       toast.error("Kunne ikke opdatere pin-status.");
     } else {
-      toast.success(pinned ? "Unpinnet" : "Pinnet");
+      toast.success(pinned ? "Unpinned" : "Pinned");
     }
   };
 
@@ -386,7 +386,7 @@ export default function SocialFeed() {
               </div>
 
               {/* Content */}
-              <div className="text-white mb-4 whitespace-pre-wrap">
+<div className="text-white mb-4 whitespace-pre-wrap break-words overflow-hidden">
                 {post.content}
               </div>
 
@@ -422,6 +422,7 @@ export default function SocialFeed() {
                 <div className="mt-4 border-t border-white/20 pt-4">
                   {(comments[post.id] || []).map((c) => (
                     <div key={c.id} className="flex items-start gap-2 mb-2">
+                      <div className="w-8 h-8 mr-2 shrink-0 flex items-center justify-center">
                       {c.avatar ? (
                         <img
                           src={c.avatar}
@@ -433,6 +434,7 @@ export default function SocialFeed() {
                           <UserIcon className="h-4 w-4 text-white" />
                         </div>
                       )}
+                      </div>
                       <div className="text-white/80">
                         <strong>{c.displayname}</strong>: {c.content}
                       </div>
