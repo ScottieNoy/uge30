@@ -53,7 +53,7 @@ export default function StageDetailPage() {
         .eq("stage_id", id)
         .order("time");
 
-      if (!stageError) setStage(stageData as Stage);
+      //if (!stageError) setStage(stageData as Stage);
       setEvents((eventData || []) as Event[]);
       setLoading(false);
     };

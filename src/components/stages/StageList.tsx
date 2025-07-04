@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabaseClient";
 import StageCard from "@/components/stages/StageCard";
 
 interface StageListProps {
-  data:
+  data?:
     | {
         id: string;
         title: string;

@@ -21,7 +21,7 @@ export default async function StagesPage() {
           </p>
         </div>
 
-        <StageList data={data} />
+        <StageList />
       </div>
     </div>
   );

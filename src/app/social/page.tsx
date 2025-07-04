@@ -1,15 +1,12 @@
+import { Suspense } from "react";
 import Social from "@/components/Social";
-import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Social",
-  description: "Social page",
-};
-
-export default function Page() {
+export default function SocialPage() {
   return (
-    <>
+    <Suspense
+      fallback={<div className="text-white p-8">Loading social hub...</div>}
+    >
       <Social />
-    </>
+    </Suspense>
   );
 }

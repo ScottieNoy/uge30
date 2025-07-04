@@ -4,23 +4,45 @@ import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabaseClient";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabaseClient";
+
+interface Event {
+  id: string;
+  title: string;
+  time: string;
+  emoji: string;
+  location: string;
+  description: string;
+  stage_id: string;
+}
+
+interface Stage {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+}
+
+interface StageFormModalProps {
+  existingStage?: Stage;
+  onClose: () => void;
+  onSaved: () => void;
+}
 
 export default function StageFormModal({
   existingStage,
   onClose,
   onSaved,
-}: any) {
-  const supabase = createClient();
+}: StageFormModalProps) {
   const [title, setTitle] = useState(existingStage?.title ?? "");
   const [description, setDescription] = useState(
     existingStage?.description ?? ""
   );
   const [emoji, setEmoji] = useState(existingStage?.emoji ?? "");
   const [loading, setLoading] = useState(false);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [newEvent, setNewEvent] = useState({
     title: "",
     time: "",
@@ -28,6 +50,8 @@ export default function StageFormModal({
     location: "",
     description: "",
   });
+
+  const supabase = createClient();
 
   // Load existing events if editing
   useEffect(() => {
@@ -38,38 +62,81 @@ export default function StageFormModal({
         .select("*")
         .eq("stage_id", existingStage.id)
         .order("time");
-      if (data) setEvents(data);
+      if (data)
+        setEvents(
+          data.map((ev) => ({
+            id: ev.id,
+            title: ev.title ?? "",
+            time: ev.time ?? "",
+            emoji: ev.emoji ?? "",
+            location: ev.location ?? "",
+            description: ev.description ?? "",
+            stage_id: ev.stage_id ?? "",
+          }))
+        );
     };
     fetchEvents();
   }, [existingStage]);
 
   const handleSubmit = async () => {
-    setLoading(true);
-    const payload = { title, description, emoji };
-
-    if (existingStage) {
-      await supabase.from("stages").update(payload).eq("id", existingStage.id);
-    } else {
-      await supabase.from("stages").insert(payload);
+    if (!title.trim()) {
+      toast.error("Titel er påkrævet");
+      return;
     }
-    toast.success(existingStage ? "Etape opdateret" : "Etape oprettet");
 
-    setLoading(false);
-    onSaved();
-    onClose();
+    setLoading(true);
+
+    const payload = {
+      name: title,
+      // Note: The stages table doesn't have description/emoji columns based on the schema
+      // If you need these, you'll need to add them to the database first
+    };
+
+    try {
+      if (existingStage) {
+        const { error } = await supabase
+          .from("stages")
+          .update(payload)
+          .eq("id", existingStage.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("stages").insert(payload);
+
+        if (error) throw error;
+      }
+
+      toast.success(existingStage ? "Etape opdateret" : "Etape oprettet");
+      onSaved();
+      onClose();
+    } catch (error) {
+      console.error("Error saving stage:", error);
+      toast.error("Fejl ved gemning af etape");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateEvent = async () => {
     if (!existingStage) return;
 
-    const { error } = await supabase.from("events").insert({
-      ...newEvent,
-      time: localInputToUTC(newEvent.time),
+    if (!newEvent.title.trim()) {
+      toast.error("Event titel er påkrævet");
+      return;
+    }
 
-      stage_id: existingStage.id,
-    });
+    try {
+      const { error } = await supabase.from("events").insert({
+        title: newEvent.title,
+        time: newEvent.time ? localInputToUTC(newEvent.time) : null,
+        emoji: newEvent.emoji || null,
+        location: newEvent.location || null,
+        description: newEvent.description || null,
+        stage_id: existingStage.id,
+      });
 
-    if (!error) {
+      if (error) throw error;
+
       setNewEvent({
         title: "",
         time: "",
@@ -77,42 +144,83 @@ export default function StageFormModal({
         location: "",
         description: "",
       });
+
       toast.success("Event oprettet");
+
+      // Refresh events
       const { data } = await supabase
         .from("events")
         .select("*")
         .eq("stage_id", existingStage.id)
         .order("time");
-      if (data) setEvents(data);
-    } else {
+      if (data)
+        setEvents(
+          data.map((ev) => ({
+            id: ev.id,
+            title: ev.title ?? "",
+            time: ev.time ?? "",
+            emoji: ev.emoji ?? "",
+            location: ev.location ?? "",
+            description: ev.description ?? "",
+            stage_id: ev.stage_id ?? "",
+          }))
+        );
+    } catch (error) {
+      console.error("Error creating event:", error);
       toast.error("Kunne ikke oprette event");
     }
   };
 
   const handleDeleteEvent = async (id: string) => {
-    await supabase.from("events").delete().eq("id", id);
-    setEvents(events.filter((e) => e.id !== id));
-    toast.success("Event slettet");
+    try {
+      const { error } = await supabase.from("events").delete().eq("id", id);
+      if (error) throw error;
+
+      setEvents(events.filter((e) => e.id !== id));
+      toast.success("Event slettet");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Kunne ikke slette event");
+    }
   };
 
-  const handleUpdateEvent = async (event: any) => {
-    await supabase.from("events").update(event).eq("id", event.id);
-    toast.success("Event opdateret");
+  const handleUpdateEvent = async (event: Event) => {
+    try {
+      const { error } = await supabase
+        .from("events")
+        .update({
+          title: event.title,
+          time: event.time ? localInputToUTC(event.time) : null,
+          emoji: event.emoji || null,
+          location: event.location || null,
+          description: event.description || null,
+        })
+        .eq("id", event.id);
+
+      if (error) throw error;
+      toast.success("Event opdateret");
+    } catch (error) {
+      console.error("Error updating event:", error);
+      toast.error("Kunne ikke opdatere event");
+    }
   };
-  function toLocalInputValue(utcString: string) {
+
+  const toLocalInputValue = (utcString: string) => {
+    if (!utcString) return "";
     const date = new Date(utcString);
-    const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
+    const tzOffset = date.getTimezoneOffset() * 60000;
     const localISO = new Date(date.getTime() - tzOffset)
       .toISOString()
       .slice(0, 16);
     return localISO;
-  }
-  function localInputToUTC(value: string) {
+  };
+
+  const localInputToUTC = (value: string) => {
     const local = new Date(value);
     return new Date(
       local.getTime() - local.getTimezoneOffset() * 60000
     ).toISOString();
-  }
+  };
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -129,6 +237,7 @@ export default function StageFormModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="F.eks. Øldag"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
             />
           </div>
 
@@ -138,6 +247,7 @@ export default function StageFormModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Kort beskrivelse"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
             />
           </div>
 
@@ -147,13 +257,14 @@ export default function StageFormModal({
               value={emoji}
               onChange={(e) => setEmoji(e.target.value)}
               placeholder="🍺"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
             />
           </div>
 
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-cyan-600"
+            className="w-full bg-cyan-600 hover:bg-cyan-700"
           >
             {loading ? "Gemmer..." : "Gem Etape"}
           </Button>
@@ -187,6 +298,7 @@ export default function StageFormModal({
                           )
                         )
                       }
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                     <Input
                       type="datetime-local"
@@ -200,6 +312,7 @@ export default function StageFormModal({
                           )
                         )
                       }
+                      className="bg-white/10 border-white/20 text-white"
                     />
 
                     <Input
@@ -214,6 +327,7 @@ export default function StageFormModal({
                           )
                         )
                       }
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                     <Input
                       placeholder="Emoji"
@@ -227,6 +341,7 @@ export default function StageFormModal({
                           )
                         )
                       }
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                     />
                   </div>
 
@@ -242,6 +357,7 @@ export default function StageFormModal({
                         )
                       )
                     }
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
 
                   <div className="flex justify-between gap-2">
@@ -277,6 +393,7 @@ export default function StageFormModal({
                   onChange={(e) =>
                     setNewEvent((prev) => ({ ...prev, title: e.target.value }))
                   }
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
                 <Input
                   type="datetime-local"
@@ -284,6 +401,7 @@ export default function StageFormModal({
                   onChange={(e) =>
                     setNewEvent((prev) => ({ ...prev, time: e.target.value }))
                   }
+                  className="bg-white/10 border-white/20 text-white"
                 />
 
                 <Input
@@ -295,6 +413,7 @@ export default function StageFormModal({
                       location: e.target.value,
                     }))
                   }
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
                 <Input
                   placeholder="Emoji"
@@ -302,6 +421,7 @@ export default function StageFormModal({
                   onChange={(e) =>
                     setNewEvent((prev) => ({ ...prev, emoji: e.target.value }))
                   }
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -314,11 +434,12 @@ export default function StageFormModal({
                     description: e.target.value,
                   }))
                 }
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
 
               <Button
                 onClick={handleCreateEvent}
-                className="w-full bg-green-600"
+                className="w-full bg-green-600 hover:bg-green-700"
               >
                 ➕ Opret Event
               </Button>

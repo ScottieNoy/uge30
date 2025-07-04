@@ -1,0 +1,227 @@
+Project festival_app {
+  database_type: "PostgreSQL"
+}
+
+Table users {
+  id uuid [pk]
+  firstname varchar
+  lastname varchar
+  emoji varchar
+  displayname varchar
+  is_admin bool
+  role varchar
+  avatar_url varchar
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (displayname)
+    (role)
+  }
+}
+
+Table posts {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  images text[]
+  content text
+  pinned bool
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (user_id)
+    (created_at)
+  }
+}
+
+Table comments {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  post_id uuid [ref: > posts.id]
+  content text
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (post_id)
+    (user_id)
+  }
+}
+
+Table likes {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  post_id uuid [ref: > posts.id]
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (post_id)
+    (user_id)
+    (user_id, post_id) [unique]
+  }
+}
+
+Table chat_messages {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  content text
+  created_at timestamp
+
+  Indexes {
+    (created_at)
+  }
+}
+
+Table stages {
+  id uuid [pk]
+  name varchar
+  date date
+  created_at timestamp
+
+  Indexes {
+    (date)
+  }
+}
+
+Table events {
+  id uuid [pk]
+  stage_id uuid [ref: > stages.id]
+  title varchar
+  description varchar
+  emoji varchar
+  location varchar
+  time timestamp
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (stage_id)
+    (time)
+  }
+}
+
+Table votes {
+  id uuid [pk]
+  stage_id uuid [ref: > stages.id]
+  voted_by uuid [ref: > users.id]
+  voted_for uuid [ref: > users.id]
+  created_at timestamp
+
+  Indexes {
+    (stage_id)
+    (voted_by)
+    (stage_id, voted_by) [unique]
+  }
+}
+
+Table jerseys {
+  id uuid [pk]
+  name varchar
+  emoji varchar
+  description text
+  is_overall bool
+
+  Indexes {
+    (name) [unique]
+  }
+}
+
+Table points {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  stage_id uuid [ref: > stages.id]
+  submitted_by uuid [ref: > users.id]
+  category varchar // e.g. "Beer Pong", "Chug", etc.
+  value integer
+  note text
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (user_id)
+    (submitted_by)
+    (category)
+    (created_at)
+  }
+}
+
+Table point_jerseys {
+  id uuid [pk]
+  point_id uuid [ref: > points.id]
+  jersey_id uuid [ref: > jerseys.id]
+
+  Indexes {
+    (point_id)
+    (jersey_id)
+    (point_id, jersey_id) [unique]
+  }
+}
+
+Table user_jerseys {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  jersey_id uuid [ref: > jerseys.id]
+  awarded_at timestamp
+
+  Indexes {
+    (user_id)
+    (jersey_id)
+    (jersey_id, awarded_at)
+  }
+}
+
+Table push_subscriptions {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  endpoint text
+  keys jsonb
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (user_id, endpoint) [unique]
+  }
+}
+
+Table teams {
+  id uuid [pk]
+  name varchar [unique]
+  color varchar
+  emoji varchar
+  created_at timestamp
+}
+
+Table user_teams {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  team_id uuid [ref: > teams.id]
+  joined_at timestamp
+
+  Indexes {
+    (user_id)
+    (team_id)
+    (user_id, team_id) [unique]
+  }
+}
+
+Table user_jerseys_history {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  jersey_id uuid [ref: > jerseys.id]
+  awarded_at timestamp
+  reason text
+}
+
+Table stage_podiums {
+  id uuid [pk]
+  stage_id uuid [ref: > stages.id]
+  jersey_id uuid [ref: > jerseys.id]
+  user_id uuid [ref: > users.id]
+  rank integer
+
+  Indexes {
+    (stage_id, jersey_id, rank) [unique]
+  }
+}

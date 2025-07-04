@@ -45,8 +45,20 @@ export default function MyPage() {
           toast("User not found. Please create a profile first.");
           return;
         }
-        setUser(userData);
-        setEditForm(userData);
+        const mappedUser: User = {
+          id: userData.id,
+          firstname: userData.firstname ?? "",
+          lastname: userData.lastname ?? "",
+          displayname: userData.displayname ?? "",
+          avatar_url: userData.avatar_url ?? "",
+          emoji: userData.emoji ?? "",
+          is_admin: userData.is_admin ?? false,
+          role: userData.role ?? "",
+          created_at: userData.created_at ?? "",
+          updated_at: userData.updated_at ?? "",
+        };
+        setUser(mappedUser);
+        setEditForm(mappedUser);
       }
       setIsEditing(false);
     };
@@ -71,7 +83,19 @@ export default function MyPage() {
     if (error) {
       toast("Error updating profile: " + error.message);
     } else {
-      setUser(data);
+      const mappedUser: User = {
+        id: data.id,
+        firstname: data.firstname ?? "",
+        lastname: data.lastname ?? "",
+        displayname: data.displayname ?? "",
+        avatar_url: data.avatar_url ?? "",
+        emoji: data.emoji ?? "",
+        is_admin: data.is_admin ?? false,
+        role: data.role ?? "",
+        created_at: data.created_at ?? "",
+        updated_at: data.updated_at ?? "",
+      };
+      setUser(mappedUser);
       setIsEditing(false);
       toast("Profile updated successfully!");
     }
@@ -90,23 +114,35 @@ export default function MyPage() {
   const handleAvatarUpload = async (publicUrl: string) => {
     if (!user || !editForm) return;
 
-    const updated = { ...editForm, avatar: publicUrl };
+    const updated = { ...editForm, avatar_url: publicUrl };
 
-    setUser({ ...user, avatar: publicUrl });
+    setUser({ ...user, avatar_url: publicUrl });
     setEditForm(updated);
 
     const { data, error } = await supabase
       .from("users")
-      .update({ avatar: publicUrl })
+      .update({ avatar_url: publicUrl })
       .eq("id", user.id)
       .select()
       .single();
 
     if (error) {
-      toast("Error saving avatar: " + error.message);
+      toast("Error saving avatar_url: " + error.message);
     } else {
-      setUser(data);
-      setEditForm(data);
+      const mappedUser: User = {
+        id: data.id,
+        firstname: data.firstname ?? "",
+        lastname: data.lastname ?? "",
+        displayname: data.displayname ?? "",
+        avatar_url: data.avatar_url ?? "",
+        emoji: data.emoji ?? "",
+        is_admin: data.is_admin ?? false,
+        role: data.role ?? "",
+        created_at: data.created_at ?? "",
+        updated_at: data.updated_at ?? "",
+      };
+      setUser(mappedUser);
+      setEditForm(mappedUser);
       toast("Avatar updated successfully!");
     }
   };
@@ -185,7 +221,7 @@ export default function MyPage() {
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
                   <Avatar className="h-24 w-24">
                     <AvatarImage
-                      src={user.avatar || ""}
+                      src={user.avatar_url || ""}
                       className="object-cover"
                       alt={`${user.firstname} ${user.lastname}`}
                     />

@@ -83,9 +83,10 @@ export interface User {
   firstname: string;
   lastname: string;
   displayname: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
   emoji: string | null;
   is_admin?: boolean | null;
+  role: string | null; // e.g., "user", "admin"
   created_at: string | null;
   updated_at: string | null;
 }
@@ -131,18 +132,6 @@ export type AssignPoints = {
 };
 
 /* ------------------------- DOMAIN MODELS ------------------------- */
-
-// Supabase `users` table shape + optional frontend additions
-export interface User {
-  id: string;
-  firstname: string;
-  lastname: string;
-  avatar?: string | null; // optional avatar URL
-  emoji: string | null; // optional emoji
-  is_admin?: boolean | null; // optional admin flag
-  created_at: string | null; // optional created date
-  updated_at: string | null; // optional updated date
-}
 
 // Supabase `points` table shape + optional relational data
 export interface UserPoint {
@@ -224,8 +213,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     bgColor: "bg-pink-100",
     borderColor: "border-pink-200",
   },
-  
-  
+
   maane: {
     id: "maane",
     name: "Maillot Lune",
@@ -234,7 +222,4 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     bgColor: "bg-blue-300",
     borderColor: "border-blue-400",
   },
-  
-  
-  
 };

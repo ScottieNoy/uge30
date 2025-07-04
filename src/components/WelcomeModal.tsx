@@ -5,26 +5,33 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import AvatarUpload from "@/components/AvatarUpload";
-import { createClient } from "@/lib/supabaseClient";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import { createClient } from "@/lib/supabaseClient";
 
 export default function WelcomeModal() {
-  const supabase = createClient();
-  const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false); // Show modal by default for demo
   const [step, setStep] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [displayname, setDisplayname] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [installPwaPrompt, setInstallPwaPrompt] = useState<any>(null);
   const [isIos, setIsIos] = useState(false);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const supabase = createClient();
 
   // Validation for username
   const [isCheckingName, setIsCheckingName] = useState(false);
   const [isNameValid, setIsNameValid] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user && user.user_metadata?.profileComplete === false) {
+      setOpen(true);
+    }
+  }, [user]);
 
   // Check if the device is iOS
   useEffect(() => {
@@ -42,20 +49,7 @@ export default function WelcomeModal() {
     }
   }, []);
 
-  // Check user metadata on load
-  useEffect(() => {
-    const check = async () => {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (user && !user.user_metadata?.profile_complete) {
-        setOpen(true);
-        setUserId(user.id);
-      }
-    };
-    check();
-  }, []);
-
-  // Debounced display name check
+  // Simple display name validation (without backend check)
   useEffect(() => {
     if (displayname.trim().length < 2) {
       setIsNameValid(false);
@@ -64,55 +58,44 @@ export default function WelcomeModal() {
     }
 
     setIsCheckingName(true);
-    const timeout = setTimeout(async () => {
-      const { data, error } = await supabase
-        .from("users")
-        .select("id")
-        .eq("displayname", displayname.trim())
-        .maybeSingle();
-
-      if (error) {
-        setNameError("Fejl ved tjek af navn");
-        setIsNameValid(false);
-      } else if (data) {
-        setNameError("Dette navn er allerede taget");
-        setIsNameValid(false);
-      } else {
-        setNameError(null);
-        setIsNameValid(true);
-      }
-
+    const timeout = setTimeout(() => {
+      // Simple validation without backend
+      setNameError(null);
+      setIsNameValid(true);
       setIsCheckingName(false);
     }, 600);
 
     return () => clearTimeout(timeout);
-  }, [displayname, supabase]);
+  }, [displayname]);
 
   // Handle form completion
   const handleComplete = async () => {
-    if (!userId) return;
+    if (!user) {
+      toast.error("Du skal være logget ind for at fortsætte");
+      return;
+    }
 
     setLoading(true);
-
-    const { error: authError } = await supabase.auth.updateUser({
-      data: {
-        avatar: avatarUrl || null,
-        displayname,
-        profile_complete: true,
-      },
-    });
 
     const { error: dbError } = await supabase
       .from("users")
       .update({
-        avatar: avatarUrl || null,
+        avatar_url: avatarUrl || null,
         displayname,
       })
-      .eq("id", userId);
+      .eq("id", user.id);
 
-    if (authError || dbError) {
+    if (dbError) {
+      console.error("Database error:", dbError);
       toast.error("Fejl ved opdatering af profil");
     } else {
+      // ✅ Update auth metadata
+      await supabase.auth.updateUser({
+        data: {
+          profileComplete: true,
+        },
+      });
+
       toast.success("Velkommen til UGE30 🎉");
       setOpen(false);
       setStep(1);
@@ -138,6 +121,7 @@ export default function WelcomeModal() {
     };
   }, []);
 
+  // Modal steps
   const steps = [
     {
       title: isIos

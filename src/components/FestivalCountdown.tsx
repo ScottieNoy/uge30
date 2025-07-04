@@ -39,17 +39,21 @@ const FestivalCountdown = () => {
       }
 
       const now = new Date();
-      const upcoming = data?.find((event) => new Date(event.time) > now);
+      const upcoming = data?.find(
+        (event) => event.time && new Date(event.time) > now
+      );
       if (upcoming) {
         setNextEvent({
           id: upcoming.id,
-          title: upcoming.title,
-          time: upcoming.time,
+          title: upcoming.title ?? "",
+          time: upcoming.time ?? "",
           emoji: upcoming.emoji ?? undefined,
           location: upcoming.location ?? undefined,
           stage_id: upcoming.stage_id ?? undefined, // Ensure stage_id is included
         });
-        updateCountdown(new Date(upcoming.time));
+        if (upcoming.time) {
+          updateCountdown(new Date(upcoming.time));
+        }
       }
     };
 

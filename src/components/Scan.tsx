@@ -46,7 +46,18 @@ const Scan = () => {
         return;
       }
 
-      setCurrentUser(userData);
+      setCurrentUser({
+        ...userData,
+        firstname: userData.firstname ?? "",
+        lastname: userData.lastname ?? "",
+        displayname: userData.displayname ?? "",
+        avatar_url: userData.avatar_url ?? "",
+        emoji: userData.emoji ?? "",
+        role: userData.role ?? "",
+        created_at: userData.created_at ?? "",
+        updated_at: userData.updated_at ?? "",
+        is_admin: userData.is_admin ?? false,
+      });
     };
 
     fetchCurrentUser();
@@ -77,7 +88,18 @@ const Scan = () => {
       return;
     }
 
-    setTargetUser(foundUser);
+    setTargetUser({
+      ...foundUser,
+      firstname: foundUser.firstname ?? "",
+      lastname: foundUser.lastname ?? "",
+      displayname: foundUser.displayname ?? "",
+      avatar_url: foundUser.avatar_url ?? "",
+      emoji: foundUser.emoji ?? "",
+      role: foundUser.role ?? "",
+      created_at: foundUser.created_at ?? "",
+      updated_at: foundUser.updated_at ?? "",
+      is_admin: foundUser.is_admin ?? false,
+    });
     setShowScanner(false);
     setShowPointsAssignment(true);
   };
@@ -160,7 +182,10 @@ const Scan = () => {
                 Show this QR code to let others give you points.
               </p>
               <div className="flex flex-col items-center w-fit justify-center bg-white p-6 rounded-lg text-center">
-                <QRCodeCanvas value={`${currentUser?.displayname}`} size={180} />
+                <QRCodeCanvas
+                  value={`${currentUser?.displayname}`}
+                  size={180}
+                />
                 <p className="text-gray-800 font-medium mt-3">
                   {currentUser?.displayname || "Loading..."}
                 </p>
