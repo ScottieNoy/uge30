@@ -9,6 +9,14 @@ export default async function StagesPage() {
     .select("*")
     .order("position", { ascending: true });
 
+  // Ensure 'position' is not null before passing to StageList
+  const sanitizedData =
+    data?.filter((stage) => stage.position !== null) // filter out null positions
+      .map((stage) => ({
+        ...stage,
+        position: stage.position as number, // cast to number (safe after filter)
+      })) ?? null;
+
   return (
     <div className="min-h-screen p-4 pt-20">
       <div className="max-w-4xl mx-auto">
@@ -21,7 +29,7 @@ export default async function StagesPage() {
           </p>
         </div>
 
-        <StageList data={data} />
+        <StageList data={sanitizedData} />
       </div>
     </div>
   );
