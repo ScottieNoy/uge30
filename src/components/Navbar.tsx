@@ -23,16 +23,50 @@ import AuthModal from "./AuthModal";
 import { formatUserName } from "@/lib/utils";
 import { Session } from "@supabase/supabase-js";
 import { User } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
 
-interface NavbarProps {
-  session: Session | null;
-  userData: User | null;
-}
-
-export default function Navbar({ session, userData }: NavbarProps) {
+export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
+
   const supabase = createClient();
+
+  const [userData, setUserData] = useState<User | null>(null);
+  const [userError, setUserError] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user?.id) {
+        setUserData(null);
+        setUserError(null);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      setUserData(
+        data
+          ? {
+              ...data,
+              firstname: data.firstname ?? "",
+              lastname: data.lastname ?? "",
+              displayname: data.displayname ?? "",
+              emoji: data.emoji ?? "",
+              role: data.role ?? "",
+              avatar_url: data.avatar_url ?? "",
+              created_at: data.created_at ?? "",
+              updated_at: data.updated_at ?? "",
+              is_admin: data.is_admin ?? false,
+            }
+          : null
+      );
+      setUserError(error);
+    };
+    fetchUserData();
+  }, [user?.id, supabase]);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -40,10 +74,10 @@ export default function Navbar({ session, userData }: NavbarProps) {
     "login"
   );
 
-  const isLoggedIn = !!session;
+  const isLoggedIn = !!user;
   const isAdmin = userData?.is_admin ?? false;
   const userName = userData ? formatUserName(userData) : "Not logged in";
-  const avatarUrl = userData?.avatar || null;
+  const avatarUrl = userData?.avatar_url || null;
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const closeMenu = () => setIsMenuOpen(false);

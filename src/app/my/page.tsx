@@ -92,12 +92,12 @@ export default function MyPage() {
 
     const updated = { ...editForm, avatar: publicUrl };
 
-    setUser({ ...user, avatar: publicUrl });
+    setUser({ ...user, avatar_url: publicUrl });
     setEditForm(updated);
 
     const { data, error } = await supabase
       .from("users")
-      .update({ avatar: publicUrl })
+      .update({ avatar_url: publicUrl })
       .eq("id", user.id)
       .select()
       .single();
@@ -185,7 +185,7 @@ export default function MyPage() {
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
                   <Avatar className="h-24 w-24">
                     <AvatarImage
-                      src={user.avatar || ""}
+                      src={user.avatar_url || ""}
                       className="object-cover"
                       alt={`${user.firstname} ${user.lastname}`}
                     />

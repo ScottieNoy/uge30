@@ -49,7 +49,21 @@ export const useLeaderboard = () => {
 
       const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
       const nonAdmins = users.filter((u) => !u.is_admin);
-      setParticipants(users);
+      setParticipants(
+        users.map((u) => ({
+          ...u,
+          avatar_url: u.avatar_url ?? "",
+          created_at: u.created_at ?? "",
+          displayname: u.displayname ?? "",
+          emoji: u.emoji ?? "",
+          firstname: u.firstname ?? "",
+          id: u.id,
+          is_admin: u.is_admin ?? false,
+          lastname: u.lastname ?? "",
+          role: u.role ?? "",
+          updated_at: u.updated_at ?? "",
+        }))
+      );
 
       const jerseyScores: JerseyScoreMap = {};
       for (const user of nonAdmins) {
@@ -59,11 +73,17 @@ export const useLeaderboard = () => {
       }
 
       for (const point of points) {
-        if (jerseyScores[point.user_id]) {
-          jerseyScores[point.user_id][point.category] += point.value;
+        if (
+          point.user_id &&
+          jerseyScores[point.user_id] &&
+          point.category !== null &&
+          point.category !== undefined
+        ) {
+          jerseyScores[point.user_id][point.category as JerseyCategory] +=
+            point.value ?? 0;
 
           if (point.category !== "førertroje") {
-            jerseyScores[point.user_id].førertroje += point.value;
+            jerseyScores[point.user_id].førertroje += point.value ?? 0;
           }
         }
 
@@ -72,7 +92,7 @@ export const useLeaderboard = () => {
           point.user_id !== point.submitted_by &&
           jerseyScores[point.submitted_by]
         ) {
-          jerseyScores[point.submitted_by].flydende_haand += point.value;
+          jerseyScores[point.submitted_by].flydende_haand += point.value ?? 0;
         }
       }
 
@@ -80,7 +100,19 @@ export const useLeaderboard = () => {
       (Object.keys(jerseyConfigs) as JerseyCategory[]).forEach((category) => {
         boards[category] = nonAdmins
           .map((user) => ({
-            user,
+            user: {
+              ...user,
+              avatar_url: user.avatar_url ?? "",
+              created_at: user.created_at ?? "",
+              displayname: user.displayname ?? "",
+              emoji: user.emoji ?? "",
+              firstname: user.firstname ?? "",
+              id: user.id,
+              is_admin: user.is_admin ?? false,
+              lastname: user.lastname ?? "",
+              role: user.role ?? "",
+              updated_at: user.updated_at ?? "",
+            },
             total: jerseyScores[user.id][category] || 0,
           }))
           .sort((a, b) => b.total - a.total);
@@ -103,6 +135,21 @@ export const useLeaderboard = () => {
       }));
       setJerseyData(transformedJerseyData);
 
+      const allowedTypes = [
+        "beer",
+        "wine",
+        "vodka",
+        "funnel",
+        "shot",
+        "beerpong",
+        "cornhole",
+        "dart",
+        "billiard",
+        "stigegolf",
+        "bonus",
+        "other",
+      ] as const;
+
       const recentActivity = [...points]
         .reverse()
         .slice(0, 10)
@@ -110,12 +157,23 @@ export const useLeaderboard = () => {
           const submitter = point.submitted_by
             ? userMap[point.submitted_by]
             : undefined;
-          const target = userMap[point.user_id];
-          const meta = SUBCATEGORY_META[point.subcategory];
+          const target = point.user_id ? userMap[point.user_id] : undefined;
+          const meta =
+            point.category &&
+            SUBCATEGORY_META[point.category as keyof typeof SUBCATEGORY_META]
+              ? SUBCATEGORY_META[
+                  point.category as keyof typeof SUBCATEGORY_META
+                ]
+              : { icon: "AlertCircle", color: "gray", label: "Ukendt" };
+
+          // Ensure type is one of the allowed Activity types
+          const type = allowedTypes.includes(point.category as any)
+            ? (point.category as (typeof allowedTypes)[number])
+            : "other";
 
           return {
             id: point.id,
-            icon: meta.icon,
+            icon: meta.icon as Activity["icon"],
             color: meta.color,
             label: meta.label,
             user: `${submitter?.emoji || "👤"} ${
@@ -124,9 +182,9 @@ export const useLeaderboard = () => {
             target: `${target?.emoji || "👤"} ${target?.firstname || "Ukendt"}`,
             points: point.value ?? 0,
             timestamp: formatCopenhagenTime(point.created_at || ""),
-            type: point.subcategory,
+            type,
             message: `${submitter?.firstname || "Ukendt"} loggede ${
-              point.subcategory
+              point.category
             } for ${target?.firstname || "Ukendt"}`,
           };
         });

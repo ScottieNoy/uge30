@@ -191,39 +191,46 @@ export type Database = {
       }
       points: {
         Row: {
-          category: Database["public"]["Enums"]["jersey_category"]
+          category: string | null
           created_at: string | null
           id: string
           note: string | null
-          subcategory: Database["public"]["Enums"]["subcategory"]
+          stage_id: string | null
           submitted_by: string | null
           updated_at: string | null
-          user_id: string
-          value: number
+          user_id: string | null
+          value: number | null
         }
         Insert: {
-          category: Database["public"]["Enums"]["jersey_category"]
+          category?: string | null
           created_at?: string | null
           id?: string
           note?: string | null
-          subcategory: Database["public"]["Enums"]["subcategory"]
+          stage_id?: string | null
           submitted_by?: string | null
           updated_at?: string | null
-          user_id: string
-          value: number
+          user_id?: string | null
+          value?: number | null
         }
         Update: {
-          category?: Database["public"]["Enums"]["jersey_category"]
+          category?: string | null
           created_at?: string | null
           id?: string
           note?: string | null
-          subcategory?: Database["public"]["Enums"]["subcategory"]
+          stage_id?: string | null
           submitted_by?: string | null
           updated_at?: string | null
-          user_id?: string
-          value?: number
+          user_id?: string | null
+          value?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "points_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "points_submitted_by_fkey"
             columns: ["submitted_by"]
@@ -260,6 +267,7 @@ export type Database = {
           created_at: string | null
           id: string
           images: string[] | null
+          location: string | null
           pinned: boolean | null
           updated_at: string | null
           user_id: string | null
@@ -269,6 +277,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           images?: string[] | null
+          location?: string | null
           pinned?: boolean | null
           updated_at?: string | null
           user_id?: string | null
@@ -278,6 +287,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           images?: string[] | null
+          location?: string | null
           pinned?: boolean | null
           updated_at?: string | null
           user_id?: string | null
@@ -349,7 +359,7 @@ export type Database = {
       }
       users: {
         Row: {
-          avatar: string | null
+          avatar_url: string | null
           created_at: string | null
           displayname: string
           emoji: string | null
@@ -357,10 +367,11 @@ export type Database = {
           id: string
           is_admin: boolean | null
           lastname: string
+          role: string | null
           updated_at: string | null
         }
         Insert: {
-          avatar?: string | null
+          avatar_url?: string | null
           created_at?: string | null
           displayname: string
           emoji?: string | null
@@ -368,10 +379,11 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           lastname: string
+          role?: string | null
           updated_at?: string | null
         }
         Update: {
-          avatar?: string | null
+          avatar_url?: string | null
           created_at?: string | null
           displayname?: string
           emoji?: string | null
@@ -379,6 +391,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           lastname?: string
+          role?: string | null
           updated_at?: string | null
         }
         Relationships: []
