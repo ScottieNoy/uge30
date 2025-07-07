@@ -4,84 +4,143 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send } from "lucide-react";
+import { X, Send, Image, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostCreationProps {
   onClose: () => void;
+  onPostCreated?: () => void;
 }
 
-const PostCreation = ({ onClose }: PostCreationProps) => {
+const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
   const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [location, setLocation] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const supabase = createClient();
+  const { user } = useAuth();
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        setImageFiles((prev) => [...prev, file]);
+        const previewUrl = URL.createObjectURL(file);
+        setImagePreviews((prev) => [...prev, previewUrl]);
+      }
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleLocationShare = () => {
+    if (!navigator.geolocation) {
+      toast("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsLoadingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        setIsLoadingLocation(false);
+        toast("Location shared successfully!");
+      },
+      () => {
+        setIsLoadingLocation(false);
+        toast("Failed to get location. Please allow location access.");
+      }
+    );
+  };
+
+  const uploadImages = async () => {
+    const urls: string[] = [];
+
+    for (const file of imageFiles) {
+      const filePath = `posts/${user!.id}/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage.from("post-images").upload(filePath, file);
+
+      if (error) {
+        console.error("Error uploading image:", error);
+        toast("Failed to upload image.");
+        continue;
+      }
+
+      const { data: publicUrl } = supabase.storage.from("post-images").getPublicUrl(filePath);
+      if (publicUrl?.publicUrl) {
+        urls.push(publicUrl.publicUrl);
+      }
+    }
+
+    return urls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!content.trim()) {
-      toast("⚠️ Skriv noget inden du poster.");
+    if (!content.trim() && imageFiles.length === 0) {
+      toast("Please add some content or images to your post.");
       return;
     }
 
-    setLoading(true);
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      toast.error("Du skal være logget ind for at poste.");
-      setLoading(false);
+    if (!user) {
+      toast("Please log in to create a post.");
       return;
     }
 
-    const { error: insertError } = await supabase.from("posts").insert({
-      content,
-      user_id: user.id,
-      pinned: false,
-    });
+    setIsSubmitting(true);
 
-    if (insertError) {
-      toast.error("Kunne ikke oprette opslag.");
-      setLoading(false);
-      return;
+    try {
+      const uploadedImageUrls = await uploadImages();
+
+      const { error } = await supabase.from("posts").insert({
+        content: content.trim(),
+        user_id: user.id,
+        images: uploadedImageUrls,
+        location,
+      });
+
+      if (error) {
+        console.error("Error creating post:", error);
+        toast("Failed to create post.");
+        return;
+      }
+
+      toast("Post created successfully!");
+
+      setContent("");
+      setImageFiles([]);
+      setImagePreviews([]);
+      setLocation("");
+      onClose();
+      onPostCreated?.();
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      toast("An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Send push notification to all subscribers
-    const res = await fetch("/api/send-notification", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        broadcast: true,
-        title: "📬 Nyt opslag",
-        body: content.length > 100 ? content.slice(0, 100) + "…" : content,
-        url: "/", // Or change to e.g. "/feed"
-      }),
-    });
-
-    if (!res.ok) {
-      toast.error("Opslaget blev oprettet, men notifikation fejlede.");
-    } else {
-      toast.success("📬 Opslag oprettet og notifikation sendt!");
-    }
-
-    setContent("");
-    setLoading(false);
-    onClose();
   };
 
   return (
     <Card className="bg-white/10 backdrop-blur-md border-white/20">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-white">Opret opslag</CardTitle>
+        <CardTitle className="text-white">Create Post</CardTitle>
         <Button
           variant="ghost"
           size="sm"
           onClick={onClose}
           className="text-white hover:bg-white/10"
+          disabled={isSubmitting}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -89,26 +148,98 @@ const PostCreation = ({ onClose }: PostCreationProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Textarea
-            placeholder="Hvad sker der på festivalen?"
+            placeholder="What's happening at the festival?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            disabled={isSubmitting}
             className="min-h-[100px] bg-white/5 border-white/20 text-white placeholder:text-white/60"
-            disabled={loading}
           />
+
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              {imagePreviews.map((image, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={image}
+                    alt={`Upload ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 h-6 w-6 p-0 bg-black/50 hover:bg-black/70 text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {location && (
+            <div className="flex items-center space-x-2 p-2 bg-white/5 rounded-lg">
+              <MapPin className="h-4 w-4 text-white/60" />
+              <span className="text-white/80 text-sm">
+                Location: {location}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("")}
+                className="ml-auto h-6 w-6 p-0 text-white/60 hover:text-white"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <div className="flex space-x-2">
-              <Button type="button" variant="ghost" size="sm" className="text-white" disabled />
-              <Button type="button" variant="ghost" size="sm" className="text-white" disabled />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+                id="image-upload"
+                disabled={isSubmitting}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => document.getElementById("image-upload")?.click()}
+                className="text-white hover:bg-white/10"
+                disabled={isSubmitting}
+              >
+                <Image className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleLocationShare}
+                className="text-white hover:bg-white/10"
+                disabled={isSubmitting || isLoadingLocation}
+              >
+                {isLoadingLocation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MapPin className="h-4 w-4" />
+                )}
+              </Button>
             </div>
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isSubmitting}
               className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
             >
               <Send className="h-4 w-4 mr-2" />
-              {loading ? "Poster..." : "Post"}
+              {isSubmitting ? "Posting..." : "Post"}
             </Button>
           </div>
         </form>

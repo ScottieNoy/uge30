@@ -1,472 +1,362 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabaseClient";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Heart,
   MessageSquare,
+  Share,
   MoreHorizontal,
-  Pin,
-  PinOff,
   Trash2,
-  UserIcon,
+  MapPin,
 } from "lucide-react";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import CommentSection from "./commentSection";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
-interface PostWithAuthor {
+interface Post {
   id: string;
   content: string;
   created_at: string;
-  pinned: boolean;
   user_id: string;
-  like_count: number;
-  liked_by_user: boolean;
-  comment_count: number;
-  author: {
-    id: string;
-    displayname: string;
-    avatar: string | null;
-    emoji: string | null;
-    jersey: string | null;
-  };
-}
-
-interface CommentRecord {
-  id: string;
-  post_id: string;
-  user_id: string;
-  content: string;
+  images: string[];
   users: {
     displayname: string;
-    avatar?: string | null;
+    firstname: string;
+    lastname: string;
+    avatar_url: string;
+    emoji: string;
   };
+  likes: { id: string; user_id: string }[];
+  comments: { id: string }[];
 }
 
-interface Comment {
-  id: string;
-  post_id: string;
-  user_id: string;
-  displayname: string;
-  content: string;
-  avatar: string | null;
+export interface SocialFeedRef {
+  refreshPosts: () => void;
 }
 
-export default function SocialFeed() {
-  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
-  const [showCommentsFor, setShowCommentsFor] = useState<string | null>(null);
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>(
-    {}
-  );
-  const [comments, setComments] = useState<Record<string, Comment[]>>({});
-  const [currentUser, setCurrentUser] = useState<{
-    id: string;
-    is_admin: boolean;
-    displayname: string;
-    avatar?: string | null;
-  } | null>(null);
-
+const SocialFeed = forwardRef<SocialFeedRef>((props, ref) => {
+  const { user } = useAuth();
   const supabase = createClient();
-  const searchParams = useSearchParams();
-  const postIdToOpen = searchParams.get("post");
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openComments, setOpenComments] = useState<string | null>(null);
 
-  const fetchAll = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return setCurrentUser(null);
+  const fetchPosts = async () => {
+    try {
+      const { data: postsData, error } = await supabase
+        .from("posts")
+        .select(
+          `
+          id,
+          content,
+          created_at,
+          user_id,
+          images,
+          users:user_id (
+            displayname,
+            firstname,
+            lastname,
+            avatar_url,
+            emoji
+          ),
+          likes (id, user_id),
+          comments (id)
+        `
+        )
+        .order("created_at", { ascending: false });
 
-    const { data: profile } = await supabase
-      .from("users")
-      .select("id, is_admin, displayname, avatar")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      setCurrentUser({
-        id: profile.id,
-        is_admin: profile.is_admin ?? false,
-        displayname: profile.displayname,
-        avatar: profile.avatar || null,
-      });
-    }
-
-    const { data, error } = await supabase.rpc(
-      "fetch_posts_with_likes_and_counts",
-      {
-        current_user_id: user.id,
+      if (error) {
+        console.error("Error fetching posts:", error);
+        toast("Failed to load posts. Please try again later.");
+        return;
       }
-    );
 
-    if (!error && data) {
       setPosts(
-        data.map((p: any) => ({
-          ...p,
-          author: {
-            id: p.user_id,
-            displayname: p.displayname,
-            avatar: p.avatar,
-            emoji: p.emoji,
-            jersey: null,
+        (postsData || []).map((post: any) => ({
+          id: post.id,
+          content: post.content ?? "",
+          created_at: post.created_at ?? "",
+          user_id: post.user_id ?? "",
+          images: post.images ?? [],
+          users: {
+            displayname: post.users?.displayname ?? "",
+            firstname: post.users?.firstname ?? "",
+            lastname: post.users?.lastname ?? "",
+            avatar_url: post.users?.avatar_url ?? "",
+            emoji: post.users?.emoji ?? "",
           },
+          likes: post.likes ?? [],
+          comments: post.comments ?? [],
         }))
       );
+    } catch (error) {
+      console.error("Error in fetchPosts:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchComments = async (postId: string) => {
-    const { data, error } = await supabase
-      .from("comments")
-      .select("id, post_id, user_id, content, users(displayname, avatar)")
-      .eq("post_id", postId)
-      .order("created_at", { ascending: true });
-
-    if (!error && data) {
-      setComments((prev) => ({
-        ...prev,
-        [postId]: (data as CommentRecord[]).map((c) => ({
-          id: c.id,
-          post_id: c.post_id,
-          user_id: c.user_id,
-          content: c.content,
-          displayname: c.users.displayname,
-          avatar: c.users.avatar || null,
-        })),
-      }));
-    }
-  };
-
-  const toggleComments = (post: PostWithAuthor) => {
-    if (showCommentsFor === post.id) {
-      setShowCommentsFor(null);
-    } else {
-      fetchComments(post.id);
-      setShowCommentsFor(post.id);
-    }
-  };
-
-  const submitComment = async (postId: string) => {
-    const comment = commentInputs[postId]?.trim();
-    if (!comment || !currentUser) return;
-
-    const { error } = await supabase.from("comments").insert({
-      post_id: postId,
-      user_id: currentUser.id,
-      content: comment,
-    });
-
-    if (error) {
-      toast.error("Fejl ved tilføjelse af kommentar");
-      return;
-    }
-    const post = posts.find((p) => p.id === postId);
-    if (post && post.user_id !== currentUser.id) {
-      await fetch("/api/send-notification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: post.user_id,
-          title: "Ny kommentar 💬",
-          body: `${
-            currentUser.displayname
-          } har kommenteret på dit opslag: "${comment.slice(0, 50)}..."`,
-          url: `/social?post=${post.id}`, // or a link to the post if you support it
-        }),
-      });
-    }
-    toast.success("Kommentar tilføjet!");
-
-    setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
-    fetchAll();
-    fetchComments(postId);
-  };
-
-  const togglePin = async (postId: string, pinned: boolean) => {
-    const { error } = await supabase
-      .from("posts")
-      .update({ pinned: !pinned })
-      .eq("id", postId);
-
-    if (error) {
-      toast.error("Kunne ikke opdatere pin-status.");
-    } else {
-      toast.success(pinned ? "Unpinned" : "Pinned");
-    }
-  };
-
-  const deletePost = async (postId: string) => {
-    const { error } = await supabase.from("posts").delete().eq("id", postId);
-
-    if (error) {
-      toast.error("Kunne ikke slette opslag.");
-    } else {
-      toast.success("Opslag slettet.");
-    }
-  };
-
-  const handleLike = async (postId: string, liked: boolean) => {
-    if (!currentUser) return;
-
-    if (liked) {
-      await supabase
-        .from("post_likes")
-        .delete()
-        .eq("post_id", postId)
-        .eq("user_id", currentUser.id);
-    } else {
-      await supabase.from("post_likes").insert({
-        post_id: postId,
-        user_id: currentUser.id,
-      });
-
-      // Send notification to post owner
-      const post = posts.find((p) => p.id === postId);
-      if (post && post.user_id !== currentUser.id) {
-        await fetch("/api/send-notification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: post.user_id,
-            title: "Nyt like ❤️",
-            body: `${
-              currentUser.displayname
-            } har liket dit opslag: "${post.content.slice(0, 50)}..."`,
-            url: `/social?post=${post.id}`, // or a link to the post if you support it
-          }),
-        });
-      }
-    }
-
-    fetchAll();
-  };
+  useImperativeHandle(ref, () => ({
+    refreshPosts: fetchPosts,
+  }));
 
   useEffect(() => {
-    fetchAll().then(() => {
-      if (postIdToOpen) {
-        setShowCommentsFor(postIdToOpen);
-        fetchComments(postIdToOpen);
-        const el = document.getElementById(`post-${postIdToOpen}`);
-      }
-    });
-
-    const channel = supabase
-      .channel("posts-updates")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "posts" },
-        fetchAll
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "comments" },
-        fetchAll
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "post_likes" },
-        fetchAll
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    fetchPosts();
   }, []);
 
-  useEffect(() => {
-  fetchAll().then(() => {
-    if (postIdToOpen) {
-      setShowCommentsFor(postIdToOpen);
-      fetchComments(postIdToOpen);
-      const el = document.getElementById(`post-${postIdToOpen}`);
-      if (el) {
-          el.classList.add("ring-2", "ring-cyan-500", "transition");
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const handleLike = async (postId: string) => {
+    if (!user) return;
 
-          setTimeout(() => {
-            el.classList.remove("ring-2", "ring-cyan-500");
-          }, 2000);
+    try {
+      const post = posts.find((p) => p.id === postId);
+      const userLike = post?.likes.find((like) => like.user_id === user.id);
+
+      if (userLike) {
+        const { error } = await supabase
+          .from("likes")
+          .delete()
+          .eq("id", userLike.id);
+
+        if (error) {
+          console.error("Error unliking post:", error);
+          return;
         }
+      } else {
+        const { error } = await supabase.from("likes").insert({
+          post_id: postId,
+          user_id: user.id,
+        });
+
+        if (error) {
+          console.error("Error liking post:", error);
+          return;
+        }
+      }
+
+      fetchPosts();
+    } catch (error) {
+      console.error("Error in handleLike:", error);
     }
-  });
+  };
 
-  // Real-time subscriptions...
-}, []);
+  const handleDeletePost = async (postId: string) => {
+    if (!user) return;
 
+    try {
+      const { error } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", postId)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error deleting post:", error);
+        toast("Failed to delete post. Please try again later.");
+        return;
+      }
+
+      toast("Post deleted successfully!");
+
+      fetchPosts();
+    } catch (error) {
+      console.error("Error in handleDeletePost:", error);
+    }
+  };
+
+  const handleComment = (postId: string) => {
+    setOpenComments(openComments === postId ? null : postId);
+  };
+
+  const handleShare = (postId: string) => {
+    console.log(`Share post ${postId}`);
+    // TODO: Implement share functionality
+  };
+
+  const getDisplayName = (user: Post["users"]) => {
+    return (
+      user.displayname ||
+      `${user.firstname || ""} ${user.lastname || ""}`.trim() ||
+      "Anonymous User"
+    );
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    return `${Math.floor(diffInHours / 24)} days ago`;
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center text-white/60 py-8">Loading posts...</div>
+      </div>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center text-white/60 py-8">
+          No posts yet. Be the first to share something!
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {posts.map((post) => {
-        const canDelete =
-          currentUser?.is_admin || currentUser?.id === post.user_id;
+        const userLike = post.likes.find((like) => like.user_id === user?.id);
+        const isLiked = !!userLike;
+        const isOwnPost = user?.id === post.user_id;
 
         return (
           <Card
             key={post.id}
-            id={`post-${post.id}`} // 👈 this is the fix
-            className={`bg-white/10 border-white/20 ${
-              post.pinned ? "border-cyan-500 shadow-lg" : ""
-            }`}
+            className="bg-white/10 backdrop-blur-md border-white/20"
           >
             <CardContent className="p-6">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white">
-                    {post.author.avatar ? (
-                      <img
-                        src={post.author.avatar}
-                        alt="avatar"
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span>{post.author.emoji || "👤"}</span>
-                    )}
-                  </div>
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={post.users.avatar_url} />
+                    <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                      {post.users.emoji || post.users.firstname?.[0] || "U"}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center space-x-2">
                       <span className="text-white font-semibold">
-                        {post.author.displayname}
+                        {getDisplayName(post.users)}
                       </span>
-                      {post.author.jersey && (
-                        <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs border-0">
-                          {post.author.jersey}
-                        </Badge>
-                      )}
                     </div>
                     <div className="text-white/60 text-sm">
-                      {new Date(post.created_at).toLocaleTimeString("da-DK", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {getTimeAgo(post.created_at)}
                     </div>
                   </div>
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:bg-white/10"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-40 bg-white/10 text-white border-white/20 backdrop-blur-md">
-                    {currentUser?.is_admin && (
-                      <DropdownMenuItem
-                        onClick={() => togglePin(post.id, post.pinned)}
+                {isOwnPost && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:bg-white/10"
                       >
-                        {post.pinned ? (
-                          <PinOff className="h-4 w-4" />
-                        ) : (
-                          <Pin className="h-4 w-4" />
-                        )}
-                        {post.pinned ? "Unpin" : "Pin"}
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-white/10 backdrop-blur-md border-white/20">
+                      <DropdownMenuItem
+                        onClick={() => handleDeletePost(post.id)}
+                        className="text-red-400 hover:text-red-300 hover:bg-white/10"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Post
                       </DropdownMenuItem>
-                    )}
-                    {canDelete && (
-                      <DropdownMenuItem onClick={() => deletePost(post.id)}>
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
 
-              {/* Content */}
-<div className="text-white mb-4 whitespace-pre-wrap break-words overflow-hidden">
-                {post.content}
-              </div>
+              {post.content && (
+                <div className="text-white mb-4 leading-relaxed">
+                  {post.content}
+                </div>
+              )}
 
-              {/* Actions */}
-              <div className="flex items-center gap-6 border-t border-white/10 pt-4">
+              {post.images && post.images.length > 0 && (
+                <div
+                  className={`mb-4 grid gap-2 ${
+                    post.images.length === 1
+                      ? "grid-cols-1"
+                      : post.images.length === 2
+                      ? "grid-cols-2"
+                      : "grid-cols-2"
+                  }`}
+                >
+                  {post.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Post image ${index + 1}`}
+                      className="w-full rounded-lg object-cover max-h-96"
+                    />
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center space-x-6 border-t border-white/10 pt-4">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleLike(post.id, post.liked_by_user)}
-                  className={`text-white ${
-                    post.liked_by_user ? "text-red-400" : "hover:text-red-300"
+                  onClick={() => handleLike(post.id)}
+                  className={`text-white hover:bg-white/10 transition-colors ${
+                    isLiked
+                      ? "text-red-400 hover:text-red-300"
+                      : "hover:text-red-300"
                   }`}
                 >
                   <Heart
-                    className="h-4 w-4 mr-2"
-                    fill={post.liked_by_user ? "currentColor" : "none"}
-                  />{" "}
-                  {post.like_count}
+                    className={`h-4 w-4 mr-2 ${isLiked ? "fill-current" : ""}`}
+                  />
+                  {post.likes.length}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => toggleComments(post)}
-                  className="text-white hover:text-blue-300"
+                  onClick={() => handleComment(post.id)}
+                  className="text-white hover:bg-white/10 hover:text-blue-300 transition-colors"
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />{" "}
-                  {post.comment_count}
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  {post.comments.length}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleShare(post.id)}
+                  className="text-white hover:bg-white/10 hover:text-green-300 transition-colors"
+                >
+                  <Share className="h-4 w-4 mr-2" />0
                 </Button>
               </div>
 
-              {/* Comments */}
-              {showCommentsFor === post.id && (
-                <div className="mt-4 border-t border-white/20 pt-4">
-                  {(comments[post.id] || []).map((c) => (
-                    <div key={c.id} className="flex items-start gap-2 mb-2">
-                      <div className="w-8 h-8 mr-2 shrink-0 flex items-center justify-center">
-                      {c.avatar ? (
-                        <img
-                          src={c.avatar}
-                          alt="avatar"
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mr-3 flex items-center justify-center">
-                          <UserIcon className="h-4 w-4 text-white" />
-                        </div>
-                      )}
-                      </div>
-                      <div className="text-white/80">
-                        <strong>{c.displayname}</strong>: {c.content}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      value={commentInputs[post.id] || ""}
-                      onChange={(e) =>
-                        setCommentInputs((prev) => ({
-                          ...prev,
-                          [post.id]: e.target.value,
-                        }))
-                      }
-                      className="flex-1 rounded bg-white/10 text-white p-2 placeholder-white/50"
-                      placeholder="Skriv en kommentar..."
-                    />
-                    <Button
-                      onClick={() => submitComment(post.id)}
-                      disabled={!commentInputs[post.id]?.trim()}
-                      variant="ghost"
-                      className="text-white"
-                    >
-                      Send
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <CommentSection
+                postId={post.id}
+                isOpen={openComments === post.id}
+                onClose={() => setOpenComments(null)}
+              />
             </CardContent>
           </Card>
         );
       })}
     </div>
   );
-}
+});
+
+SocialFeed.displayName = "SocialFeed";
+
+export default SocialFeed;

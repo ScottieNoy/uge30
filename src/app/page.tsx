@@ -34,7 +34,7 @@ export default function Home() {
         ...jerseyConfig,
         holder: {
           name: `${topEntry.user.firstname} ${topEntry.user.lastname}`,
-          avatar: topEntry.user.avatar, // assumes .avatar contains image URL
+          avatar: topEntry.user.avatar_url, // assumes .avatar contains image URL
           displayName: topEntry.user.displayname || `${topEntry.user.firstname} ${topEntry.user.lastname}`,
         },
 

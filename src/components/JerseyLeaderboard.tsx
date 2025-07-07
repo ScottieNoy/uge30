@@ -80,9 +80,9 @@ const JerseyLeaderboard = ({
                     {/* {participant.user.firstname} {participant.user.lastname} */}
                   </span>
                   <div className="flex items-center justify-center space-x-2">
-                        {participant.user.avatar ? (
+                        {participant.user.avatar_url ? (
                           <img
-                            src={participant.user.avatar}
+                            src={participant.user.avatar_url}
                             alt={participant.user.displayname}
                             className="w-7 h-7 rounded-full object-cover"
                           />

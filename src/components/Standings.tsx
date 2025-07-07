@@ -56,16 +56,22 @@ export default function Standings() {
       > = {};
 
       points.forEach((p) => {
-        const category = p.category;
-        const time = new Date(p.created_at!).toLocaleTimeString("da-DK", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        const category = p.category ?? "";
+        const time = p.created_at
+          ? new Date(p.created_at).toLocaleTimeString("da-DK", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "";
+
+        if (!category || !time) return; // skip if either is invalid
 
         if (!byJersey[category]) byJersey[category] = {};
         if (!byJersey[category][time]) byJersey[category][time] = {};
-        byJersey[category][time][p.user_id] =
-          (byJersey[category][time][p.user_id] || 0) + p.value;
+        if (p.user_id !== null && p.user_id !== undefined) {
+          byJersey[category][time][p.user_id] =
+            (byJersey[category][time][p.user_id] || 0) + (p.value ?? 0);
+        }
       });
 
       for (const [category, timeData] of Object.entries(byJersey)) {
