@@ -82,7 +82,8 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
             emoji
           ),
           likes (id, user_id),
-          comments (id)
+          comments (id),
+          shares (id, user_id)
         `
           )
           .order("created_at", { ascending: false });
@@ -222,6 +223,25 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
         } else {
           await navigator.clipboard.writeText(shareUrl);
           toast("Link kopieret til udklipsholder");
+        }
+
+        // Insert share in DB (only if user is logged in)
+        if (user) {
+          const { error } = await supabase.from("shares").upsert(
+            {
+              post_id: postId,
+              user_id: user.id,
+            },
+            {
+              onConflict: "user_id,post_id", // to avoid duplicate entries
+            }
+          );
+
+          if (error) {
+            console.error("Error saving share:", error);
+          } else {
+            fetchPosts(); // refresh share count
+          }
         }
       } catch (err) {
         console.error("Share failed:", err);
@@ -389,7 +409,8 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                     onClick={() => handleShare(post.id)}
                     className="text-white hover:bg-white/10 hover:text-green-300 transition-colors"
                   >
-                    <Share className="h-4 w-4 mr-2" />{post.shares.length}
+                    <Share className="h-4 w-4 mr-2" />
+                    {post.shares.length}
                   </Button>
                 </div>
 

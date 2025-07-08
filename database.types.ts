@@ -330,6 +330,52 @@ export type Database = {
         }
         Relationships: []
       }
+      shares: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shares_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shares_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_display_name"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stages: {
         Row: {
           created_at: string | null
@@ -457,22 +503,7 @@ export type Database = {
       }
     }
     Functions: {
-      fetch_posts_with_likes_and_counts: {
-        Args: { current_user_id: string }
-        Returns: {
-          id: string
-          content: string
-          created_at: string
-          pinned: boolean
-          user_id: string
-          displayname: string
-          avatar: string
-          emoji: string
-          like_count: number
-          liked_by_user: boolean
-          comment_count: number
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       jersey_category:
