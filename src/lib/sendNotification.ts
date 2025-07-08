@@ -1,13 +1,15 @@
-export async function sendNotificationToUser({
-  userId,
+export async function sendNotification({
+  userId = undefined, // Optional user ID to send notification to
   title,
   body,
   url,
+  broadcast = false,
 }: {
-  userId: string
+  userId?: string
   title: string
   body: string
   url?: string
+  broadcast?: boolean
 }) {
   try {
     const res = await fetch('/api/send-notification', {
@@ -18,6 +20,7 @@ export async function sendNotificationToUser({
         title,
         body,
         url,
+        broadcast, // If true, send to all users; otherwise, send to specific user
       }),
     })
 

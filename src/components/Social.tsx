@@ -24,6 +24,8 @@ interface SocialFeedProps {
   style?: React.CSSProperties;
   children?: React.ReactNode;
   ref?: React.Ref<SocialFeedHandle>;
+  postId?: string; // optional post ID for direct linking
+
   [key: string]: any; // allow additional props
 }
 
@@ -36,6 +38,7 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<"feed" | "chat">("feed");
+  const [postId, setPostId] = useState<string | null>(null);
   const [showPostCreation, setShowPostCreation] = useState(false);
   const socialFeedRef = useRef<{ refreshPosts: () => void }>(null);
 
@@ -45,8 +48,17 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
       socialFeedRef.current.refreshPosts();
     }
   };
+  // Extract postId from searchParams at the top level
   useEffect(() => {
     const newTab = searchParams.get("tab");
+    const newPostId = searchParams.get("post");
+    if (newPostId) {
+      setPostId(newPostId);
+      // Optionally, you can scroll to the post or highlight it
+      // e.g., socialFeedRef.current?.scrollToPost(newPostId);
+    } else {
+      setPostId(null);
+    }
     if (newTab === "chat" || newTab === "feed") {
       setActiveTab(newTab);
     }
@@ -64,13 +76,14 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
         {/* Header - Mobile optimized */}
         <div className="text-center mb-4 sm:mb-8 flex-shrink-0">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
-            Social{" "}
+            UGE30{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-              Hub
+              Social
             </span>
           </h1>
           <p className="text-blue-100 text-sm sm:text-base">
-            Connect with fellow festival-goers
+            Her kan du dele UGE30 relateret indhold, chatte med andre deltagere og
+            finde information om festivalen.
           </p>
         </div>
 
@@ -128,7 +141,7 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
               )}
 
               {/* Social Feed */}
-              <SocialFeed ref={socialFeedRef} />
+              <SocialFeed ref={socialFeedRef} highlightedPostId={postId ?? undefined} />
             </div>
           )}
 

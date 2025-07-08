@@ -8,6 +8,7 @@ import { X, Send, Image, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
+import { sendNotification } from "@/lib/sendNotification";
 
 interface PostCreationProps {
   onClose: () => void;
@@ -68,7 +69,9 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
 
     for (const file of imageFiles) {
       const filePath = `posts/${user!.id}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from("post-images").upload(filePath, file);
+      const { error } = await supabase.storage
+        .from("post-images")
+        .upload(filePath, file);
 
       if (error) {
         console.error("Error uploading image:", error);
@@ -76,7 +79,9 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
         continue;
       }
 
-      const { data: publicUrl } = supabase.storage.from("post-images").getPublicUrl(filePath);
+      const { data: publicUrl } = supabase.storage
+        .from("post-images")
+        .getPublicUrl(filePath);
       if (publicUrl?.publicUrl) {
         urls.push(publicUrl.publicUrl);
       }
@@ -102,18 +107,33 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
     try {
       const uploadedImageUrls = await uploadImages();
 
-      const { error } = await supabase.from("posts").insert({
-        content: content.trim(),
-        user_id: user.id,
-        images: uploadedImageUrls,
-        location,
-      });
+      const { data, error } = await supabase
+        .from("posts")
+        .insert({
+          content: content.trim(),
+          user_id: user.id,
+          images: uploadedImageUrls,
+          location,
+        })
+        .select("id")
+        .single();
 
-      if (error) {
+      if (error || !data) {
         console.error("Error creating post:", error);
         toast("Failed to create post.");
         return;
       }
+
+      const postId = data.id;
+
+      // Send notification to all users with direct link to the post
+      await sendNotification({
+        userId: user.id,
+        broadcast: true,
+        title: "New Post Created",
+        body: `${user.user_metadata.displayname || "Someone"} just created a new post!`,
+        url: `/social?tab=feed&post=${postId}`,
+      });
 
       toast("Post created successfully!");
 

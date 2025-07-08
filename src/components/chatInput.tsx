@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Image, X, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { sendNotification } from "@/lib/sendNotification";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChatInputProps {
   onSendMessage: (message: string, images?: File[]) => Promise<void>;
@@ -15,17 +17,14 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      (!message.trim() && imageFiles.length === 0) ||
-      isSending ||
-      disabled
-    )
+    if ((!message.trim() && imageFiles.length === 0) || isSending || disabled)
       return;
 
     setIsSending(true);
@@ -36,6 +35,19 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         message.trim(),
         imageFiles.length > 0 ? imageFiles : undefined
       );
+
+      if (message.trim()) {
+        await sendNotification({
+          userId: user?.id,
+          broadcast: true,
+          title: "Ny chatbesked",
+          body: `${
+            user?.user_metadata?.displayname || "Nogen"
+          } har sendt en besked: "${message.trim()}"`,
+          url: "/social?tab=chat",
+        });
+      }
+
       setMessage("");
       setImageFiles([]);
     } catch (error) {
@@ -44,25 +56,23 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         error instanceof Error ? error.message : "Failed to send message"
       );
       toast("Failed to send message. Please try again.");
-    } finally {
-      setIsSending(false);
     }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const files = event.target.files;
-      if (!files) return;
-  
-      Array.from(files).forEach((file) => {
-        if (file.type.startsWith("image/")) {
-          setImageFiles((prev) => [...prev, file]);
-          const previewUrl = URL.createObjectURL(file);
-          setImagePreviews((prev) => [...prev, previewUrl]);
-        }
-      });
-  // Add to existing images (max 5 total)
-  // Reset input value to allow selecting the same file again
-  // (This logic should be inside handleImageUpload, not outside)
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        setImageFiles((prev) => [...prev, file]);
+        const previewUrl = URL.createObjectURL(file);
+        setImagePreviews((prev) => [...prev, previewUrl]);
+      }
+    });
+    // Add to existing images (max 5 total)
+    // Reset input value to allow selecting the same file again
+    // (This logic should be inside handleImageUpload, not outside)
   };
 
   const removeImage = (index: number) => {
