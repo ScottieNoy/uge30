@@ -13,6 +13,11 @@ import { AuthProvider } from "@/hooks/useAuth";
 export const metadata = {
   title: "UGE 30",
   description: "Classement for UGE 30",
+  icons: {
+    icon: "/uge30gul-192.png",
+    apple: "/uge30gul-180.png",
+    shortcut: "/uge30gul-192.png",
+  },
 };
 
 export default async function RootLayout({
