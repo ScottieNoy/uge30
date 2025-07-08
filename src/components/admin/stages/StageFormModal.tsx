@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabaseClient";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { date } from "zod";
 
 export default function StageFormModal({
   existingStage,
@@ -14,19 +15,20 @@ export default function StageFormModal({
   onSaved,
 }: any) {
   const supabase = createClient();
-  const [title, setTitle] = useState(existingStage?.title ?? "");
-  const [description, setDescription] = useState(
-    existingStage?.description ?? ""
+  const [name, setName] = useState(existingStage?.name ?? "");
+  const [date, setDate] = useState(
+    existingStage?.date ? new Date(existingStage.date).toISOString().slice(0, 10) : ""
   );
-  const [emoji, setEmoji] = useState(existingStage?.emoji ?? "");
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({
     title: "",
-    time: "",
+    description: "",
     emoji: "",
     location: "",
-    description: "",
+    time: "",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   });
 
   // Load existing events if editing
@@ -38,14 +40,26 @@ export default function StageFormModal({
         .select("*")
         .eq("stage_id", existingStage.id)
         .order("time");
-      if (data) setEvents(data);
+
+      if (data) {
+        const formatted = data.map((event) => ({
+          ...event,
+          time: formatForInput(event.time? event.time : ""),
+        }));
+        setEvents(formatted);
+      }
     };
+
     fetchEvents();
   }, [existingStage]);
+  function formatForInput(dateString: string) {
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16); // strips seconds + Z
+  }
 
   const handleSubmit = async () => {
     setLoading(true);
-    const payload = { title, description, emoji };
+    const payload = { name: name, date: date };
 
     if (existingStage) {
       await supabase.from("stages").update(payload).eq("id", existingStage.id);
@@ -64,7 +78,7 @@ export default function StageFormModal({
 
     const { error } = await supabase.from("events").insert({
       ...newEvent,
-      time: localInputToUTC(newEvent.time),
+      time: newEvent.time,
 
       stage_id: existingStage.id,
     });
@@ -72,10 +86,12 @@ export default function StageFormModal({
     if (!error) {
       setNewEvent({
         title: "",
-        time: "",
+        description: "",
         emoji: "",
         location: "",
-        description: "",
+        time: "",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       });
       toast.success("Event oprettet");
       const { data } = await supabase
@@ -99,20 +115,20 @@ export default function StageFormModal({
     await supabase.from("events").update(event).eq("id", event.id);
     toast.success("Event opdateret");
   };
-  function toLocalInputValue(utcString: string) {
-    const date = new Date(utcString);
-    const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
-    const localISO = new Date(date.getTime() - tzOffset)
-      .toISOString()
-      .slice(0, 16);
-    return localISO;
-  }
-  function localInputToUTC(value: string) {
-    const local = new Date(value);
-    return new Date(
-      local.getTime() - local.getTimezoneOffset() * 60000
-    ).toISOString();
-  }
+  // function toLocalInputValue(utcString: string) {
+  //   const date = new Date(utcString);
+  //   const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
+  //   const localISO = new Date(date.getTime() - tzOffset)
+  //     .toISOString()
+  //     .slice(0, 16);
+  //   return localISO;
+  // }
+  // function localInputToUTC(value: string) {
+  //   const local = new Date(value);
+  //   return new Date(
+  //     local.getTime() - local.getTimezoneOffset() * 60000
+  //   ).toISOString();
+  // }
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -126,27 +142,18 @@ export default function StageFormModal({
           <div>
             <label className="block text-white mb-1">Titel</label>
             <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="F.eks. Øldag"
             />
           </div>
 
           <div>
-            <label className="block text-white mb-1">Beskrivelse</label>
+            <label className="block text-white mb-1">Dato</label>
             <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Kort beskrivelse"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white mb-1">Emoji</label>
-            <Input
-              value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
-              placeholder="🍺"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
             />
           </div>
 
@@ -190,7 +197,7 @@ export default function StageFormModal({
                     />
                     <Input
                       type="datetime-local"
-                      value={event.time ? toLocalInputValue(event.time) : ""}
+                      value={event.time}
                       onChange={(e) =>
                         setEvents((prev) =>
                           prev.map((ev) =>

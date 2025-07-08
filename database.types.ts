@@ -110,8 +110,9 @@ export type Database = {
           id: string
           location: string | null
           stage_id: string | null
-          time: string
-          title: string
+          time: string | null
+          title: string | null
+          updated_at: string | null
         }
         Insert: {
           created_at?: string | null
@@ -120,8 +121,9 @@ export type Database = {
           id?: string
           location?: string | null
           stage_id?: string | null
-          time: string
-          title: string
+          time?: string | null
+          title?: string | null
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
@@ -130,18 +132,11 @@ export type Database = {
           id?: string
           location?: string | null
           stage_id?: string | null
-          time?: string
-          title?: string
+          time?: string | null
+          title?: string | null
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_stage_id_fkey"
-            columns: ["stage_id"]
-            isOneToOne: false
-            referencedRelation: "stages"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       likes: {
         Row: {
@@ -224,13 +219,6 @@ export type Database = {
           value?: number | null
         }
         Relationships: [
-          {
-            foreignKeyName: "points_stage_id_fkey"
-            columns: ["stage_id"]
-            isOneToOne: false
-            referencedRelation: "stages"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "points_submitted_by_fkey"
             columns: ["submitted_by"]
@@ -379,27 +367,21 @@ export type Database = {
       stages: {
         Row: {
           created_at: string | null
-          description: string | null
-          emoji: string | null
+          date: string | null
           id: string
-          position: number | null
-          title: string
+          name: string | null
         }
         Insert: {
           created_at?: string | null
-          description?: string | null
-          emoji?: string | null
+          date?: string | null
           id?: string
-          position?: number | null
-          title: string
+          name?: string | null
         }
         Update: {
           created_at?: string | null
-          description?: string | null
-          emoji?: string | null
+          date?: string | null
           id?: string
-          position?: number | null
-          title?: string
+          name?: string | null
         }
         Relationships: []
       }
@@ -506,30 +488,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      jersey_category:
-        | "førertroje"
-        | "gyldne_blaerer"
-        | "flydende_haand"
-        | "sprinter"
-        | "prikket"
-        | "ungdom"
-        | "punkttroje"
-        | "maane"
-      subcategory:
-        | "beer"
-        | "ølbong"
-        | "shot"
-        | "beerpong"
-        | "stigegolf"
-        | "dart"
-        | "challenge"
-        | "bonus"
-        | "other"
-        | "competition"
-        | "wine"
-        | "billiard"
-        | "cornhole"
-        | "vodkadrink"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -656,33 +615,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      jersey_category: [
-        "førertroje",
-        "gyldne_blaerer",
-        "flydende_haand",
-        "sprinter",
-        "prikket",
-        "ungdom",
-        "punkttroje",
-        "maane",
-      ],
-      subcategory: [
-        "beer",
-        "ølbong",
-        "shot",
-        "beerpong",
-        "stigegolf",
-        "dart",
-        "challenge",
-        "bonus",
-        "other",
-        "competition",
-        "wine",
-        "billiard",
-        "cornhole",
-        "vodkadrink",
-      ],
-    },
+    Enums: {},
   },
 } as const

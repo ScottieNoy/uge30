@@ -12,20 +12,13 @@ export default function AdminStageList() {
   const [modalOpen, setModalOpen] = useState(false)
 
   const loadStages = async () => {
-    const { data } = await supabase.from('stages').select('*').order('position')
+    const { data } = await supabase.from('stages').select('*').order('date')
     if (data) setStages(data)
   }
 
   useEffect(() => {
     loadStages()
   }, [])
-
-  const handleReorder = async (updated: any[]) => {
-    for (let i = 0; i < updated.length; i++) {
-      await supabase.from('stages').update({ position: i }).eq('id', updated[i].id)
-    }
-    loadStages()
-  }
 
   return (
     <div>
@@ -43,7 +36,6 @@ export default function AdminStageList() {
           <AdminStageItem
             key={stage.id}
             stage={stage}
-            index={index}
             onUpdated={loadStages}
           />
         ))}

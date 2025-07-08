@@ -7,14 +7,17 @@ export default async function StagesPage() {
   const { data } = await supabase
     .from("stages")
     .select("*")
-    .order("position", { ascending: true });
+    .order("date", { ascending: true });
 
-  // Ensure 'position' is not null before passing to StageList
+  // Ensure data matches StageListProps before passing to StageList
   const sanitizedData =
-    data?.filter((stage) => stage.position !== null) // filter out null positions
+    data
+      ?.filter((stage) => stage.date !== null && stage.name !== null && stage.created_at !== null)
       .map((stage) => ({
-        ...stage,
-        position: stage.position as number, // cast to number (safe after filter)
+        id: stage.id,
+        created_at: stage.created_at as string,
+        name: stage.name as string,
+        date: String(stage.date),
       })) ?? null;
 
   return (

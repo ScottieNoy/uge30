@@ -13,9 +13,9 @@ export const metadata = {
   title: "UGE 30",
   description: "Classement for UGE 30",
   icons: {
-    icon: "/uge30gul-192.png",
+    icon: "/uge30gul-192.jpg",
     apple: "/uge30gul-180.png",
-    shortcut: "/uge30gul-192.png",
+    shortcut: "/uge30gul-192.jpg",
   },
 };
 

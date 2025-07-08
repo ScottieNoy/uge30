@@ -5,14 +5,12 @@ import { createClient } from "@/lib/supabaseClient";
 import StageCard from "@/components/stages/StageCard";
 
 interface StageListProps {
-  data:
+  data?:
     | {
         id: string;
-        title: string;
-        description: string | null;
-        emoji: string | null;
-        position: number;
-        created_at: string | null;
+        created_at: string;
+        name: string;
+        date: string;
       }[]
     | null;
 }
@@ -26,13 +24,24 @@ const StageList: React.FC<StageListProps> = ({ data }) => {
     );
   }
 
-  // Sort by position to ensure correct order
-  const sortedData = [...data].sort((a, b) => a.position - b.position);
+
+  // Sort data by date (descending), or use as is if no date
+  const sortedData = [...data].sort((a, b) => {
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 
   return (
     <div className="space-y-4">
       {sortedData.map((stage) => (
-        <StageCard key={stage.id} stage={stage} />
+        <StageCard
+          key={stage.id}
+          stage={{
+            ...stage,
+            date: stage.date ?? null, // or set to null if you don't have a date
+          }}
+        />
       ))}
     </div>
   );

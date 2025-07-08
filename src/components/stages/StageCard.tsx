@@ -1,25 +1,51 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabaseClient";
 
 interface StageCardProps {
   stage: {
     id: string;
-    title: string;
-    description: string | null;
-    emoji: string | null;
-    position: number; // used for sorting, not rendered
     created_at: string | null;
+    name: string;
+    date: string | null;
   };
 }
 
 const StageCard: React.FC<StageCardProps> = ({ stage }) => {
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString("da-DK", {
+  const supabase = createClient();
+  const [nextEvent, setNextEvent] = useState<null | {
+    title: string;
+    time: string;
+  }>(null);
+
+  useEffect(() => {
+    const loadNextEvent = async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("title, time")
+        .eq("stage_id", stage.id)
+        .gt("time", new Date().toISOString())
+        .order("time", { ascending: true })
+        .limit(1);
+
+      if (data?.[0] && data[0].title && data[0].time) {
+        setNextEvent({
+          title: data[0].title,
+          time: data[0].time,
+        });
+      }
+    };
+
+    loadNextEvent();
+  }, [stage.id]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("da-DK", {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -48,41 +74,25 @@ const StageCard: React.FC<StageCardProps> = ({ stage }) => {
           <CardHeader className="relative z-10 px-4 pt-5 pb-2 sm:px-6">
             <CardTitle className="text-lg sm:text-xl">
               <div className="flex items-start gap-2">
-                {/* Emoji */}
-                {stage.emoji && (
-                  <motion.span
-                    className="text-3xl shrink-0"
-                    initial={{ y: -4 }}
-                    animate={{ y: 0 }}
-                    transition={{ type: "spring", stiffness: 120 }}
-                  >
-                    {stage.emoji}
-                  </motion.span>
-                )}
-
-                {/* Title */}
                 <h3 className="self-center text-gray-900 font-semibold group-hover:text-blue-700 transition-colors duration-300 leading-tight break-words">
-                  {stage.title}
+                  {stage.name}
                 </h3>
               </div>
             </CardTitle>
           </CardHeader>
 
           <CardContent className="relative z-10 px-4 pt-2 pb-5 sm:px-6">
-            {/* Description */}
-            {stage.description && (
-              <p className="text-gray-600 mb-4 leading-relaxed text-sm">
-                {stage.description}
-              </p>
-            )}
-
-            {/* Date */}
-            {stage.created_at && (
+            {nextEvent ? (
               <div className="items-center gap-2 text-xs text-gray-500 bg-gray-100/80 rounded-md px-3 py-2 inline-flex backdrop-blur-sm border border-gray-200">
                 <span className="text-blue-500">📅</span>
-                <span className="font-medium">
-                  {formatDate(stage.created_at)}
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{nextEvent.title}</span>
+                  <span className="text-xs">{formatDate(nextEvent.time)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500 italic mb-2">
+                Ingen kommende aktiviteter
               </div>
             )}
           </CardContent>

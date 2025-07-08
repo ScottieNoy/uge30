@@ -11,10 +11,9 @@ import { ArrowLeft } from "lucide-react";
 // Types
 interface Stage {
   id: string;
-  title: string;
-  emoji: string | null;
-  description: string | null;
   created_at: string | null;
+  date: string | null;
+  name: string;
 }
 
 interface Event {
@@ -134,23 +133,12 @@ export default function StageDetailPage() {
             <CardHeader className="px-6 pt-6 pb-4">
               <CardTitle className="text-2xl sm:text-3xl">
                 <div className="flex items-start gap-4">
-                  {stage.emoji && (
-                    <span className="text-4xl shrink-0">{stage.emoji}</span>
-                  )}
                   <h1 className="self-center text-gray-900 font-bold leading-tight break-words">
-                    {stage.title}
+                    {stage.name}
                   </h1>
                 </div>
               </CardTitle>
             </CardHeader>
-
-            {stage.description && (
-              <CardContent className="px-6 pb-6 pt-0">
-                <p className="text-gray-600 leading-relaxed">
-                  {stage.description}
-                </p>
-              </CardContent>
-            )}
           </Card>
         </motion.div>
 
