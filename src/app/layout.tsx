@@ -1,6 +1,5 @@
 // app/layout.tsx
 import "./globals.css";
-import NotificationManager from "../components/NotificationManager";
 import Navbar from "../components/Navbar";
 import PwaInit from "../components/PwaInit";
 import SplashScreen from "@/components/SplashScreen";
