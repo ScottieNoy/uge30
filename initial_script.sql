@@ -47,6 +47,16 @@ CREATE TABLE likes (
   UNIQUE (user_id, post_id)
 );
 
+-- === Shares ===
+CREATE TABLE shares (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (user_id, post_id) -- prevent duplicate shares per user
+);
+
 -- === Chat Messages ===
 CREATE TABLE chat_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -171,6 +181,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shares ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_teams ENABLE ROW LEVEL SECURITY;
@@ -197,6 +208,11 @@ CREATE POLICY "Users can delete own comments" ON comments FOR DELETE USING (auth
 CREATE POLICY "Anyone can view likes" ON likes FOR SELECT USING (true);
 CREATE POLICY "Users can create likes" ON likes FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own likes" ON likes FOR DELETE USING (auth.uid() = user_id);
+
+-- === Shares Policies ===
+CREATE POLICY "Anyone can view shares" ON shares FOR SELECT USING (true);
+CREATE POLICY "Users can share posts" ON shares FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can remove their own share" ON shares FOR DELETE USING (auth.uid() = user_id);
 
 -- Chat messages policies
 CREATE POLICY "Anyone can view chat messages" ON chat_messages FOR SELECT USING (true);
@@ -344,6 +360,7 @@ CREATE INDEX IF NOT EXISTS posts_user_id_idx ON posts(user_id);
 CREATE INDEX IF NOT EXISTS posts_created_at_idx ON posts(created_at DESC);
 CREATE INDEX IF NOT EXISTS comments_post_id_idx ON comments(post_id);
 CREATE INDEX IF NOT EXISTS likes_post_id_idx ON likes(post_id);
+CREATE INDEX IF NOT EXISTS shares_post_id_idx ON shares(post_id);
 CREATE INDEX IF NOT EXISTS points_user_id_idx ON points(user_id);
 CREATE INDEX IF NOT EXISTS points_stage_id_idx ON points(stage_id);
 CREATE INDEX IF NOT EXISTS chat_messages_created_at_idx ON chat_messages(created_at DESC);
