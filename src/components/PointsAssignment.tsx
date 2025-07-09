@@ -4,49 +4,52 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Trophy, Beer, Zap, Star } from "lucide-react";
-import { AssignPoints, JERSEY_CATEGORIES, JerseyCategory, User } from "@/types";
+import { AssignPoints, Jersey, User, Category } from "@/types";
 import { toast } from "sonner";
-import { sendNotification } from "@/lib/sendNotification";
 
 interface PointsAssignmentProps {
   targetUser: User;
-  currentUser: User | null; // Use UserType for Supabase user object
+  currentUser: User | null;
   onClose: () => void;
   onAssignPoints: (assignPoints: AssignPoints) => Promise<void>;
 }
 
-const pointCategories = [
+const allowedPointActions = [
   {
     id: "competition",
-    name: "Competition",
+    label: "Competition",
     icon: Trophy,
     points: 50,
+    category: "competition" as Category,
+    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
     color: "from-yellow-400 to-orange-500",
-    category: JERSEY_CATEGORIES[0],
   },
   {
     id: "drink",
-    name: "Drink",
+    label: "Drink",
     icon: Beer,
     points: 10,
+    category: "øl" as Category,
+    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
     color: "from-blue-400 to-cyan-400",
-    category: JERSEY_CATEGORIES[1],
   },
   {
     id: "challenge",
-    name: "Challenge",
+    label: "Challenge",
     icon: Zap,
     points: 25,
+    category: "bonus" as Category,
+    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
     color: "from-purple-500 to-pink-500",
-    category: JERSEY_CATEGORIES[2],
   },
   {
     id: "bonus",
-    name: "Bonus",
+    label: "Bonus",
     icon: Star,
     points: 15,
+    category: "bonus" as Category,
+    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
     color: "from-green-400 to-emerald-500",
-    category: JERSEY_CATEGORIES[3],
   },
 ];
 
@@ -56,43 +59,37 @@ const PointsAssignment = ({
   onClose,
   onAssignPoints,
 }: PointsAssignmentProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAssignPoints = async (
-    category: JerseyCategory,
-    points: number
+  const handleSubmit = async (
+    jersey_id: Jersey,
+    category: Category,
+    value: number
   ) => {
     if (!currentUser) {
-      toast("You must be logged in to assign points.");
+      toast.error("You must be logged in to assign points.");
       return;
     }
 
     if (targetUser.id === currentUser.id) {
-      toast("You cannot assign points to yourself.");
+      toast.error("You cannot assign points to yourself.");
       return;
     }
 
     setIsSubmitting(true);
+
     try {
       await onAssignPoints({
-        category: category,
-        subcategory: "beer",
-        value: points,
-        note: `Points assigned by ${currentUser.id}`,
+        category,
+        value,
+        note: `Assigned via QR by ${currentUser.displayname}`,
+        jersey_id, // empty string if not available, or provide a valid string
       });
 
-      await sendNotification({
-        userId: targetUser.id,
-        title: "💥 Point Received!",
-        body: `${
-          currentUser.displayname || "Someone"
-        } just gave you ${points} points for ${category.toLowerCase()}.`,
-        url: "/my", // or link to scoreboard/profile/etc
-      });
+      // toast.success("Points assigned successfully!");
       onClose();
-    } catch (error) {
-      toast("Error assigning points: " + (error as Error).message);
+    } catch (error: any) {
+      // toast.error("Error assigning points: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -112,31 +109,36 @@ const PointsAssignment = ({
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
+
         <CardContent className="space-y-6">
-          {/* Target User Display */}
+          {/* User Info */}
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mx-auto mb-3 flex items-center justify-center">
               <span className="text-white font-bold text-xl">
-                {targetUser.firstname.charAt(0).toUpperCase()}
+                {targetUser.firstname[0]?.toUpperCase()}
               </span>
             </div>
             <h3 className="text-white font-semibold text-lg">
               {targetUser.firstname} {targetUser.lastname}
             </h3>
             <p className="text-white/60 text-sm">
-              Select category to assign points
+              Choose a category to assign points
             </p>
           </div>
 
-          {/* Point Categories */}
+          {/* Category Buttons */}
           <div className="grid grid-cols-1 gap-3">
-            {pointCategories.map((category) => {
-              const IconComponent = category.icon;
+            {allowedPointActions.map((action) => {
+              const Icon = action.icon;
               return (
                 <Button
-                  key={category.id}
+                  key={action.id}
                   onClick={() =>
-                    handleAssignPoints(category.category, category.points)
+                    handleSubmit(
+                      action.jersey_id,
+                      action.category,
+                      action.points
+                    )
                   }
                   disabled={isSubmitting}
                   className="h-auto p-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white justify-between"
@@ -144,19 +146,19 @@ const PointsAssignment = ({
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-10 h-10 rounded-full bg-gradient-to-r ${category.color} flex items-center justify-center`}
+                      className={`w-10 h-10 rounded-full bg-gradient-to-r ${action.color} flex items-center justify-center`}
                     >
-                      <IconComponent className="h-5 w-5 text-white" />
+                      <Icon className="h-5 w-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <div className="font-medium">{category.name}</div>
+                      <div className="font-medium">{action.label}</div>
                       <div className="text-sm text-white/60">Tap to assign</div>
                     </div>
                   </div>
                   <Badge
-                    className={`bg-gradient-to-r ${category.color} text-white border-0`}
+                    className={`bg-gradient-to-r ${action.color} text-white border-0`}
                   >
-                    +{category.points}
+                    +{action.points}
                   </Badge>
                 </Button>
               );

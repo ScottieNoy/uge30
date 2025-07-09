@@ -11,6 +11,8 @@ import { createClient } from "@/lib/supabaseClient";
 import { AssignPoints, User } from "@/types";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
+import { getCurrentStage } from "@/lib/getCurrentStage";
+import { sendNotification } from "@/lib/sendNotification";
 
 const Scan = () => {
   const router = useRouter();
@@ -84,20 +86,39 @@ const Scan = () => {
 
   const handleAssignPoints = async (assignPoints: AssignPoints) => {
     if (!currentUser || !targetUser) return;
+    const pointId = crypto.randomUUID();
+    const stageId = await getCurrentStage();
 
-    const { error } = await supabase.from("points").insert({
-      user_id: targetUser.id,
-      category: assignPoints.category,
-      subcategory: assignPoints.subcategory,
-      value: assignPoints.value,
-      note: assignPoints.note || null,
-      submitted_by: currentUser.id,
-    });
+    if (!stageId) {
+      toast.error("Kunne ikke finde en igangværende etape. Prøv igen senere.");
+      return;
+    }
 
-    if (error) {
-      toast("Error assigning points: " + error.message);
+    const { error: transactionError } = await supabase.rpc(
+      "perform_point_and_jersey_insert",
+      {
+        p_point_id: pointId,
+        p_user_id: targetUser.id,
+        p_submitted_by: currentUser.id,
+        p_value: assignPoints.value,
+        p_note: assignPoints.note || "",
+        p_stage_id: stageId || "",
+        p_jersey_id: assignPoints.jersey_id,
+        p_category: assignPoints.category,
+      }
+    );
+
+    if (transactionError) {
+      toast.error("Fejl under point tildeling: " + transactionError.message);
     } else {
-      toast("Points assigned successfully!");
+      toast.success("Pointene er blevet tildelt!");
+      await sendNotification({
+        userId: targetUser.id,
+        broadcast: false,
+        title: "💥 Point Received!",
+        body: `${currentUser.displayname} gav dig ${assignPoints.value} point for ${assignPoints.category}.`,
+        url: "/my",
+      });
     }
 
     setShowPointsAssignment(false);
@@ -160,7 +181,10 @@ const Scan = () => {
                 Show this QR code to let others give you points.
               </p>
               <div className="flex flex-col items-center w-fit justify-center bg-white p-6 rounded-lg text-center">
-                <QRCodeCanvas value={`${currentUser?.displayname}`} size={180} />
+                <QRCodeCanvas
+                  value={`${currentUser?.displayname}`}
+                  size={180}
+                />
                 <p className="text-gray-800 font-medium mt-3">
                   {currentUser?.displayname || "Loading..."}
                 </p>
