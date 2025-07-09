@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Image, X, AlertCircle } from "lucide-react";
@@ -48,14 +48,18 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         });
       }
 
+      // ✅ Reset after success
       setMessage("");
       setImageFiles([]);
+      setImagePreviews([]);
     } catch (error) {
       console.error("Error sending message:", error);
       setUploadError(
         error instanceof Error ? error.message : "Failed to send message"
       );
       toast("Failed to send message. Please try again.");
+    } finally {
+      setIsSending(false); // ✅ always reset sending state
     }
   };
 
@@ -63,31 +67,37 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     const files = event.target.files;
     if (!files) return;
 
+    const newPreviews: string[] = [];
+
     Array.from(files).forEach((file) => {
       if (file.type.startsWith("image/")) {
         setImageFiles((prev) => [...prev, file]);
         const previewUrl = URL.createObjectURL(file);
-        setImagePreviews((prev) => [...prev, previewUrl]);
+        newPreviews.push(previewUrl);
       }
     });
-    // Add to existing images (max 5 total)
-    // Reset input value to allow selecting the same file again
-    // (This logic should be inside handleImageUpload, not outside)
+
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+    // Allow re-uploading same file again
+    event.target.value = "";
   };
 
   const removeImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviews[index]);
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // const removeImage = (index: number) => {
-  //   setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-  //   setUploadError(null);
-  // };
+  // Clean up URLs on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
 
   return (
     <div className="p-3 sm:p-4">
-      {/* Error display */}
       {uploadError && (
         <div className="mb-3 p-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-sm">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -101,16 +111,14 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         </div>
       )}
 
-      {/* Image previews - mobile optimized */}
-      {imageFiles.length > 0 && (
+      {imagePreviews.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
-          {imageFiles.map((file, index) => (
+          {imagePreviews.map((url, index) => (
             <div key={index} className="relative">
               <img
-                src={URL.createObjectURL(file)}
+                src={url}
                 alt={`Preview ${index + 1}`}
                 className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded border border-white/20"
-                onLoad={() => URL.revokeObjectURL(URL.createObjectURL(file))}
               />
               <button
                 type="button"
@@ -125,13 +133,12 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
       )}
 
       <form onSubmit={handleSubmit} className="flex gap-2">
-        {/* Input field - mobile first */}
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
           disabled={isSending || disabled}
-          className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/60 text-sm sm:text-base h-10 sm:h-11"
+          className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/60 text-base h-10 sm:h-11"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -140,7 +147,6 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           }}
         />
 
-        {/* Image upload button - touch friendly */}
         <Button
           type="button"
           variant="outline"
@@ -162,7 +168,6 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           className="hidden"
         />
 
-        {/* Send button - touch friendly */}
         <Button
           type="submit"
           disabled={
