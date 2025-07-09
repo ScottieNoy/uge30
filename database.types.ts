@@ -414,14 +414,14 @@ export type Database = {
           {
             foreignKeyName: "push_subscriptions_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "push_subscriptions_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users_with_display_name"
             referencedColumns: ["id"]
           },
@@ -788,6 +788,7 @@ export type Database = {
           p_note: string
           p_stage_id: string
           p_jersey_id: string
+          p_category: string
         }
         Returns: undefined
       }

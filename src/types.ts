@@ -1,20 +1,20 @@
 import * as Icons from "lucide-react";
 import { Database } from "../database.types";
 
-/* ------------------------- CONSTANT ENUMS ------------------------- */
+/* -------------------- ENUMS -------------------- */
 
-export const JERSEY_CATEGORIES = [
-  "førertroje", // Leader Jersey
-  "gyldne_blaerer", // Golden Bladders
-  "flydende_haand", // Flowing Hand
-  "sprinter", // Sprint
-  "prikket", // Dotted
-  "ungdom", // Youth
-  "punkttroje", // Points Jersey
-  "maane", // Moon
+export const JERSEYS = [
+  "førertroje",
+  "gyldne_blaerer",
+  "flydende_haand",
+  "sprinter",
+  "prikket",
+  "ungdom",
+  "punkttroje",
+  "maane",
 ] as const;
 
-export const SUBCATEGORIES = [
+export const CATEGORIES = [
   "beer",
   "wine",
   "vodka",
@@ -29,7 +29,10 @@ export const SUBCATEGORIES = [
   "other",
 ] as const;
 
-export const SUBCATEGORY_POINTS: Record<Subcategory, number> = {
+export type Jersey = typeof JERSEYS[number]; // `jersey_id`
+export type Category = typeof CATEGORIES[number]; // `category` in DB
+
+export const CATEGORY_POINTS: Record<Category, number> = {
   beer: 1,
   wine: 2,
   vodka: 3,
@@ -44,39 +47,7 @@ export const SUBCATEGORY_POINTS: Record<Subcategory, number> = {
   other: 1,
 };
 
-export type JerseyData = {
-  id: JerseyCategory;
-  name: string;
-  participants: {
-    user: User;
-    total: number;
-    rank: number;
-    trend: "up" | "down";
-    change: string;
-  }[];
-};
-
-/* ------------------------- UI CATEGORY CONFIG ------------------------- */
-
-export type JerseyCategoryConfig = {
-  id: JerseyCategory;
-  name: string;
-  icon: keyof typeof Icons;
-  color: string;
-  bgColor: string;
-  borderColor: string;
-};
-
-export type JerseyDisplay = JerseyCategoryConfig & {
-  holder: string;
-  points: number;
-  displayName: string; // full name of the holder
-  icon: keyof typeof Icons; // or React.ComponentType<any>
-  avatar?: string | null; // optional avatar URL
-};
-
-export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];
-export type Subcategory = (typeof SUBCATEGORIES)[number];
+/* -------------------- DOMAIN MODELS -------------------- */
 
 export interface User {
   id: string;
@@ -86,77 +57,64 @@ export interface User {
   avatar_url?: string | null;
   emoji: string | null;
   is_admin?: boolean | null;
-  role: string | null; // e.g., "user", "admin"
+  role: string | null;
   created_at: string | null;
   updated_at: string | null;
 }
 
+// Point event from `points` + optional jersey link
 export interface UserPoint {
   id?: string;
   user_id: string;
   user?: User;
-  category: JerseyCategory;
-  subcategory: Subcategory;
-  value: number; // match Supabase column
+  jersey_id: string; // refers to a jersey category
+  category: Category; // previously `category` in DB
+  value: number;
+  note?: string | null;
+  stage_id?: string | null;
   submitted_by?: string;
   submitted_by_user?: User;
   created_at: string;
   updated_at?: string;
 }
 
-export interface LeaderboardEntry {
-  user_id: string;
-  user: User;
-  category: JerseyCategory;
-  total_points: number;
-  rank: number;
-}
-
-export interface Activity {
-  id: string;
-  icon: keyof typeof Icons; // or React.ComponentType<any> if you store the component
-  color: string;
-  user: string;
-  target: string;
-  points: number;
-  timestamp: string;
-  type: Subcategory;
-  message: string;
-  // category?: JerseyCategory; // optional
-}
-export type AssignPoints = {
-  category: JerseyCategory;
-  subcategory: Subcategory;
+// Used in `Scan` and `AssignPointsForm`
+export interface AssignPoints {
+  jersey_id: string; // required: the actual jersey (e.g. førertroje)
+  category: Category; // DB `category` column
   value: number;
-  note?: string; // optional note for the points assignment
-};
-
-/* ------------------------- DOMAIN MODELS ------------------------- */
-
-// Supabase `points` table shape + optional relational data
-export interface UserPoint {
-  id?: string; // optional ID for existing points
-  user_id: string;
-  user?: User; // optional expanded user info
-  category: JerseyCategory;
-  subcategory: Subcategory;
-  points: number; // renamed from `value` for clarity
-  submitted_by?: string;
-  submitted_by_user?: User; // optional expanded submitter info
-  created_at: string;
-  updated_at?: string;
+  note?: string;
 }
 
-// Leaderboard aggregated info
+/* -------------------- LEADERBOARD -------------------- */
+
 export interface LeaderboardEntry {
   user_id: string;
   user: User;
-  category: JerseyCategory;
+  jersey_id: string;
   total_points: number;
   rank: number;
 }
 
-export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
+/* -------------------- JERSEY CONFIG -------------------- */
+
+export interface JerseyCategoryConfig {
+  id: Jersey;
+  name: string;
+  icon: keyof typeof Icons;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}
+
+export interface JerseyDisplay extends JerseyCategoryConfig {
+  holder: string;
+  displayName: string;
+  points: number;
+  avatar?: string | null;
+}
+
+export const jerseyConfigs: Record<Jersey, JerseyCategoryConfig> = {
   førertroje: {
     id: "førertroje",
     name: "Maillot Jaune",
@@ -213,7 +171,6 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     bgColor: "bg-pink-100",
     borderColor: "border-pink-200",
   },
-
   maane: {
     id: "maane",
     name: "Maillot Lune",
@@ -223,3 +180,17 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     borderColor: "border-blue-400",
   },
 };
+
+/* -------------------- ACTIVITY -------------------- */
+
+export interface Activity {
+  id: string;
+  icon: keyof typeof Icons;
+  color: string;
+  user: string;
+  target: string;
+  points: number;
+  timestamp: string;
+  type: Category;
+  message: string;
+}
