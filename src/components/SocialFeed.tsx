@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import { sendNotification } from "@/lib/sendNotification";
 
 interface Post {
   id: string;
@@ -152,24 +153,23 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
         const userLike = post?.likes.find((like) => like.user_id === user.id);
 
         if (userLike) {
-          const { error } = await supabase
-            .from("likes")
-            .delete()
-            .eq("id", userLike.id);
-
-          if (error) {
-            console.error("Error unliking post:", error);
-            return;
-          }
+          await supabase.from("likes").delete().eq("id", userLike.id);
         } else {
-          const { error } = await supabase.from("likes").insert({
+          await supabase.from("likes").insert({
             post_id: postId,
             user_id: user.id,
           });
 
-          if (error) {
-            console.error("Error liking post:", error);
-            return;
+          // 🔔 Send notification (if not self-like)
+          if (post?.user_id !== user.id) {
+            await sendNotification({
+              userId: post?.user_id,
+              title: "Nyt like på dit opslag",
+              body: `${
+                user.user_metadata?.displayname || "Nogen"
+              } synes godt om dit opslag.`,
+              url: `/social?tab=feed&post=${postId}`,
+            });
           }
         }
 
@@ -416,6 +416,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
 
                 <CommentSection
                   postId={post.id}
+                  postAuthorId={post.user_id}
                   isOpen={openComments === post.id}
                   onClose={() => setOpenComments(null)}
                 />

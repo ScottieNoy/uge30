@@ -8,6 +8,7 @@ import { Send, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { createClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import { sendNotification } from "@/lib/sendNotification";
 
 interface Comment {
   id: string;
@@ -26,10 +27,16 @@ interface Comment {
 interface CommentSectionProps {
   postId: string;
   isOpen: boolean;
+  postAuthorId: string;
   onClose: () => void;
 }
 
-const CommentSection = ({ postId, isOpen, onClose }: CommentSectionProps) => {
+const CommentSection = ({
+  postId,
+  postAuthorId,
+  isOpen,
+  onClose,
+}: CommentSectionProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,6 +120,17 @@ const CommentSection = ({ postId, isOpen, onClose }: CommentSectionProps) => {
 
       setNewComment("");
       fetchComments();
+      if (postAuthorId && postAuthorId !== user.id) {
+        await sendNotification({
+          userId: postAuthorId,
+          title: "Ny kommentar på dit opslag",
+          body: `${
+            user.user_metadata?.displayname || "Nogen"
+          } har kommenteret på dit opslag.`,
+          url: `/social?tab=feed&post=${postId}`,
+        });
+      }
+
       toast("Comment posted successfully!");
     } catch (error) {
       console.error("Error in handleSubmitComment:", error);
