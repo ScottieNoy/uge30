@@ -57,30 +57,19 @@ export default function AssignPointsForm() {
       return;
     }
 
-    // Insert point directly since RPC function doesn't exist
-    const { error: pointError } = await supabase.from("points").insert({
-      id: pointId,
-      user_id: userId,
-      submitted_by: adminId,
-      value: value,
-      note: note,
-      stage_id: "c06e6ee6-57b7-44b3-9d4a-5c90be333be2",
-      category: "admin",
-    });
-
-    if (pointError) {
-      toast.error("Failed to insert point");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Link point to jersey
-    const { error: jerseyError } = await supabase.from("point_jerseys").insert({
-      point_id: pointId,
-      jersey_id: jerseyId,
-    });
-
-    const transactionError = jerseyError;
+    const { error: transactionError } = await supabase.rpc(
+      "perform_point_and_jersey_insert",
+      {
+        p_point_id: pointId,
+        p_user_id: userId,
+        p_submitted_by: adminId,
+        p_value: value,
+        p_note: note,
+        p_stage_id: "c06e6ee6-57b7-44b3-9d4a-5c90be333be2",
+        p_jersey_id: jerseyId,
+        p_category: "admin",
+      }
+    );
 
     if (transactionError) {
       toast.error("Failed to insert point and jersey");
