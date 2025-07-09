@@ -301,6 +301,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "points_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "points_submitted_by_fkey"
             columns: ["submitted_by"]
             isOneToOne: false
@@ -772,7 +779,18 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      perform_point_and_jersey_insert: {
+        Args: {
+          p_point_id: string
+          p_user_id: string
+          p_submitted_by: string
+          p_value: number
+          p_note: string
+          p_stage_id: string
+          p_jersey_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
