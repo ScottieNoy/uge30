@@ -177,7 +177,7 @@ const CommentSection = ({ postId, isOpen, onClose }: CommentSectionProps) => {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               disabled={isSubmitting}
-              className="flex-1 min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/60 text-sm"
+              className="flex-1 min-h-[60px] bg-white/5 border-white/20 text-white placeholder:text-white/60 text-base"
             />
             <Button
               type="submit"
