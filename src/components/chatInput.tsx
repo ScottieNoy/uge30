@@ -7,6 +7,7 @@ import { Send, Loader2, Image, X, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { sendNotification } from "@/lib/sendNotification";
 import { useAuth } from "@/hooks/useAuth";
+import { compressImage } from "@/lib/compressImage";
 
 interface ChatInputProps {
   onSendMessage: (message: string, images?: File[]) => Promise<void>;
@@ -63,25 +64,32 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const files = event.target.files;
+  if (!files) return;
 
-    const newPreviews: string[] = [];
+  const newFiles: File[] = [];
+  const newPreviews: string[] = [];
 
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        setImageFiles((prev) => [...prev, file]);
-        const previewUrl = URL.createObjectURL(file);
-        newPreviews.push(previewUrl);
-      }
-    });
+  for (const file of Array.from(files)) {
+    if (!file.type.startsWith("image/")) continue;
 
-    setImagePreviews((prev) => [...prev, ...newPreviews]);
+    try {
+      const compressed = await compressImage(file, 1000); // Resize max 1000px
+      newFiles.push(compressed);
+      const previewUrl = URL.createObjectURL(compressed);
+      newPreviews.push(previewUrl);
+    } catch (err) {
+      console.error("Compression error", err);
+      toast("Kunne ikke komprimere billedet");
+    }
+  }
 
-    // Allow re-uploading same file again
-    event.target.value = "";
-  };
+  setImageFiles((prev) => [...prev, ...newFiles]);
+  setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+  event.target.value = "";
+};
 
   const removeImage = (index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
