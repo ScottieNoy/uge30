@@ -4,14 +4,14 @@ import { Database } from "../database.types";
 /* ------------------------- CONSTANT ENUMS ------------------------- */
 
 export const JERSEY_CATEGORIES = [
-  "førertroje", // Leader Jersey
-  "gyldne_blaerer", // Golden Bladders
-  "flydende_haand", // Flowing Hand
-  "sprinter", // Sprint
-  "prikket", // Dotted
-  "ungdom", // Youth
-  "punkttroje", // Points Jersey
-  "maane", // Moon
+  "ede64da5-3020-4812-aafb-a89550629af3", // Leader Jersey
+  "45158f97-3418-401c-b02f-8cd91d7ef7d3", // Golden Bladders
+  "c82651a0-7737-4010-9baa-e884259a2b9c", // Flowing Hand
+  "00f9b012-02b1-41a2-8146-62e2750380a6", // Sprint
+  "dccd4651-7429-4679-a352-8a6a5993863b", // Dotted
+  "ad5a8eed-74d5-48ea-8f13-7e9b968419f2", // Youth
+  "22020dc6-4d9a-4200-96d5-c36db91ff3be", // Humorous or troll-based points
+  "4a58d3e7-c9eb-4d13-bd2a-2040f98eabb1", // Moon
 ] as const;
 
 export const SUBCATEGORIES = [
@@ -59,7 +59,6 @@ export type JerseyData = {
 /* ------------------------- UI CATEGORY CONFIG ------------------------- */
 
 export type JerseyCategoryConfig = {
-  id: JerseyCategory;
   name: string;
   icon: keyof typeof Icons;
   color: string;
@@ -157,56 +156,49 @@ export interface LeaderboardEntry {
 }
 
 export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
-  førertroje: {
-    id: "førertroje",
+  "ede64da5-3020-4812-aafb-a89550629af3": {
     name: "Maillot Jaune",
     icon: "Trophy",
     color: "from-yellow-400 to-yellow-500",
     bgColor: "bg-yellow-100",
     borderColor: "border-yellow-200",
   },
-  gyldne_blaerer: {
-    id: "gyldne_blaerer",
+  "45158f97-3418-401c-b02f-8cd91d7ef7d3": {
     name: "Den gyldne blære",
     icon: "Beer",
     color: "from-orange-400 to-orange-500",
     bgColor: "bg-orange-100",
     borderColor: "border-orange-200",
   },
-  flydende_haand: {
-    id: "flydende_haand",
+  "c82651a0-7737-4010-9baa-e884259a2b9c": {
     name: "Den flydende hånd",
     icon: "Hand",
     color: "from-blue-400 to-blue-500",
     bgColor: "bg-blue-100",
     borderColor: "border-blue-200",
   },
-  sprinter: {
-    id: "sprinter",
+  "00f9b012-02b1-41a2-8146-62e2750380a6": {
     name: "Maillot Vert",
     icon: "Bike",
     color: "from-green-400 to-green-500",
     bgColor: "bg-green-100",
     borderColor: "border-green-200",
   },
-  prikket: {
-    id: "prikket",
+  "dccd4651-7429-4679-a352-8a6a5993863b": {
     name: "Maillot à Pois Rouges",
     icon: "CircleDot",
     color: "from-red-400 to-red-500",
     bgColor: "bg-red-100",
     borderColor: "border-red-200",
   },
-  ungdom: {
-    id: "ungdom",
+  "ad5a8eed-74d5-48ea-8f13-7e9b968419f2": {
     name: "Maillot Blanc",
     icon: "User",
     color: "from-gray-400 to-gray-500",
     bgColor: "bg-gray-100",
     borderColor: "border-gray-200",
   },
-  punkttroje: {
-    id: "punkttroje",
+  "22020dc6-4d9a-4200-96d5-c36db91ff3be": {
     name: "Le Plus Pédophile",
     icon: "Baby",
     color: "from-pink-400 to-pink-500",
@@ -214,8 +206,7 @@ export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
     borderColor: "border-pink-200",
   },
 
-  maane: {
-    id: "maane",
+  "4a58d3e7-c9eb-4d13-bd2a-2040f98eabb1": {
     name: "Maillot Lune",
     icon: "Moon",
     color: "from-blue-600 to-blue-700",

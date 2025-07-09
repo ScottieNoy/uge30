@@ -27,6 +27,7 @@ export default function Home() {
 
   const jerseyDisplay = Object.entries(jerseyBoards)
     .map(([category, entries]) => {
+      if (!entries || entries.length === 0) return null;
       const topEntry = entries[0];
       if (!topEntry) return null;
       const jerseyConfig = jerseyConfigs[category as JerseyCategory];
@@ -35,7 +36,9 @@ export default function Home() {
         holder: {
           name: `${topEntry.user.firstname} ${topEntry.user.lastname}`,
           avatar: topEntry.user.avatar_url, // assumes .avatar contains image URL
-          displayName: topEntry.user.displayname || `${topEntry.user.firstname} ${topEntry.user.lastname}`,
+          displayName:
+            topEntry.user.displayname ||
+            `${topEntry.user.firstname} ${topEntry.user.lastname}`,
         },
 
         points: topEntry.total,
@@ -117,7 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      <JerseyShowcase jerseyDisplay={jerseyDisplay} />
+      <JerseyShowcase />
 
       {/* Leaderboards */}
       <section className="px-4 py-8">
