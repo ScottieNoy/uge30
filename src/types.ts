@@ -12,15 +12,6 @@ export const JERSEY_CATEGORIES = [
   "ad5a8eed-74d5-48ea-8f13-7e9b968419f2", // Youth
   "22020dc6-4d9a-4200-96d5-c36db91ff3be", // Humorous or troll-based points
   "4a58d3e7-c9eb-4d13-bd2a-2040f98eabb1", // Moon
-export const JERSEYS = [
-  "førertroje",
-  "gyldne_blaerer",
-  "flydende_haand",
-  "sprinter",
-  "prikket",
-  "ungdom",
-  "punkttroje",
-  "maane",
 ] as const;
 
 export const CATEGORIES = [
@@ -38,8 +29,7 @@ export const CATEGORIES = [
   "other",
 ] as const;
 
-export type Jersey = typeof JERSEYS[number]; // `jersey_id`
-export type Category = typeof CATEGORIES[number]; // `category` in DB
+export type Category = (typeof CATEGORIES)[number]; // `category` in DB
 
 export const CATEGORY_POINTS: Record<Category, number> = {
   beer: 1,
@@ -70,24 +60,7 @@ export type JerseyData = {
 
 /* ------------------------- UI CATEGORY CONFIG ------------------------- */
 
-export type JerseyCategoryConfig = {
-  name: string;
-  icon: keyof typeof Icons;
-  color: string;
-  bgColor: string;
-  borderColor: string;
-};
-
-export type JerseyDisplay = JerseyCategoryConfig & {
-  holder: string;
-  points: number;
-  displayName: string; // full name of the holder
-  icon: keyof typeof Icons; // or React.ComponentType<any>
-  avatar?: string | null; // optional avatar URL
-};
-
 export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];
-export type Subcategory = (typeof SUBCATEGORIES)[number];
 /* -------------------- DOMAIN MODELS -------------------- */
 
 export interface User {
@@ -140,7 +113,6 @@ export interface LeaderboardEntry {
 /* -------------------- JERSEY CONFIG -------------------- */
 
 export interface JerseyCategoryConfig {
-  id: Jersey;
   name: string;
   icon: keyof typeof Icons;
   color: string;
@@ -166,9 +138,6 @@ export interface LeaderboardEntry {
 
 export const jerseyConfigs: Record<JerseyCategory, JerseyCategoryConfig> = {
   "ede64da5-3020-4812-aafb-a89550629af3": {
-export const jerseyConfigs: Record<Jersey, JerseyCategoryConfig> = {
-  førertroje: {
-    id: "førertroje",
     name: "Maillot Jaune",
     icon: "Trophy",
     color: "from-yellow-400 to-yellow-500",
@@ -219,8 +188,6 @@ export const jerseyConfigs: Record<Jersey, JerseyCategoryConfig> = {
   },
 
   "4a58d3e7-c9eb-4d13-bd2a-2040f98eabb1": {
-  maane: {
-    id: "maane",
     name: "Maillot Lune",
     icon: "Moon",
     color: "from-blue-600 to-blue-700",
@@ -242,4 +209,3 @@ export interface Activity {
   type: Category;
   message: string;
 }
-
