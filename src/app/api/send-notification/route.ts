@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 
 webpush.setVapidDetails(
-  'mailto:dups@rhedd.dk',
+  'mailto:dups@uge30.dk',
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 )
@@ -42,22 +42,20 @@ export async function POST(req: Request) {
 
   const payload = JSON.stringify({ title, body, url })
 
-  const validSubscriptions = subscriptions.filter(
-    (sub) => typeof sub.endpoint === 'string' && !!sub.endpoint
-  );
-
   const results = await Promise.allSettled(
-    validSubscriptions.map((sub) => {
-      const pushSub = {
-        endpoint: sub.endpoint as string,
-        keys: {
-          p256dh: (sub.keys as any).p256dh,
-          auth: (sub.keys as any).auth,
+    subscriptions
+      .filter((sub) => typeof sub.endpoint === 'string' && sub.endpoint)
+      .map((sub) => {
+        const pushSub = {
+          endpoint: sub.endpoint as string,
+          keys: {
+            p256dh: (sub.keys as any).p256dh,
+            auth: (sub.keys as any).auth,
+          }
         }
-      };
-      return webpush.sendNotification(pushSub, payload);
-    })
-  );
+        return webpush.sendNotification(pushSub, payload)
+      })
+  )
 
   const successCount = results.filter(r => r.status === 'fulfilled').length
   const failureCount = results.length - successCount
