@@ -35,10 +35,10 @@ export async function GET() {
   try {
     // Ensure the subscription matches the PushSubscription type
     const pushSubscription = {
-      endpoint: subscription.endpoint,
+      endpoint: subscription.endpoint as string,
       keys: {
         p256dh: (subscription.keys as any).p256dh,
-    auth: (subscription.keys as any).auth,
+        auth: (subscription.keys as any).auth,
       },
     }
 

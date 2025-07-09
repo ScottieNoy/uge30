@@ -194,6 +194,15 @@ export default function Navbar() {
                       Administrer Etaper
                     </Button>
                   </Link>
+                  <Link href="/admin/points-assignment">
+                    <Button
+                      variant="ghost"
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Points Assignment
+                    </Button>
+                  </Link>
                 </>
               )}
 
@@ -314,20 +323,16 @@ export default function Navbar() {
 
                 {isAdmin && (
                   <>
-                    {/* <Link href="/add-points" onClick={closeMenu}>
-                      <Button variant="ghost" className="w-full text-green-300">
-                        Add Points
-                      </Button>
-                    </Link> */}
-                    {/* <Link href="/jerseys/edit" onClick={closeMenu}>
-                      <Button variant="ghost" className="w-full text-green-300">
-                        Edit Jerseys
-                      </Button>
-                    </Link> */}
                     <Link href="/admin/stages" onClick={closeMenu}>
                       <Button variant="ghost" className="w-full text-green-300">
                         <Shield className="h-4 w-4 mr-2" />
                         Administrer Etaper
+                      </Button>
+                    </Link>
+                    <Link href="/admin/points-assignment" onClick={closeMenu}>
+                      <Button variant="ghost" className="w-full text-green-300">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Points Assignment
                       </Button>
                     </Link>
                   </>
