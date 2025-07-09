@@ -11,7 +11,6 @@ import {
   JerseyData,
   jerseyConfigs,
 } from "@/types";
-import { SUBCATEGORY_META } from "@/lib/utils";
 
 // Utility
 const formatCopenhagenTime = (dateString: string) => {
@@ -83,7 +82,9 @@ export const useLeaderboard = () => {
             point.value ?? 0;
 
           if (point.category !== "førertroje") {
-            jerseyScores[point.user_id].førertroje += point.value ?? 0;
+            jerseyScores[point.user_id][
+              "ede64da5-3020-4812-aafb-a89550629af3"
+            ] += point.value ?? 0;
           }
         }
 
@@ -92,7 +93,9 @@ export const useLeaderboard = () => {
           point.user_id !== point.submitted_by &&
           jerseyScores[point.submitted_by]
         ) {
-          jerseyScores[point.submitted_by].flydende_haand += point.value ?? 0;
+          jerseyScores[point.submitted_by][
+            "c82651a0-7737-4010-9baa-e884259a2b9c"
+          ] += point.value ?? 0;
         }
       }
 
@@ -158,13 +161,7 @@ export const useLeaderboard = () => {
             ? userMap[point.submitted_by]
             : undefined;
           const target = point.user_id ? userMap[point.user_id] : undefined;
-          const meta =
-            point.category &&
-            SUBCATEGORY_META[point.category as keyof typeof SUBCATEGORY_META]
-              ? SUBCATEGORY_META[
-                  point.category as keyof typeof SUBCATEGORY_META
-                ]
-              : { icon: "AlertCircle", color: "gray", label: "Ukendt" };
+          const meta = { icon: "AlertCircle", color: "gray", label: "Ukendt" };
 
           // Ensure type is one of the allowed Activity types
           const type = allowedTypes.includes(point.category as any)

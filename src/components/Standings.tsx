@@ -9,7 +9,7 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
-import { JERSEY_CATEGORIES, jerseyConfigs, User } from "@/types";
+import { JERSEY_IDS, jerseyConfigs, User } from "@/types";
 
 export default function Standings() {
   const supabase = createClient();
@@ -173,14 +173,14 @@ export default function Standings() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        {JERSEY_CATEGORIES.map((j) => {
+        {JERSEY_IDS.map((j) => {
           const jersey = jerseyConfigs[j];
           const IconComponent = Icons[
             jersey.icon as keyof typeof Icons
           ] as React.FC<React.SVGProps<SVGSVGElement>>;
           return (
             <Card
-              key={jersey.id}
+              key={jersey.name}
               className="bg-white/10 backdrop-blur-md border-white/20"
             >
               <CardHeader className="pb-3 sm:pb-6">

@@ -3,7 +3,7 @@ import { Database } from "../database.types";
 
 /* -------------------- ENUMS -------------------- */
 
-export const JERSEY_CATEGORIES = [
+export const JERSEY_IDS = [
   "ede64da5-3020-4812-aafb-a89550629af3", // Leader Jersey
   "45158f97-3418-401c-b02f-8cd91d7ef7d3", // Golden Bladders
   "c82651a0-7737-4010-9baa-e884259a2b9c", // Flowing Hand
@@ -13,6 +13,8 @@ export const JERSEY_CATEGORIES = [
   "22020dc6-4d9a-4200-96d5-c36db91ff3be", // Humorous or troll-based points
   "4a58d3e7-c9eb-4d13-bd2a-2040f98eabb1", // Moon
 ] as const;
+
+export type Jersey = (typeof JERSEY_IDS)[number]; // `jersey_id` in DB
 
 export const CATEGORIES = [
   "beer",
@@ -60,7 +62,7 @@ export type JerseyData = {
 
 /* ------------------------- UI CATEGORY CONFIG ------------------------- */
 
-export type JerseyCategory = (typeof JERSEY_CATEGORIES)[number];
+export type JerseyCategory = (typeof JERSEY_IDS)[number];
 /* -------------------- DOMAIN MODELS -------------------- */
 
 export interface User {
