@@ -42,18 +42,22 @@ export async function POST(req: Request) {
 
   const payload = JSON.stringify({ title, body, url })
 
+  const validSubscriptions = subscriptions.filter(
+    (sub) => typeof sub.endpoint === 'string' && !!sub.endpoint
+  );
+
   const results = await Promise.allSettled(
-    subscriptions.map((sub) => {
+    validSubscriptions.map((sub) => {
       const pushSub = {
-        endpoint: sub.endpoint,
+        endpoint: sub.endpoint as string,
         keys: {
           p256dh: (sub.keys as any).p256dh,
           auth: (sub.keys as any).auth,
         }
-      }
-      return webpush.sendNotification(pushSub, payload)
+      };
+      return webpush.sendNotification(pushSub, payload);
     })
-  )
+  );
 
   const successCount = results.filter(r => r.status === 'fulfilled').length
   const failureCount = results.length - successCount
