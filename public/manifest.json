@@ -8,12 +8,22 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/Uge30gul-192.jpg",
+      "src": "/uge30gul-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/Uge30gul-512.jpg",
+      "src": "/uge30gul-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/android/android-launchericon-192-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android/android-launchericon-512-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
