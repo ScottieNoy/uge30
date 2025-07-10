@@ -73,28 +73,38 @@ const FlipCard: FC<FlipCardProps> = ({
               </div>
 
               <div className="mb-1">
-                <div className="flex items-center justify-center space-x-2">
-                  {jersey.avatar_url ? (
-                    <img
-                      src={jersey.avatar_url}
-                      alt="User Avatar"
-                      className="w-7 h-7 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
-                      <UserIcon className="h-4 w-4 text-white" />
-                    </div>
-                  )}
-                  <span className="text-sm font-semibold truncate">
-                    {displayname}
-                  </span>
-                </div>
+                {displayname ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    {jersey.avatar_url ? (
+                      <img
+                        src={jersey.avatar_url}
+                        alt="User Avatar"
+                        className="w-7 h-7 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                        <UserIcon className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    <span className="text-sm font-semibold truncate">
+                      {displayname}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-black">
+                    ingen har claimet trøjen endnu
+                  </p>
+                )}
               </div>
 
-              <p className="text-lg font-bold bg-clip-text bg-gradient-to-r from-white to-gray-300">
-                {total_points}
-              </p>
-              <p className="text-xs">points</p>
+              {displayname && (
+                <>
+                  <p className="text-lg font-bold bg-clip-text bg-gradient-to-r from-white to-gray-300">
+                    {total_points}
+                  </p>
+                  <p className="text-xs">points</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
