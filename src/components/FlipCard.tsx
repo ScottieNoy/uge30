@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ComponentType, FC } from "react";
+import { useState, ComponentType, FC, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,18 @@ const FlipCard: FC<FlipCardProps> = ({
   total_points,
 }) => {
   const [flipped, setFlipped] = useState(false);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (flipped) {
+      timeout = setTimeout(() => {
+        setFlipped(false);
+      }, 30000); // 30 seconds
+    }
+
+    return () => clearTimeout(timeout);
+  }, [flipped]);
 
   return (
     <div
