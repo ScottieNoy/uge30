@@ -1,4 +1,5 @@
 // hooks/useJerseys.ts
+"use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { JerseyRow } from "@/types";
