@@ -8,18 +8,23 @@ import useSWR from "swr";
 export type JerseyHolder = {
   jersey_id: string;
   jersey_name: string;
-  jersey_emoji: string | null;
+  jersey_icon: string | null;
   user_id: string;
   displayname: string;
   total_points: number;
+  color?: string; // Optional, if you want to include color
+  bg_color?: string; // Optional, if you want to include background color
+  border_color?: string; // Optional, if you want to include border color
+  avatar_url?: string | null; // Optional avatar URL
 };
 
 // SWR fetcher using Supabase client
 const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("v_jersey_overall_leaders")
-    .select("*");
+    .from("v_jersey_holders")
+    .select("*")
+    .order("total_points", { ascending: false });
 
   if (error) {
     console.error("Supabase error:", error);
@@ -30,10 +35,14 @@ const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
     (item): JerseyHolder => ({
       jersey_id: item.jersey_id ?? "",
       jersey_name: item.jersey_name ?? "",
-      jersey_emoji: item.jersey_emoji ?? null,
+      jersey_icon: item.jersey_icon ?? null,
       user_id: item.user_id ?? "",
       displayname: item.displayname ?? "",
       total_points: item.total_points ?? 0,
+      color: item.color ?? "text-gray-800", // Default color if not provided
+      bg_color: item.bg_color ?? "bg-white", // Default background color if not provided
+      border_color: item.border_color ?? "border-gray-200", // Default border color if
+      avatar_url: item.avatar_url ?? null, // Optional avatar URL
     })
   );
 };

@@ -2,12 +2,11 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import * as Icons from "lucide-react";
-import { Tables } from "../../database.types";
-import { JerseyCategoryConfig, User } from "@/types";
+import { JerseyRow, User } from "@/types";
 import { UserIcon } from "lucide-react";
 
 interface JerseyLeaderboardProps {
-  jersey: JerseyCategoryConfig;
+  jersey: JerseyRow;
   participants: {
     user: User;
     total: number;
@@ -42,7 +41,7 @@ const JerseyLeaderboard = ({
 
   return (
     <Card
-      className={`${jersey.bgColor} ${jersey.borderColor} border backdrop-blur-md`}
+      className={`${jersey.bg_color} ${jersey.border_color} border backdrop-blur-md`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -68,7 +67,7 @@ const JerseyLeaderboard = ({
         <div className="space-y-2">
           {topParticipants.map((participant) => (
             <div
-              key={participant.rank}
+              key={`${jersey.id}-${participant.user.id}`}
               className="flex items-center justify-between p-3 rounded-lg bg-white/20 hover:bg-white/30 transition-colors border border-white/10"
             >
               <div className="flex items-center space-x-3">
@@ -76,49 +75,49 @@ const JerseyLeaderboard = ({
                 {/* <div className="text-lg">{participant.user.emoji || "🙂"}</div> */}
 
                 {/* <div className="text-gray-800 text-sm font-semibold"> */}
-                  <span>
-                    {/* {participant.user.firstname} {participant.user.lastname} */}
-                  </span>
-                  <div className="flex items-center justify-center space-x-2">
-                        {participant.user.avatar_url ? (
-                          <img
-                            src={participant.user.avatar_url}
-                            alt={participant.user.displayname}
-                            className="w-7 h-7 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
-                            <UserIcon className="h-4 w-4 text-white" />
-                          </div>
-                        )}
-                        <span className="text-sm font-semibold truncate">
-                          {participant.user.displayname}
-                        </span>
-                      </div>
-                   
-                  <div className="flex items-center space-x-2 text-sm">
-                    <span className="text-gray-700 font-medium">
-                      {participant.total} pts
-                    </span>
-                    <div
-                      className={`flex items-center space-x-1 ${
-                        participant.trend === "up"
-                          ? "text-green-700"
-                          : "text-red-700"
-                      }`}
-                    >
-                      {participant.trend === "up" ? (
-                        <Icons.TrendingUp className="h-3 w-3" />
-                      ) : (
-                        <Icons.TrendingDown className="h-3 w-3" />
-                      )}
-                      <span className="text-xs font-medium">
-                        {participant.change}
-                      </span>
+                <span>
+                  {/* {participant.user.firstname} {participant.user.lastname} */}
+                </span>
+                <div className="flex items-center justify-center space-x-2">
+                  {participant.user.avatar_url ? (
+                    <img
+                      src={participant.user.avatar_url}
+                      alt={participant.user.displayname}
+                      className="w-7 h-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full flex items-center justify-center">
+                      <UserIcon className="h-4 w-4 text-white" />
                     </div>
+                  )}
+                  <span className="text-sm font-semibold truncate">
+                    {participant.user.displayname}
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-2 text-sm">
+                  <span className="text-gray-700 font-medium">
+                    {participant.total} pts
+                  </span>
+                  <div
+                    className={`flex items-center space-x-1 ${
+                      participant.trend === "up"
+                        ? "text-green-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    {participant.trend === "up" ? (
+                      <Icons.TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <Icons.TrendingDown className="h-3 w-3" />
+                    )}
+                    <span className="text-xs font-medium">
+                      {participant.change}
+                    </span>
                   </div>
                 </div>
               </div>
+            </div>
             // </div>
           ))}
           {topParticipants.length === 0 && (

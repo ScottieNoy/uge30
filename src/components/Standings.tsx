@@ -9,12 +9,13 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabaseClient";
-import { JERSEY_IDS, jerseyConfigs, User } from "@/types";
+import { User, Jersey, JerseyRow } from "@/types";
 
 export default function Standings() {
   const supabase = createClient();
   const [users, setUsers] = useState<User[]>([]);
-  const [jerseyData, setJerseyData] = useState<Record<string, any[]>>({});
+  const [jerseyData, setJerseyData] = useState<Record<string, JerseyRow[]>>({});
+  const [jerseyIds, setJerseyIds] = useState<Jersey[]>([]);
   const [visibleUsers, setVisibleUsers] = useState<string[]>(() =>
     users.map((u) => u.id)
   );
@@ -33,22 +34,27 @@ export default function Standings() {
 
   useEffect(() => {
     const loadData = async () => {
-      const [{ data: points }, { data: users }] = await Promise.all([
+      const [{ data: points }, { data: users }, { data: jerseys}] = await Promise.all([
         supabase
           .from("points")
           .select("*")
           .order("created_at", { ascending: true }),
         supabase.from("users").select("*"),
+        supabase.from("jerseys").select("*"),
       ]);
 
-      if (!points || !users) return;
+      if (!points || !users || !jerseys) return;
 
       setUsers(users);
       setVisibleUsers(users.map((u) => u.id)); // Initialize with all users visible
 
       const userIds = users.map((u) => u.id);
 
-      const jerseyChartData: Record<string, any[]> = {};
+      const JERSEY_IDS = jerseys.map((j) => j.id);
+
+      setJerseyIds(JERSEY_IDS);
+
+      const jerseyChartData: Record<string, JerseyRow[]> = {};
 
       const byJersey: Record<
         string,
@@ -173,24 +179,31 @@ export default function Standings() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        {JERSEY_IDS.map((j) => {
-          const jersey = jerseyConfigs[j];
-          const IconComponent = Icons[
-            jersey.icon as keyof typeof Icons
-          ] as React.FC<React.SVGProps<SVGSVGElement>>;
+        {jerseyIds.map((j) => {
+          // Find the jersey object by id from the jerseys array
+          const jerseyObj = (Array.isArray(jerseyIds)
+            ? (jerseyIds as any[])
+            : []
+          ).find((jersey) => jersey.id === j);
+
+          const jersey = jerseyData[j];
+          const IconComponent = jerseyObj && jerseyObj.icon
+            ? (Icons[jerseyObj.icon as keyof typeof Icons] as React.FC<React.SVGProps<SVGSVGElement>>)
+            : Icons.Award; // fallback icon
+
           return (
             <Card
-              key={jersey.name}
+              key={jerseyObj?.name ?? j}
               className="bg-white/10 backdrop-blur-md border-white/20"
             >
               <CardHeader className="pb-3 sm:pb-6">
                 <CardTitle className="flex items-center space-x-2 sm:space-x-3 text-white text-lg sm:text-xl">
                   <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r ${jersey.color} flex items-center justify-center shadow-lg`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r ${jerseyObj?.color ?? ""} flex items-center justify-center shadow-lg`}
                   >
                     <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <span className="text-sm sm:text-base">{jersey.name}</span>
+                  <span className="text-sm sm:text-base">{jerseyObj?.name ?? "Jersey"}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-6 pt-0">

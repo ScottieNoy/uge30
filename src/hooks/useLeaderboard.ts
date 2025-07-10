@@ -1,18 +1,17 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import {
   User,
-  UserPoint,
-  JerseyCategory,
-  JerseyDisplay,
-  JerseyCategoryConfig,
-  Activity,
+  Jersey,
   JerseyData,
-  jerseyConfigs,
+  ActivityRow,
+  JerseyRow,
+  CategoryRow,
+  Category,
 } from "@/types";
 
-// Utility
 const formatCopenhagenTime = (dateString: string) => {
   const utcDate = new Date(dateString);
   const offsetMs = 2 * 60 * 60 * 1000;
@@ -23,169 +22,90 @@ const formatCopenhagenTime = (dateString: string) => {
   });
 };
 
-type JerseyScoreMap = Record<string, Record<JerseyCategory, number>>;
-type JerseyBoardEntry = { user: User; total: number };
-type JerseyBoards = Record<JerseyCategory, JerseyBoardEntry[]>;
-
 export const useLeaderboard = () => {
   const supabase = createClient();
+
   const [participants, setParticipants] = useState<User[]>([]);
-  const [jerseyBoards, setJerseyBoards] = useState<JerseyBoards>(
-    {} as JerseyBoards
-  );
   const [jerseyData, setJerseyData] = useState<JerseyData[]>([]);
-  const [activityFeed, setActivityFeed] = useState<Activity[]>([]);
+  const [activityFeed, setActivityFeed] = useState<ActivityRow[]>([]);
+  const [allowedCategories, setAllowedCategories] = useState<CategoryRow[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: users } = await supabase.from("users").select("*");
-      const { data: points } = await supabase
-        .from("points")
+      const { data: users } = await supabase
+        .from("users")
         .select("*")
         .order("created_at", { ascending: true });
 
-      if (!users || !points) return;
+      const { data: categories } = await supabase
+        .from("categories")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      const { data: leaders } = await supabase
+        .from("v_jersey_overall_leaders")
+        .select("*");
+
+      const { data: activities } = await supabase
+        .from("v_activity_feed")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (!users || !categories || !leaders || !activities) {
+        console.error("Failed to fetch one or more required tables");
+        return;
+      }
 
       const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
-      const nonAdmins = users.filter((u) => !u.is_admin);
-      setParticipants(
-        users.map((u) => ({
-          ...u,
-          avatar_url: u.avatar_url ?? "",
-          created_at: u.created_at ?? "",
-          displayname: u.displayname ?? "",
-          emoji: u.emoji ?? "",
-          firstname: u.firstname ?? "",
-          id: u.id,
-          is_admin: u.is_admin ?? false,
-          lastname: u.lastname ?? "",
-          role: u.role ?? "",
-          updated_at: u.updated_at ?? "",
-        }))
-      );
+      const jerseyMap: Record<string, JerseyData> = {};
 
-      const jerseyScores: JerseyScoreMap = {};
-      for (const user of nonAdmins) {
-        jerseyScores[user.id] = Object.fromEntries(
-          Object.keys(jerseyConfigs).map((key) => [key, 0])
-        ) as Record<JerseyCategory, number>;
-      }
+      for (const row of leaders) {
+        if (row.jersey_id) {
+          if (!jerseyMap[row.jersey_id]) {
+            jerseyMap[row.jersey_id] = {
+              id: row.jersey_id,
+              name: row.jersey_name ?? "",
+              icon: (row.jersey_icon as JerseyData["icon"]) ?? "Star",
+              color: row.color ?? "text-gray-800",
+              bg_color: row.bg_color ?? "bg-white",
+              border_color: row.border_color ?? "border-gray-200",
+              description: null,
+              is_overall: row.is_overall,
+              created_at: null,
+              participants: [],
+            };
+          }
 
-      for (const point of points) {
-        if (
-          point.user_id &&
-          jerseyScores[point.user_id] &&
-          point.category !== null &&
-          point.category !== undefined
-        ) {
-          jerseyScores[point.user_id][point.category as JerseyCategory] +=
-            point.value ?? 0;
-
-          if (point.category !== "førertroje") {
-            jerseyScores[point.user_id][
-              "ede64da5-3020-4812-aafb-a89550629af3"
-            ] += point.value ?? 0;
+          const user = row.user_id ? userMap[row.user_id] : undefined;
+          if (user) {
+            jerseyMap[row.jersey_id].participants.push({
+              user,
+              total: row.total_points ?? 0,
+              rank: row.rank ?? 0,
+              trend: (row.rank ?? 0) <= 3 ? "up" : "down",
+              change: `+${row.total_points}`,
+            });
           }
         }
-
-        if (
-          point.submitted_by &&
-          point.user_id !== point.submitted_by &&
-          jerseyScores[point.submitted_by]
-        ) {
-          jerseyScores[point.submitted_by][
-            "c82651a0-7737-4010-9baa-e884259a2b9c"
-          ] += point.value ?? 0;
-        }
       }
 
-      const boards: JerseyBoards = {} as JerseyBoards;
-      (Object.keys(jerseyConfigs) as JerseyCategory[]).forEach((category) => {
-        boards[category] = nonAdmins
-          .map((user) => ({
-            user: {
-              ...user,
-              avatar_url: user.avatar_url ?? "",
-              created_at: user.created_at ?? "",
-              displayname: user.displayname ?? "",
-              emoji: user.emoji ?? "",
-              firstname: user.firstname ?? "",
-              id: user.id,
-              is_admin: user.is_admin ?? false,
-              lastname: user.lastname ?? "",
-              role: user.role ?? "",
-              updated_at: user.updated_at ?? "",
-            },
-            total: jerseyScores[user.id][category] || 0,
-          }))
-          .sort((a, b) => b.total - a.total);
-      });
-
-      setJerseyBoards(boards);
-
-      const transformedJerseyData: JerseyData[] = (
-        Object.keys(boards) as JerseyCategory[]
-      ).map((category) => ({
-        id: category,
-        name: jerseyConfigs[category].name ?? category,
-        participants: boards[category].map((entry, idx) => ({
-          user: entry.user,
-          total: entry.total,
-          rank: idx + 1,
-          trend: idx < 3 ? "up" : "down",
-          change: entry.total > 0 ? `+${entry.total}` : `${entry.total}`,
-        })),
+      const recentActivity: ActivityRow[] = activities.map((activity) => ({
+        ...activity,
+        timestamp: formatCopenhagenTime(activity.created_at ?? ""),
+        user: activity.target_name ?? "Ukendt", // 👈 display recipient
+        target: activity.source_name ?? "Ukendt", // 👈 display assigner
+        icon: "Activity",
+        color: activity.jersey_color ?? "from-blue-500 to-cyan-500",
+        points: activity.value ?? 0,
+        message:
+          activity.note ??
+          `${activity.target_name ?? "Ukendt"} modtog ${activity.category} fra ${activity.source_name ?? "Ukendt"}`,
       }));
-      setJerseyData(transformedJerseyData);
 
-      const allowedTypes = [
-        "beer",
-        "wine",
-        "vodka",
-        "funnel",
-        "shot",
-        "beerpong",
-        "cornhole",
-        "dart",
-        "billiard",
-        "stigegolf",
-        "bonus",
-        "other",
-      ] as const;
-
-      const recentActivity = [...points]
-        .reverse()
-        .slice(0, 10)
-        .map((point) => {
-          const submitter = point.submitted_by
-            ? userMap[point.submitted_by]
-            : undefined;
-          const target = point.user_id ? userMap[point.user_id] : undefined;
-          const meta = { icon: "AlertCircle", color: "gray", label: "Ukendt" };
-
-          // Ensure type is one of the allowed Activity types
-          const type = allowedTypes.includes(point.category as any)
-            ? (point.category as (typeof allowedTypes)[number])
-            : "other";
-
-          return {
-            id: point.id,
-            icon: meta.icon as Activity["icon"],
-            color: meta.color,
-            label: meta.label,
-            user: `${submitter?.emoji || "👤"} ${
-              submitter?.firstname || "Ukendt"
-            }`,
-            target: `${target?.emoji || "👤"} ${target?.firstname || "Ukendt"}`,
-            points: point.value ?? 0,
-            timestamp: formatCopenhagenTime(point.created_at || ""),
-            type,
-            message: `${submitter?.firstname || "Ukendt"} loggede ${
-              point.category
-            } for ${target?.firstname || "Ukendt"}`,
-          };
-        });
-
+      setParticipants(users);
+      setJerseyData(Object.values(jerseyMap));
+      setAllowedCategories(categories);
       setActivityFeed(recentActivity);
     };
 
@@ -194,8 +114,12 @@ export const useLeaderboard = () => {
 
   return {
     participants,
-    jerseyBoards,
+    jerseyBoards: jerseyData.reduce<Record<string, JerseyData["participants"]>>((acc, jersey) => {
+      acc[jersey.id] = jersey.participants;
+      return acc;
+    }, {}),
     jerseyData,
     activityFeed,
+    allowedCategories,
   };
 };

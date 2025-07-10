@@ -1,10 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Trophy, Beer, Zap, Star } from "lucide-react";
-import { AssignPoints, Jersey, User, Category } from "@/types";
+import { LucideIcon, X } from "lucide-react";
+import { createClient } from "@/lib/supabaseClient";
+import { AssignPoints, User, CategoryRow, Jersey, JerseyRow } from "@/types";
+import * as LucideIcons from "lucide-react";
 import { toast } from "sonner";
 
 interface PointsAssignmentProps {
@@ -12,58 +14,63 @@ interface PointsAssignmentProps {
   currentUser: User | null;
   onClose: () => void;
   onAssignPoints: (assignPoints: AssignPoints) => Promise<void>;
+  allowedJerseys: Jersey[]; // only show categories for these jerseys
 }
-
-const allowedPointActions = [
-  {
-    id: "competition",
-    label: "Competition",
-    icon: Trophy,
-    points: 50,
-    category: "competition" as Category,
-    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
-    color: "from-yellow-400 to-orange-500",
-  },
-  {
-    id: "drink",
-    label: "Drink",
-    icon: Beer,
-    points: 10,
-    category: "øl" as Category,
-    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
-    color: "from-blue-400 to-cyan-400",
-  },
-  {
-    id: "challenge",
-    label: "Challenge",
-    icon: Zap,
-    points: 25,
-    category: "bonus" as Category,
-    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    id: "bonus",
-    label: "Bonus",
-    icon: Star,
-    points: 15,
-    category: "bonus" as Category,
-    jersey_id: "45158f97-3418-401c-b02f-8cd91d7ef7d3" as Jersey,
-    color: "from-green-400 to-emerald-500",
-  },
-];
 
 const PointsAssignment = ({
   targetUser,
   currentUser,
   onClose,
   onAssignPoints,
+  allowedJerseys,
 }: PointsAssignmentProps) => {
+  const supabase = createClient();
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [jerseys, setJerseys] = useState<JerseyRow[]>([]);
+
+  function getLucideIcon(name: string): LucideIcon {
+    const icon = LucideIcons[name as keyof typeof LucideIcons];
+    if (icon) return icon as LucideIcon;
+
+    console.warn(`⚠️ Icon "${name}" is not a valid Lucide React component.`);
+    return LucideIcons.Star; // fallback
+  }
+
+  useEffect(() => {
+    const loadCategoriesAndJerseys = async () => {
+      const [
+        { data: categoriesData, error: catError },
+        { data: jerseysData, error: jerseyError },
+      ] = await Promise.all([
+        supabase.from("categories").select("*").in("jersey_id", allowedJerseys),
+        supabase
+          .from("jerseys")
+          .select("id, name, color, created_at, description, icon, is_overall, bg_color, border_color")
+          .in("id", allowedJerseys),
+      ]);
+
+      if (catError || jerseyError) {
+        toast.error("Could not load point categories or jerseys.");
+        return;
+      }
+
+      setCategories(categoriesData || []);
+
+      setJerseys(
+        jerseysData?.map((jersey) => ({
+          ...jersey,
+          id: jersey.id as Jersey, // ensure type is Jersey
+        })) || []
+      );
+    };
+
+    loadCategoriesAndJerseys();
+  }, []);
 
   const handleSubmit = async (
     jersey_id: Jersey,
-    category: Category,
+    category: string,
     value: number
   ) => {
     if (!currentUser) {
@@ -80,20 +87,29 @@ const PointsAssignment = ({
 
     try {
       await onAssignPoints({
+        jersey_id,
         category,
         value,
-        note: `Assigned via QR by ${currentUser.displayname}`,
-        jersey_id, // empty string if not available, or provide a valid string
+        note: `${category.toUpperCase()} blev tildelt af ${currentUser.displayname}`,
       });
 
-      // toast.success("Points assigned successfully!");
       onClose();
     } catch (error: any) {
-      // toast.error("Error assigning points: " + error.message);
+      toast.error("Failed to assign points: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
+  const categoriesByJersey = categories
+    .filter((category) => category.jersey_id !== null)
+    .reduce((acc, category) => {
+      const jerseyId = category.jersey_id as Jersey;
+      if (!acc[jerseyId]) {
+        acc[jerseyId] = [];
+      }
+      acc[jerseyId].push(category);
+      return acc;
+    }, {} as Record<Jersey, CategoryRow[]>);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -110,8 +126,7 @@ const PointsAssignment = ({
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* User Info */}
+<CardContent className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mx-auto mb-3 flex items-center justify-center">
               <span className="text-white font-bold text-xl">
@@ -126,43 +141,60 @@ const PointsAssignment = ({
             </p>
           </div>
 
-          {/* Category Buttons */}
-          <div className="grid grid-cols-1 gap-3">
-            {allowedPointActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Button
-                  key={action.id}
-                  onClick={() =>
-                    handleSubmit(
-                      action.jersey_id,
-                      action.category,
-                      action.points
-                    )
-                  }
-                  disabled={isSubmitting}
-                  className="h-auto p-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white justify-between"
-                  variant="ghost"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-10 h-10 rounded-full bg-gradient-to-r ${action.color} flex items-center justify-center`}
-                    >
-                      <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-medium">{action.label}</div>
-                      <div className="text-sm text-white/60">Tap to assign</div>
-                    </div>
+          <div className="space-y-6">
+            {Object.entries(categoriesByJersey).map(
+              ([jerseyId, jerseyCategories]) => (
+                <div key={jerseyId}>
+                  <h4 className="text-white text-sm font-semibold mb-2 capitalize">
+                    {/* Display jersey name or ID */
+                      jerseys.find((j) => j.id === jerseyId)?.name ||
+                      jerseyId
+                    }{" "}
+                    {/* You can also use a mapping to get better labels */}
+                    {/* Or use a mapping if you want better labels */}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    {jerseyCategories.map((cat) => {
+                      const Icon = getLucideIcon(cat.icon ?? "Beer");
+                      return (
+                        <Button
+                          key={cat.id}
+                          onClick={() =>
+                            handleSubmit(
+                              cat.jersey_id as Jersey,
+                              cat.slug,
+                              cat.points
+                            )
+                          }
+                          disabled={isSubmitting}
+                          className="h-auto p-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white justify-between"
+                          variant="ghost"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`w-10 h-10 rounded-full bg-gradient-to-r ${cat.color} flex items-center justify-center`}
+                            >
+                              <Icon className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="text-left">
+                              <div className="font-medium">{cat.name}</div>
+                              <div className="text-sm text-white/60">
+                                Tap to assign
+                              </div>
+                            </div>
+                          </div>
+                          <Badge
+                            className={`bg-gradient-to-r ${cat.color} text-white border-0`}
+                          >
+                            +{cat.points}
+                          </Badge>
+                        </Button>
+                      );
+                    })}
                   </div>
-                  <Badge
-                    className={`bg-gradient-to-r ${action.color} text-white border-0`}
-                  >
-                    +{action.points}
-                  </Badge>
-                </Button>
-              );
-            })}
+                </div>
+              )
+            )}
           </div>
 
           <div className="text-center">

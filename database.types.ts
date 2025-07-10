@@ -14,6 +14,82 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          jersey_id: string | null
+          name: string
+          points: number
+          slug: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          jersey_id?: string | null
+          name: string
+          points?: number
+          slug: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          jersey_id?: string | null
+          name?: string
+          points?: number
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "jerseys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_activity_feed"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "categories_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "categories_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_leaderboards"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "categories_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_overall_leaders"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "categories_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_progression"
+            referencedColumns: ["jersey_id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string | null
@@ -55,14 +131,14 @@ export type Database = {
             foreignKeyName: "chat_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "chat_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -132,14 +208,14 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -214,28 +290,34 @@ export type Database = {
       }
       jerseys: {
         Row: {
+          bg_color: string | null
+          border_color: string | null
           color: string | null
           created_at: string | null
           description: string | null
-          emoji: string | null
+          icon: string | null
           id: string
           is_overall: boolean | null
           name: string | null
         }
         Insert: {
+          bg_color?: string | null
+          border_color?: string | null
           color?: string | null
           created_at?: string | null
           description?: string | null
-          emoji?: string | null
+          icon?: string | null
           id?: string
           is_overall?: boolean | null
           name?: string | null
         }
         Update: {
+          bg_color?: string | null
+          border_color?: string | null
           color?: string | null
           created_at?: string | null
           description?: string | null
-          emoji?: string | null
+          icon?: string | null
           id?: string
           is_overall?: boolean | null
           name?: string | null
@@ -290,14 +372,14 @@ export type Database = {
             foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -344,6 +426,20 @@ export type Database = {
             foreignKeyName: "point_jerseys_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
+            referencedRelation: "v_activity_feed"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "point_jerseys_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "point_jerseys_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
             referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
@@ -367,6 +463,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "points"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_jerseys_point_id_fkey"
+            columns: ["point_id"]
+            isOneToOne: false
+            referencedRelation: "v_activity_feed"
+            referencedColumns: ["point_id"]
           },
           {
             foreignKeyName: "point_jerseys_point_id_fkey"
@@ -451,14 +554,14 @@ export type Database = {
             foreignKeyName: "points_submitted_by_fkey"
             columns: ["submitted_by"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "points_submitted_by_fkey"
             columns: ["submitted_by"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -493,14 +596,14 @@ export type Database = {
             foreignKeyName: "points_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "points_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -569,14 +672,14 @@ export type Database = {
             foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -639,14 +742,14 @@ export type Database = {
             foreignKeyName: "push_subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "push_subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -713,14 +816,14 @@ export type Database = {
             foreignKeyName: "shares_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "shares_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -768,6 +871,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "jerseys"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_podiums_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_activity_feed"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "stage_podiums_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["jersey_id"]
           },
           {
             foreignKeyName: "stage_podiums_jersey_id_fkey"
@@ -829,14 +946,14 @@ export type Database = {
             foreignKeyName: "stage_podiums_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "stage_podiums_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -931,6 +1048,20 @@ export type Database = {
             foreignKeyName: "user_jerseys_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: true
+            referencedRelation: "v_activity_feed"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "user_jerseys_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: true
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "user_jerseys_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: true
             referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
@@ -966,14 +1097,14 @@ export type Database = {
             foreignKeyName: "user_jerseys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "user_jerseys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -1026,6 +1157,20 @@ export type Database = {
             foreignKeyName: "user_jerseys_history_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
+            referencedRelation: "v_activity_feed"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "user_jerseys_history_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["jersey_id"]
+          },
+          {
+            foreignKeyName: "user_jerseys_history_jersey_id_fkey"
+            columns: ["jersey_id"]
+            isOneToOne: false
             referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
@@ -1061,14 +1206,14 @@ export type Database = {
             foreignKeyName: "user_jerseys_history_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "user_jerseys_history_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -1132,14 +1277,14 @@ export type Database = {
             foreignKeyName: "user_teams_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders"
             referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "user_teams_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["user_id"]
           },
           {
@@ -1232,6 +1377,127 @@ export type Database = {
         }
         Relationships: []
       }
+      v_activity_feed: {
+        Row: {
+          category: string | null
+          category_icon: string | null
+          created_at: string | null
+          jersey_color: string | null
+          jersey_id: string | null
+          jersey_name: string | null
+          note: string | null
+          point_id: string | null
+          source_avatar: string | null
+          source_id: string | null
+          source_name: string | null
+          target_avatar: string | null
+          target_id: string | null
+          target_name: string | null
+          value: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_submitted_by_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "points_submitted_by_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_display_name"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "points_submitted_by_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_submitted_by_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_leaderboards"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_submitted_by_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "v_latest_activities"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_submitted_by_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_progression"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_user_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "points_user_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_display_name"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "points_user_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_holders"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_user_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "v_jersey_leaderboards"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_user_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "v_latest_activities"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "points_user_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_progression"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_jersey_holders: {
+        Row: {
+          avatar_url: string | null
+          bg_color: string | null
+          border_color: string | null
+          color: string | null
+          displayname: string | null
+          is_overall: boolean | null
+          jersey_icon: string | null
+          jersey_id: string | null
+          jersey_name: string | null
+          total_points: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       v_jersey_leaderboards: {
         Row: {
           displayname: string | null
@@ -1246,10 +1512,16 @@ export type Database = {
       }
       v_jersey_overall_leaders: {
         Row: {
+          avatar_url: string | null
+          bg_color: string | null
+          border_color: string | null
+          color: string | null
           displayname: string | null
-          jersey_emoji: string | null
+          is_overall: boolean | null
+          jersey_icon: string | null
           jersey_id: string | null
           jersey_name: string | null
+          rank: number | null
           total_points: number | null
           user_id: string | null
         }

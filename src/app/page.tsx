@@ -4,9 +4,7 @@ import {
   QrCode,
   Trophy,
   Users,
-  Flame,
   Crown,
-  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,42 +14,49 @@ import Link from "next/link";
 import ActivityFeed from "@/components/ActivityFeed";
 import JerseyShowcase from "@/components/JerseyShowcase";
 
-import { JerseyCategory, jerseyConfigs, JerseyDisplay } from "@/types"; // adjust path as needed
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { useRouter } from "next/navigation";
+import { useJerseys } from "@/hooks/useJerseys";
 
 export default function Home() {
   const { participants, jerseyBoards, jerseyData, activityFeed } =
     useLeaderboard();
   const router = useRouter();
+  const { jerseys } = useJerseys();
 
-  const jerseyDisplay = Object.entries(jerseyBoards)
-    .map(([category, entries]) => {
+  const jerseyDisplay = jerseys
+    .map((jersey) => {
+      const entries = jerseyBoards[jersey.id];
       if (!entries || entries.length === 0) return null;
       const topEntry = entries[0];
-      if (!topEntry) return null;
-      const jerseyConfig = jerseyConfigs[category as JerseyCategory];
+
       return {
-        ...jerseyConfig,
+        id: jersey.id,
+        name: jersey.name,
+        color: jersey.color,
+        icon: jersey.icon,
+        points: topEntry.total,
         holder: {
           name: `${topEntry.user.firstname} ${topEntry.user.lastname}`,
-          avatar: topEntry.user.avatar_url, // assumes .avatar contains image URL
+          avatar: topEntry.user.avatar_url,
           displayName:
             topEntry.user.displayname ||
             `${topEntry.user.firstname} ${topEntry.user.lastname}`,
         },
-
-        points: topEntry.total,
-        icon: jerseyConfig.icon,
-        // Ensure name is the category key, not the display string
-        name: category as JerseyCategory,
       };
     })
-    .filter(Boolean) as unknown as JerseyDisplay[];
+    .filter(Boolean);
 
   const jerseyItems = jerseyData.map((jersey, i) => ({
     ...jersey,
+    icon: jersey.icon,
+    color: jersey.color,
+    bgColor: jersey.bg_color,
+    borderColor: jersey.border_color,
     animationDelay: `${i * 100}ms`,
+    created_at: jersey.created_at ?? null,
+    description: jersey.description ?? null,
+    is_overall: jersey.is_overall ?? null,
   }));
 
   return (
@@ -137,7 +142,7 @@ export default function Home() {
           {jerseyItems.map((jersey, i) => (
             <div key={jersey.id} className="animate-fade-in">
               <JerseyLeaderboard
-                jersey={jerseyConfigs[jersey.id as JerseyCategory]}
+                jersey={jersey}
                 participants={jersey.participants}
               />
             </div>
@@ -145,7 +150,7 @@ export default function Home() {
         </div>
       </section>
 
-      <ActivityFeed activities={activityFeed} />
+      <ActivityFeed />
     </div>
   );
 }
