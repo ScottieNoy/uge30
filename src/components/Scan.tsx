@@ -127,7 +127,7 @@ const Scan = () => {
           p_point_id: bonusPointId,
           p_user_id: currentUser.id, // giver receives bonus
           p_submitted_by: currentUser.id,
-          p_value: 1,
+          p_value: 10,
           p_note: `gav en flydende hånd til ${targetUser.displayname}`,
           p_stage_id: stageId,
           p_jersey_id: FLYDENDE_HAAND_ID,
