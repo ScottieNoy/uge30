@@ -138,15 +138,6 @@ export default function Navbar() {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-cyan-300"
-                >
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Standings
-                </Button>
-              </Link>
               <Link href="/social">
                 <Button
                   variant="ghost"
@@ -299,12 +290,7 @@ export default function Navbar() {
                     Vis/Scan QR-Kode
                   </Button>
                 </Link>
-                <Link href="/" onClick={closeMenu}>
-                  <Button variant="ghost" className="w-full text-white">
-                    <Trophy className="h-4 w-4 mr-2" />
-                    Standings
-                  </Button>
-                </Link>
+
                 <Link href="/social" onClick={closeMenu}>
                   <Button
                     variant="ghost"

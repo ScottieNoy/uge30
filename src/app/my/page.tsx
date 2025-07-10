@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
 import { User } from "@/types";
-import EnableNotifications from "@/components/EnableNotificationsButton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Save, User as UserIcon, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import AvatarUpload from "@/components/AvatarUpload";
 import ProfileStats from "@/components/ProfileStats";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { useJerseyHolders } from "@/hooks/useJerseyHolders";
+
 import { toast } from "sonner";
 
 export default function MyPage() {
@@ -58,6 +60,18 @@ export default function MyPage() {
     };
   }, [supabase, toast]);
 
+  const { jerseyBoards, jerseyData, activityFeed } = useLeaderboard();
+  const { data: jerseyHolders } = useJerseyHolders();
+
+  const maillotJaune = jerseyData.find((j) => j.name === "Maillot Jaune");
+
+  const userStats = maillotJaune?.participants.find(
+    (p) => p.user.id === user?.id
+  );
+
+  const totalPoints = userStats?.total ?? 0;
+  const rank = userStats?.rank ?? "N/A";
+
   const handleSave = async () => {
     if (!editForm || !user) return;
 
@@ -76,6 +90,8 @@ export default function MyPage() {
       toast("Profile updated successfully!");
     }
   };
+
+  const myJerseys = jerseyHolders.filter((j) => j.user_id === user?.id);
 
   const handleCancel = () => {
     setIsEditing(false);
@@ -239,9 +255,12 @@ export default function MyPage() {
 
             {/* Stats Section */}
             <ProfileStats
-              totalPoints={100}
-              rank={1}
-              joinedDate={"2023-01-01T00:00:00Z"}
+              totalPoints={totalPoints}
+              rank={rank}
+              joinedDate={user.created_at || ""}
+              jerseyData={jerseyData}
+              userId={user.id}
+              activityFeed={activityFeed}
             />
           </div>
 
@@ -249,55 +268,59 @@ export default function MyPage() {
           <div className="space-y-6">
             <Card className="bg-white/10 backdrop-blur-md border-white/20">
               <CardHeader>
-                <CardTitle className="text-white">Quick Stats</CardTitle>
+                <CardTitle className="text-white">Overall Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-cyan-400">{100}</div>
+                  <div className="text-3xl font-bold text-cyan-400">
+                    {totalPoints}
+                  </div>
                   <div className="text-white/60 text-sm">Total Points</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-orange-400">#{1}</div>
+                  <div className="text-3xl font-bold text-orange-400">
+                    #{rank}
+                  </div>
                   <div className="text-white/60 text-sm">Current Rank</div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-green-400">
-                    {new Date("2023-01-01T00:00:00Z").toLocaleDateString()}
+                    {new Date(user.created_at || "").toLocaleDateString(
+                      "da-DK",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )}
                   </div>
                   <div className="text-white/60 text-sm">Member Since</div>
                 </div>
               </CardContent>
             </Card>
-
-            <Card className="bg-white/10 backdrop-blur-md border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm mb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/80">Competition Win</span>
-                    <span className="text-green-400 font-semibold">
-                      +50 pts
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/80">Drink Challenge</span>
-                    <span className="text-blue-400 font-semibold">+25 pts</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/80">Bonus Points</span>
-                    <span className="text-purple-400 font-semibold">
-                      +10 pts
-                    </span>
-                  </div>
-                </div>
-
-                <div className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
-                  <EnableNotifications />
-                </div>
-              </CardContent>
-            </Card>
+            {myJerseys.length > 0 && (
+              <Card className="bg-white/10 backdrop-blur-md border-white/20">
+                <CardHeader>
+                  <CardTitle className="text-white">Current Jerseys</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {myJerseys.map((j) => (
+                    <div
+                      key={j.jersey_id}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-white/80">{j.jersey_name}</span>
+                      <span
+                        className="font-semibold text-white"
+                        style={{ color: j.color }}
+                      >
+                        {j.total_points} pts
+                      </span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
