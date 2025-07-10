@@ -75,7 +75,7 @@ const ActivityFeed = () => {
           <CardContent className="p-6">
             <div className="space-y-4">
               {visibleActivities.map((activity, index) => {
-                const IconComponent = Icons[activity.category_icon as keyof typeof Icons] as React.FC<React.SVGProps<SVGSVGElement>>;
+                const IconComponent = Icons[activity.category_icon as keyof typeof Icons] as React.FC<React.SVGProps<SVGSVGElement>> || Icons.Activity;
                 const colorGradient = getColorFromJersey(activity.jersey_color);
 
                 return (
