@@ -285,7 +285,14 @@ export default function MyPage() {
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-green-400">
-                    {new Date(user.created_at || "").toLocaleDateString()}
+                    {new Date(user.created_at || "").toLocaleDateString(
+                      "da-DK",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )}
                   </div>
                   <div className="text-white/60 text-sm">Member Since</div>
                 </div>
