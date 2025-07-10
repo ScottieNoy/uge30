@@ -94,6 +94,7 @@ const Scan = () => {
       return;
     }
 
+    // 1. Assign main point to the target user
     const { error: transactionError } = await supabase.rpc(
       "perform_point_and_jersey_insert",
       {
@@ -110,16 +111,45 @@ const Scan = () => {
 
     if (transactionError) {
       toast.error("Fejl under point tildeling: " + transactionError.message);
-    } else {
-      toast.success("Pointene er blevet tildelt!");
-      await sendNotification({
-        userId: targetUser.id,
-        broadcast: false,
-        title: "💥 Point Received!",
-        body: `${currentUser.displayname} gav dig ${assignPoints.value} point for ${assignPoints.category}.`,
-        url: "/my",
-      });
+      return;
     }
+
+    // 2. Bonus logic: if Gyldne Blærer, give Flydende Hånd point to giver
+    const GYLDNE_BLAERER_ID = "45158f97-3418-401c-b02f-8cd91d7ef7d3";
+    const FLYDENDE_HAAND_ID = "c82651a0-7737-4010-9baa-e884259a2b9c";
+
+    if (assignPoints.jersey_id === GYLDNE_BLAERER_ID) {
+      const bonusPointId = crypto.randomUUID();
+
+      const { error: bonusError } = await supabase.rpc(
+        "perform_point_and_jersey_insert",
+        {
+          p_point_id: bonusPointId,
+          p_user_id: currentUser.id, // giver receives bonus
+          p_submitted_by: currentUser.id,
+          p_value: 1,
+          p_note: `gav en flydende hånd til ${targetUser.displayname}`,
+          p_stage_id: stageId,
+          p_jersey_id: FLYDENDE_HAAND_ID,
+          p_category: "flydende hånd",
+        }
+      );
+
+      if (bonusError) {
+        console.error("Bonus point error:", bonusError);
+        toast.error("Kunne ikke tildele bonuspoint til Den Flydende Hånd.");
+      }
+    }
+
+    // 3. Notify receiver
+    toast.success("Pointene er blevet tildelt!");
+    await sendNotification({
+      userId: targetUser.id,
+      broadcast: false,
+      title: "💥 Point Received!",
+      body: `${currentUser.displayname} gav dig ${assignPoints.value} point for ${assignPoints.category}.`,
+      url: "/my",
+    });
 
     setShowPointsAssignment(false);
   };
@@ -208,7 +238,10 @@ const Scan = () => {
           currentUser={currentUser}
           onClose={() => setShowPointsAssignment(false)}
           onAssignPoints={handleAssignPoints}
-          allowedJerseys={["45158f97-3418-401c-b02f-8cd91d7ef7d3", "00f9b012-02b1-41a2-8146-62e2750380a6"]}
+          allowedJerseys={[
+            "45158f97-3418-401c-b02f-8cd91d7ef7d3",
+            "00f9b012-02b1-41a2-8146-62e2750380a6",
+          ]}
         />
       )}
     </div>

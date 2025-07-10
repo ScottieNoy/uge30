@@ -49,7 +49,7 @@ const ActivityFeed = () => {
     if (activity.note) return activity.note;
     switch (activity.category) {
       case "beer":
-        return `drak med ${activity.target_name}`;
+        return `drak med ${activity.source_name}`;
       case "bonus":
         return `modtog bonus fra ${activity.source_name}`;
       default:
