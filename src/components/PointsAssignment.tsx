@@ -43,11 +43,11 @@ const PointsAssignment = ({
         { data: categoriesData, error: catError },
         { data: jerseysData, error: jerseyError },
       ] = await Promise.all([
-        supabase.from("categories").select("*").in("jersey_id", allowedJerseys),
+        supabase.from("categories").select("*").in("jersey_id", allowedJerseys).order("points", { ascending: false }),
         supabase
           .from("jerseys")
           .select("id, name, color, created_at, description, icon, is_overall, bg_color, border_color")
-          .in("id", allowedJerseys),
+          .in("id", allowedJerseys)
       ]);
 
       if (catError || jerseyError) {

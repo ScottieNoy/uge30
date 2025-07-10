@@ -50,7 +50,7 @@ export default function StageDetailPage() {
         .from("events")
         .select("*")
         .eq("stage_id", id)
-        .order("time");
+        .order("time", { ascending: true });
 
       if (!stageError) setStage(stageData as Stage);
       setEvents((eventData || []) as Event[]);

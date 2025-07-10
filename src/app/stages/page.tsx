@@ -18,7 +18,8 @@ export default async function StagesPage() {
         created_at: stage.created_at as string,
         name: stage.name as string,
         date: String(stage.date),
-      })) ?? null;
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) ?? null;
 
   return (
     <div className="min-h-screen p-4 pt-20">
