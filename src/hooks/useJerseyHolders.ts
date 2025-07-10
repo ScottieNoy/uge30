@@ -22,7 +22,7 @@ export type JerseyHolder = {
 const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("v_jersey_holders")
+    .from("v_jersey_overall_leaders")
     .select("*")
     .order("total_points", { ascending: false });
 
