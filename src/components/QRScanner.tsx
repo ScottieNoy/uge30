@@ -1,9 +1,21 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { createClient } from "@/lib/supabaseClient";
+import { User } from "@/types";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface QRScannerProps {
   onScan: (qrData: string) => void;
@@ -12,6 +24,23 @@ interface QRScannerProps {
 
 export default function QRScanner({ onScan, onClose }: QRScannerProps) {
   const [error, setError] = useState<string>("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    if (error && users.length === 0) {
+      setLoadingUsers(true);
+      supabase
+        .from("users")
+        .select("*")
+        .order("displayname", { ascending: true })
+        .then(({ data, error }) => {
+          if (!error && data) setUsers(data);
+          setLoadingUsers(false);
+        });
+    }
+  }, [error, supabase, users.length]);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -30,17 +59,39 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
 
         <CardContent className="space-y-4">
           {error ? (
-            <div className="text-center text-red-400">
-              <p>{error}</p>
-              <Button
-                onClick={() => {
-                  const code = prompt("Enter QR code manually:");
-                  if (code) onScan(code);
-                }}
-                className="mt-4 bg-gradient-to-r from-cyan-500 to-blue-500"
-              >
-                Enter Code Manually
-              </Button>
+            <div className="text-white text-center space-y-4">
+              <p className="text-red-400">{error}</p>
+
+              {loadingUsers ? (
+                <p className="text-white/50 text-sm">Loading users…</p>
+              ) : (
+                <>
+                  <Label className="text-white/80">Select user instead:</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      onScan(value); // Simulate scanning this user ID
+                    }}
+                  >
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder="Choose a user…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectContent>
+                        <ScrollArea className="h-60">
+                          {" "}
+                          {/* limit height to ~240px */}
+                          {users.map((user) => (
+                            <SelectItem key={user.id} value={user.displayname}>
+                              {user.displayname ||
+                                `${user.firstname} ${user.lastname}`}
+                            </SelectItem>
+                          ))}
+                        </ScrollArea>
+                      </SelectContent>
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -48,7 +99,6 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                 <Scanner
                   onScan={(codes) => {
                     if (codes[0]?.rawValue) onScan(codes[0].rawValue);
-                    console.log("Scanned codes:", codes);
                   }}
                   onError={(e) => setError((e as Error).message)}
                   constraints={{ facingMode: "environment" }}
@@ -64,7 +114,6 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                 <Button
                   onClick={() => {
                     const code = prompt("Enter QR code manually:");
-                    // console.log("Manual code entry:", code);
                     if (code) onScan(code);
                   }}
                   variant="outline"
