@@ -91,7 +91,7 @@ export default function Home() {
           <FestivalCountdown />
 
           <Card className="bg-white/10 text-center p-4">
-            <CardContent className="p-0">
+            <CardContent className="p-0 lg:mt-10">
               <Users className="h-6 w-6 text-cyan-300 mx-auto mb-2" />
               <div className="text-xl font-bold text-white">
                 {participants.length}
@@ -100,7 +100,7 @@ export default function Home() {
             </CardContent>
           </Card>
           <Card className="bg-white/10 text-center p-4">
-            <CardContent className="p-0">
+            <CardContent className="p-0 lg:mt-10">
               <Trophy className="h-6 w-6 text-yellow-300 mx-auto mb-2" />
               <div className="text-xl font-bold text-white">
                 {Object.keys(jerseyBoards).length}
