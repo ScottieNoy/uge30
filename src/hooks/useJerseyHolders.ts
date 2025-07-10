@@ -16,6 +16,7 @@ export type JerseyHolder = {
   bg_color?: string; // Optional, if you want to include background color
   border_color?: string; // Optional, if you want to include border color
   avatar_url?: string | null; // Optional avatar URL
+  description?: string | null; // Optional description
 };
 
 // SWR fetcher using Supabase client
@@ -43,6 +44,7 @@ const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
       bg_color: item.bg_color ?? "bg-white", // Default background color if not provided
       border_color: item.border_color ?? "border-gray-200", // Default border color if
       avatar_url: item.avatar_url ?? null, // Optional avatar URL
+      description: item.jersey_description, // Optional description
     })
   );
 };
