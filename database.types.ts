@@ -1413,6 +1413,7 @@ export type Database = {
           color: string | null
           displayname: string | null
           is_overall: boolean | null
+          jersey_description: string | null
           jersey_icon: string | null
           jersey_id: string | null
           jersey_name: string | null

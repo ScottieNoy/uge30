@@ -126,12 +126,20 @@ const FlipCard: FC<FlipCardProps> = ({
           <Card
             className={`${bg_color} ${border_color} border-2 backdrop-blur-md w-full h-full`}
           >
-            <CardContent className="p-4 text-center h-full flex flex-col justify-center">
-              <h3 className="text-lg font-bold mb-2">Trøje Info</h3>
+            <CardContent className="p-4 text-center h-full flex flex-col justify-between">
+              <h3 className="text-md font-bold mb-2">
+                <span className="text-xs font-light text-black">
+                  Trøjebeskrivelse
+                </span>
+                <br />
+                <span className="text-lg underline">{jersey.jersey_name}</span>
+              </h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Mere omkring {jersey.jersey_name}
+                {jersey.description || "Ingen beskrivelse tilgængelig."}
               </p>
-              <p className="text-xs text-muted-foreground">Ding Dang</p>
+              <p className="text-xs text-muted-foreground">
+                Tryk for at flippe tilbage
+              </p>
             </CardContent>
           </Card>
         </div>
