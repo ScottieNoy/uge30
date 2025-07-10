@@ -111,16 +111,41 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                 <p className="text-white/80 text-sm mb-4">
                   Point your camera at a QR code
                 </p>
-                <Button
-                  onClick={() => {
-                    const code = prompt("Enter QR code manually:");
-                    if (code) onScan(code);
-                  }}
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  Enter Code Manually
-                </Button>
+                {loadingUsers ? (
+                  <p className="text-white/50 text-sm">Loading users…</p>
+                ) : (
+                  <>
+                    <Label className="text-white/80">
+                      Select user instead:
+                    </Label>
+                    <Select
+                      onValueChange={(value) => {
+                        onScan(value); // Simulate scanning this user ID
+                      }}
+                    >
+                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                        <SelectValue placeholder="Choose a user…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectContent>
+                          <ScrollArea className="h-60">
+                            {" "}
+                            {/* limit height to ~240px */}
+                            {users.map((user) => (
+                              <SelectItem
+                                key={user.id}
+                                value={user.displayname}
+                              >
+                                {user.displayname ||
+                                  `${user.firstname} ${user.lastname}`}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
               </div>
             </>
           )}
