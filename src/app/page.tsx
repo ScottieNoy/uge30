@@ -54,6 +54,19 @@ export default function Home() {
     is_overall: jersey.is_overall ?? null,
   }));
 
+  const sortedJerseyItems = jerseyItems
+    .map((jersey) => {
+      // Get the top participant (first in the array after sorting)
+      const topParticipant = jersey.participants[0];
+      const topPoints = topParticipant ? topParticipant.total : 0;
+
+      return {
+        ...jersey,
+        topPoints,
+      };
+    })
+    .sort((a, b) => b.topPoints - a.topPoints); // Sort by topPoints descending
+
   return (
     <div>
       {/* Hero Section */}
@@ -125,7 +138,7 @@ export default function Home() {
           <p className="text-blue-100">Top performers in each category</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {jerseyItems.map((jersey, i) => (
+          {sortedJerseyItems.map((jersey, i) => (
             <div key={jersey.id} className="animate-fade-in">
               <JerseyLeaderboard
                 jersey={jersey}
