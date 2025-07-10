@@ -128,6 +128,7 @@ export interface AssignPoints {
   category: Category; // DB `category` column
   value: number;
   note?: string;
+  
 }
 
 /* -------------------- LEADERBOARD -------------------- */

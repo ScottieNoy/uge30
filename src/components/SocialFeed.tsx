@@ -35,12 +35,14 @@ interface Post {
   created_at: string;
   user_id: string;
   images: string[];
+  pinned: boolean;
   users: {
     displayname: string;
     firstname: string;
     lastname: string;
     avatar_url: string;
     emoji: string;
+    is_admin?: boolean;
   };
   likes: { id: string; user_id: string }[];
   comments: { id: string }[];
@@ -63,6 +65,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
     const [loading, setLoading] = useState(true);
     const [openComments, setOpenComments] = useState<string | null>(null);
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const fetchPosts = async () => {
       try {
@@ -75,23 +78,26 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
           created_at,
           user_id,
           images,
+          pinned,
           users:user_id (
             displayname,
             firstname,
             lastname,
             avatar_url,
-            emoji
+            emoji,
+            is_admin
           ),
           likes (id, user_id),
           comments (id),
           shares (id, user_id)
         `
           )
+          .order("pinned", { ascending: false }) // Show pinned posts first
           .order("created_at", { ascending: false });
 
         if (error) {
           console.error("Error fetching posts:", error);
-          toast("Failed to load posts. Please try again later.");
+          toast("Failed to load posts.");
           return;
         }
 
@@ -102,12 +108,14 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
             created_at: post.created_at ?? "",
             user_id: post.user_id ?? "",
             images: post.images ?? [],
+            pinned: post.pinned ?? false,
             users: {
               displayname: post.users?.displayname ?? "",
               firstname: post.users?.firstname ?? "",
               lastname: post.users?.lastname ?? "",
               avatar_url: post.users?.avatar_url ?? "",
               emoji: post.users?.emoji ?? "",
+              is_admin: post.users?.is_admin ?? false,
             },
             likes: post.likes ?? [],
             comments: post.comments ?? [],
@@ -126,32 +134,42 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
     }));
 
     useEffect(() => {
+      const checkAdmin = async () => {
+        if (!user) return;
+        const { data, error } = await supabase
+          .from("users")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+
+        if (data?.is_admin) setIsAdmin(true);
+      };
+      checkAdmin();
+    }, [user]);
+
+    useEffect(() => {
       fetchPosts();
     }, []);
 
     useEffect(() => {
       if (!highlightedPostId || posts.length === 0) return;
-
       const el = document.getElementById(`post-${highlightedPostId}`);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         setHighlightedId(highlightedPostId);
-
         const timeout = setTimeout(() => {
           setHighlightedId(null);
         }, 3000);
-
         return () => clearTimeout(timeout);
       }
     }, [highlightedPostId, posts]);
 
     const handleLike = async (postId: string) => {
       if (!user) return;
+      const post = posts.find((p) => p.id === postId);
+      const userLike = post?.likes.find((like) => like.user_id === user.id);
 
       try {
-        const post = posts.find((p) => p.id === postId);
-        const userLike = post?.likes.find((like) => like.user_id === user.id);
-
         if (userLike) {
           await supabase.from("likes").delete().eq("id", userLike.id);
         } else {
@@ -160,10 +178,9 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
             user_id: user.id,
           });
 
-          // 🔔 Send notification (if not self-like)
           if (post?.user_id !== user.id) {
             await sendNotification({
-              userId: post?.user_id,
+              userId: post?.user_id ?? "",
               title: "Nyt like på dit opslag",
               body: `${
                 user.user_metadata?.displayname || "Nogen"
@@ -174,33 +191,56 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
         }
 
         fetchPosts();
-      } catch (error) {
-        console.error("Error in handleLike:", error);
+      } catch (err) {
+        console.error("Like error:", err);
       }
     };
 
     const handleDeletePost = async (postId: string) => {
       if (!user) return;
+      const post = posts.find((p) => p.id === postId);
+      const isOwner = post?.user_id === user.id;
 
-      try {
-        const { error } = await supabase
-          .from("posts")
-          .delete()
-          .eq("id", postId)
-          .eq("user_id", user.id);
-
-        if (error) {
-          console.error("Error deleting post:", error);
-          toast("Failed to delete post. Please try again later.");
-          return;
-        }
-
-        toast("Post deleted successfully!");
-
-        fetchPosts();
-      } catch (error) {
-        console.error("Error in handleDeletePost:", error);
+      if (!isAdmin && !isOwner) {
+        toast("Du har ikke tilladelse til at slette dette opslag.");
+        return;
       }
+
+      const { error } = await supabase.from("posts").delete().eq("id", postId);
+      if (error) {
+        toast("Kunne ikke slette opslag.");
+        return;
+      }
+
+      toast("Opslag slettet.");
+      fetchPosts();
+    };
+
+    const handleTogglePin = async (postId: string, current: boolean) => {
+      if (!user) return;
+
+      const { data: profile, error: profileError } = await supabase
+        .from("users")
+        .select("is_admin")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile?.is_admin) {
+        toast("Du har ikke tilladelse til at pinne opslag.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("posts")
+        .update({ pinned: !current })
+        .eq("id", postId);
+
+      if (error) {
+        toast("Kunne ikke opdatere pin status.");
+        return;
+      }
+
+      fetchPosts();
     };
 
     const handleComment = (postId: string) => {
@@ -225,88 +265,70 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
           toast("Link kopieret til udklipsholder");
         }
 
-        // Insert share in DB (only if user is logged in)
         if (user) {
-          const { error } = await supabase.from("shares").upsert(
-            {
-              post_id: postId,
-              user_id: user.id,
-            },
-            {
-              onConflict: "user_id,post_id", // to avoid duplicate entries
-            }
-          );
-
-          if (error) {
-            console.error("Error saving share:", error);
-          } else {
-            fetchPosts(); // refresh share count
-          }
+          await supabase
+            .from("shares")
+            .upsert(
+              { post_id: postId, user_id: user.id },
+              { onConflict: "user_id,post_id" }
+            );
+          fetchPosts();
         }
       } catch (err) {
         console.error("Share failed:", err);
-        toast("Deling mislykkedes. Prøv igen.");
+        toast("Deling mislykkedes.");
       }
     };
 
-    const getDisplayName = (user: Post["users"]) => {
-      return (
-        user.displayname ||
-        `${user.firstname || ""} ${user.lastname || ""}`.trim() ||
-        "Anonymous User"
-      );
+    const getDisplayName = (user: Post["users"]) =>
+      user.displayname ||
+      `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim() ||
+      "Anonym";
+
+    const getTimeAgo = (dateStr: string) => {
+      const diff =
+        (new Date().getTime() - new Date(dateStr).getTime()) / 3600000;
+      if (diff < 1) return "Lige nu";
+      if (diff < 24) return `${Math.floor(diff)}t siden`;
+      return `${Math.floor(diff / 24)}d siden`;
     };
 
-    const getTimeAgo = (dateString: string) => {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffInHours = Math.floor(
-        (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-      );
-
-      if (diffInHours < 1) return "Just now";
-      if (diffInHours < 24) return `${diffInHours} hours ago`;
-      return `${Math.floor(diffInHours / 24)} days ago`;
-    };
-
-    if (loading) {
+    if (loading)
       return (
-        <div className="space-y-4">
-          <div className="text-center text-white/60 py-8">Loading posts...</div>
+        <div className="text-center text-white/60 py-8">Indlæser opslag…</div>
+      );
+    if (posts.length === 0)
+      return (
+        <div className="text-center text-white/60 py-8">
+          Ingen opslag endnu.
         </div>
       );
-    }
-
-    if (posts.length === 0) {
-      return (
-        <div className="space-y-4">
-          <div className="text-center text-white/60 py-8">
-            No posts yet. Be the first to share something!
-          </div>
-        </div>
-      );
-    }
 
     return (
       <div className="space-y-4">
         {posts.map((post) => {
-          const userLike = post.likes.find((like) => like.user_id === user?.id);
-          const isLiked = !!userLike;
           const isOwnPost = user?.id === post.user_id;
+          const isLiked = !!post.likes.find((l) => l.user_id === user?.id);
 
           return (
             <Card
               key={post.id}
-              id={`post-${post.id}`} // <-- add this line
-              className="bg-white/10 backdrop-blur-md border-white/20 transition-all duration-300"
+              id={`post-${post.id}`}
+              className="bg-white/10 backdrop-blur-md border-white/20"
             >
               <CardContent
-                className={`p-6 transition-all rounded-lg ${
-                  highlightedId === post.id ? "ring-2 ring-cyan-400" : ""
+                className={`p-6 rounded-lg transition-all ${
+                  (highlightedId === post.id || post.pinned) ? "ring-2 ring-cyan-400" : ""
                 }`}
               >
+                {post.pinned && (
+                  <div className="absolute top-2 right-2 bg-cyan-500/20 text-cyan-500 text-xs px-2 py-1 rounded-full">
+                    Pinned
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={post.users.avatar_url} />
                       <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
@@ -314,7 +336,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2">
                         <span className="text-white font-semibold">
                           {getDisplayName(post.users)}
                         </span>
@@ -325,7 +347,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                     </div>
                   </div>
 
-                  {isOwnPost && (
+                  {(isOwnPost || isAdmin) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -337,12 +359,23 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-white/10 backdrop-blur-md border-white/20">
+                        {isAdmin && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleTogglePin(post.id, post.pinned)
+                            }
+                            className="text-yellow-400 hover:text-yellow-300"
+                          >
+                            <MapPin className="h-4 w-4 mr-2" />
+                            {post.pinned ? "Fjern pin" : "Pin opslag"}
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
                           onClick={() => handleDeletePost(post.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-white/10"
+                          className="text-red-400 hover:text-red-300"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete Post
+                          Slet opslag
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -355,36 +388,30 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                   </div>
                 )}
 
-                {post.images && post.images.length > 0 && (
+                {post.images?.length > 0 && (
                   <div
                     className={`mb-4 grid gap-2 ${
-                      post.images.length === 1
-                        ? "grid-cols-1"
-                        : post.images.length === 2
-                        ? "grid-cols-2"
-                        : "grid-cols-2"
+                      post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
                     }`}
                   >
-                    {post.images.map((image, index) => (
+                    {post.images.map((img, i) => (
                       <img
-                        key={index}
-                        src={image}
-                        alt={`Post image ${index + 1}`}
+                        key={i}
+                        src={img}
+                        alt={`Billede ${i + 1}`}
                         className="w-full rounded-lg object-cover max-h-96"
                       />
                     ))}
                   </div>
                 )}
 
-                <div className="flex items-center space-x-6 border-t border-white/10 pt-4">
+                <div className="flex items-center gap-6 border-t border-white/10 pt-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(post.id)}
-                    className={`text-white hover:bg-white/10 transition-colors ${
-                      isLiked
-                        ? "text-red-400 hover:text-red-300"
-                        : "hover:text-red-300"
+                    className={`text-white hover:bg-white/10 ${
+                      isLiked ? "text-red-400" : ""
                     }`}
                   >
                     <Heart
@@ -398,7 +425,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                     variant="ghost"
                     size="sm"
                     onClick={() => handleComment(post.id)}
-                    className="text-white hover:bg-white/10 hover:text-blue-300 transition-colors"
+                    className="text-white hover:bg-white/10 hover:text-blue-300"
                   >
                     <MessageSquare className="h-4 w-4 mr-2" />
                     {post.comments.length}
@@ -407,7 +434,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
                     variant="ghost"
                     size="sm"
                     onClick={() => handleShare(post.id)}
-                    className="text-white hover:bg-white/10 hover:text-green-300 transition-colors"
+                    className="text-white hover:bg-white/10 hover:text-green-300"
                   >
                     <Share className="h-4 w-4 mr-2" />
                     {post.shares.length}
@@ -430,5 +457,4 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
 );
 
 SocialFeed.displayName = "SocialFeed";
-
 export default SocialFeed;
