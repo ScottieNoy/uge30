@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  QrCode,
-  Trophy,
-  Users,
-  Crown,
-} from "lucide-react";
+import { QrCode, Trophy, Users, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import JerseyLeaderboard from "@/components/JerseyLeaderboard";
@@ -86,15 +81,6 @@ export default function Home() {
             >
               <QrCode className="mr-3 h-6 w-6" /> Vis/Scan QR-Kode
             </Button>
-            <Link href="/standings">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-cyan-300 text-cyan-100"
-              >
-                <Crown className="mr-2 h-5 w-5" /> View Standings
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
