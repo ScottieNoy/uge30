@@ -29,18 +29,19 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
   const supabase = createClient();
 
   useEffect(() => {
-    if (error && users.length === 0) {
+    const fetchUsers = async () => {
       setLoadingUsers(true);
-      supabase
+      const { data, error } = await supabase
         .from("users")
         .select("*")
-        .order("displayname", { ascending: true })
-        .then(({ data, error }) => {
-          if (!error && data) setUsers(data);
-          setLoadingUsers(false);
-        });
-    }
-  }, [error, supabase, users.length]);
+        .order("displayname", { ascending: true });
+
+      if (!error && data) setUsers(data);
+      setLoadingUsers(false);
+    };
+
+    fetchUsers();
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -76,18 +77,14 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                       <SelectValue placeholder="Choose a user…" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectContent>
-                        <ScrollArea className="h-60">
-                          {" "}
-                          {/* limit height to ~240px */}
-                          {users.map((user) => (
-                            <SelectItem key={user.id} value={user.displayname}>
-                              {user.displayname ||
-                                `${user.firstname} ${user.lastname}`}
-                            </SelectItem>
-                          ))}
-                        </ScrollArea>
-                      </SelectContent>
+                      <ScrollArea className="h-60">
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.displayname}>
+                            {user.displayname ||
+                              `${user.firstname} ${user.lastname}`}
+                          </SelectItem>
+                        ))}
+                      </ScrollArea>
                     </SelectContent>
                   </Select>
                 </>
@@ -127,21 +124,14 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                         <SelectValue placeholder="Choose a user…" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectContent>
-                          <ScrollArea className="h-60">
-                            {" "}
-                            {/* limit height to ~240px */}
-                            {users.map((user) => (
-                              <SelectItem
-                                key={user.id}
-                                value={user.displayname}
-                              >
-                                {user.displayname ||
-                                  `${user.firstname} ${user.lastname}`}
-                              </SelectItem>
-                            ))}
-                          </ScrollArea>
-                        </SelectContent>
+                        <ScrollArea className="h-60">
+                          {users.map((user) => (
+                            <SelectItem key={user.id} value={user.displayname}>
+                              {user.displayname ||
+                                `${user.firstname} ${user.lastname}`}
+                            </SelectItem>
+                          ))}
+                        </ScrollArea>
                       </SelectContent>
                     </Select>
                   </>
