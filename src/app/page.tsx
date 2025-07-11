@@ -103,7 +103,12 @@ export default function Home() {
         <div className="max-w-4xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
           <FestivalCountdown />
 
+
           <Card className="bg-white/10 text-center p-4">
+          <Link
+  href="/participants"
+  className="text-sm text-cyan-200 hover:underline"
+>
             <CardContent className="p-0 lg:mt-10">
               <Users className="h-6 w-6 text-cyan-300 mx-auto mb-2" />
               <div className="text-xl font-bold text-white">
@@ -111,6 +116,7 @@ export default function Home() {
               </div>
               <div className="text-cyan-200 text-sm">Participants</div>
             </CardContent>
+          </Link>
           </Card>
           <Card className="bg-white/10 text-center p-4">
             <CardContent className="p-0 lg:mt-10">
