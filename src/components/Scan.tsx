@@ -239,7 +239,7 @@ const Scan = () => {
           onAssignPoints={handleAssignPoints}
           allowedJerseys={[
             "45158f97-3418-401c-b02f-8cd91d7ef7d3",
-            "00f9b012-02b1-41a2-8146-62e2750380a6",
+            "ad5a8eed-74d5-48ea-8f13-7e9b968419f2",
           ]}
         />
       )}
