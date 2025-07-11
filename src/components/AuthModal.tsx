@@ -76,7 +76,6 @@ const AuthModal = ({
     const candidates = generateCandidates(first, last);
     let displayname: string | null = null;
 
-
     for (const name of candidates) {
       if (!supabase) {
         toast.error("Supabase client is not initialized.");
@@ -136,7 +135,7 @@ const AuthModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md w-full my-2 p-0 bg-transparent border-0 shadow-none">
         <DialogTitle className="sr-only">
-          {activeTab === "login" ? "Sign In" : "Sign Up"}
+          {activeTab === "login" ? "Log ind" : "Opret Bruger"}
         </DialogTitle>
 
         <Button
@@ -161,7 +160,7 @@ const AuthModal = ({
                 }`}
                 onClick={() => setActiveTab("login")}
               >
-                Sign In
+                Log ind
               </Button>
               <Button
                 variant={activeTab === "register" ? "default" : "ghost"}
@@ -172,7 +171,7 @@ const AuthModal = ({
                 }`}
                 onClick={() => setActiveTab("register")}
               >
-                Sign Up
+                Opret Bruger
               </Button>
             </div>
           </div>

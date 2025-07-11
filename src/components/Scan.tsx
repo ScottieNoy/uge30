@@ -166,11 +166,10 @@ const Scan = () => {
             className="text-white hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Tilbage
           </Button>
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white">QR Scanner</h1>
-            <p className="text-blue-100">Give points to other participants</p>
           </div>
           <div className="w-16" /> {/* Spacer */}
         </div>
@@ -181,19 +180,19 @@ const Scan = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center space-x-3">
                 <QrCode className="h-6 w-6" />
-                <span>Scan QR Code</span>
+                <span>Scan QR-kode</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-white/80 mb-4">
-                Scan another participant's QR code to assign them points.
+                Scan en QR-kode for at give point til en anden rytter.
               </p>
               <Button
                 onClick={() => setShowScanner(true)}
                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-3"
               >
                 <QrCode className="h-5 w-5 mr-2" />
-                Start Scanning
+                Start Scanner
               </Button>
             </CardContent>
           </Card>
@@ -203,12 +202,12 @@ const Scan = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center space-x-3">
                 <Users className="h-6 w-6" />
-                <span>My QR Code</span>
+                <span>Min QR-kode</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <p className="text-white/80 mb-4">
-                Show this QR code to let others give you points.
+                Vis din QR-kode til andre ryttere for at modtage point.
               </p>
               <div className="flex flex-col items-center w-fit justify-center bg-white p-6 rounded-lg text-center">
                 <QRCodeCanvas

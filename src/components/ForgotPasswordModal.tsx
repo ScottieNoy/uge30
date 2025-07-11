@@ -24,8 +24,11 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
     e.preventDefault();
     setLoading(true);
 
+    const FRONTEND_URL =
+      process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `http://localhost:3000/update-password`,
+      redirectTo: `${FRONTEND_URL}/update-password`,
     });
 
     if (error) {
@@ -33,7 +36,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
     } else {
       toast.success("🔗 E-mail sendt! Tjek din indbakke.");
       setEmail(""); // Optionally reset field
-      onClose();     // Optionally close modal after success
+      onClose(); // Optionally close modal after success
     }
 
     setLoading(false);
@@ -42,7 +45,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md w-full p-0 bg-transparent border-0 shadow-none">
-        <DialogTitle className="sr-only">Forgot Password</DialogTitle>
+        <DialogTitle className="sr-only">Glemt Kodeord</DialogTitle>
 
         {/* Top-right close button */}
         <Button
@@ -61,10 +64,10 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
               <Mail className="h-8 w-8 text-white" />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              Reset Password
+              Glemt Kodeord
             </CardTitle>
             <p className="text-gray-600 text-sm">
-              We'll email you a link to reset your password
+              Vi sender dig et link til at nulstille dit kodeord.
             </p>
           </CardHeader>
 
@@ -77,7 +80,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Indtast din email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -89,7 +92,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
                 disabled={loading || !email}
                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
               >
-                {loading ? "Sending..." : "Send Reset Link"}
+                {loading ? "Sender..." : "Send Reset Link"}
               </Button>
             </form>
           </CardContent>

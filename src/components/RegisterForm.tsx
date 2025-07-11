@@ -54,22 +54,24 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
           <UserPlus className="h-8 w-8 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold text-gray-800">
-          Create Account
+          Opret Rytter
         </CardTitle>
-        <p className="text-gray-600 text-sm">Join the UGE 30 Festival Battle</p>
+        <p className="text-gray-600 text-sm">
+          Tilmeld dig for at deltage i UGE 30
+        </p>
       </CardHeader>
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-gray-700 font-medium">
-              Full Name
+              Fulde Navn
             </Label>
             <Input
-            textColor="black"
+              textColor="black"
               id="name"
               type="text"
-              placeholder="Enter your full name"
+              placeholder="Indtast dit fulde navn"
               {...register("name")}
               className={`${
                 errors.name ? "border-red-500 focus:ring-red-500" : ""
@@ -85,10 +87,10 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
               Email
             </Label>
             <Input
-            textColor="black"
+              textColor="black"
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="Indtast din email"
               {...register("email")}
               className={`${
                 errors.email ? "border-red-500 focus:ring-red-500" : ""
@@ -103,14 +105,14 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-gray-700 font-medium">
-              Password
+              Kodeord
             </Label>
             <div className="relative">
               <Input
-              textColor="black"
+                textColor="black"
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
+                placeholder="Opret et kodeord"
                 {...register("password")}
                 className={`pr-10 ${
                   errors.password ? "border-red-500 focus:ring-red-500" : ""
@@ -140,14 +142,14 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
               htmlFor="confirmPassword"
               className="text-gray-700 font-medium"
             >
-              Confirm Password
+              Bekræft Kodeord
             </Label>
             <div className="relative">
               <Input
-              textColor="black"
+                textColor="black"
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
+                placeholder="Bekræft dit kodeord"
                 {...register("confirmPassword")}
                 className={`pr-10 ${
                   errors.confirmPassword
@@ -179,7 +181,7 @@ const RegisterForm = ({ onSubmit, isLoading = false }: RegisterFormProps) => {
             disabled={isLoading}
             className="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-semibold py-2 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
           >
-            {isLoading ? "Creating Account..." : "Create Account"}
+            {isLoading ? "Opretter rytter..." : "Opret Rytter"}
           </Button>
         </form>
       </CardContent>

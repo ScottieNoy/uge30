@@ -16,7 +16,6 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-
 type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
@@ -27,7 +26,6 @@ interface LoginFormProps {
 const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
   const [showPassword, setShowPassword] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
-
 
   const {
     register,
@@ -44,9 +42,9 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
           <LogIn className="h-8 w-8 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold text-gray-800">
-          Welcome Back
+          Velkommen Tilbage
         </CardTitle>
-        <p className="text-gray-600 text-sm">Sign in to your account</p>
+        <p className="text-gray-600 text-sm">Log ind for at fortsætte</p>
       </CardHeader>
 
       <CardContent>
@@ -56,10 +54,10 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
               Email
             </Label>
             <Input
-            textColor="black"
+              textColor="black"
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="Indtast din email"
               {...register("email")}
               className={`${
                 errors.email ? "border-red-500 focus:ring-red-500" : ""
@@ -74,14 +72,14 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-gray-700 font-medium">
-              Password
+              Kodeord
             </Label>
             <div className="relative">
               <Input
                 textColor="black"
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder="Indtast dit kodeord"
                 {...register("password")}
                 className={`pr-10 ${
                   errors.password ? "border-red-500 focus:ring-red-500" : ""
@@ -111,7 +109,7 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
             disabled={isLoading}
             className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-2 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
           >
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isLoading ? "Logger ind..." : "Log ind"}
           </Button>
 
           <div className="text-center mt-4">
@@ -120,7 +118,7 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
               onClick={() => setShowForgotPassword(true)}
               className="text-cyan-600 hover:text-cyan-700 text-sm font-medium"
             >
-              Forgot your password?
+              Glemt Kodeord?
             </button>
           </div>
         </form>

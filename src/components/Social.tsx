@@ -82,8 +82,8 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
             </span>
           </h1>
           <p className="text-blue-100 text-sm sm:text-base">
-            Her kan du dele UGE30 relateret indhold, chatte med andre deltagere og
-            finde information om festivalen.
+            Her kan du dele UGE30 relateret indhold, chatte med andre deltagere
+            og finde information om festivalen.
           </p>
         </div>
 
@@ -128,7 +128,7 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
                   className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg text-sm sm:text-base"
                 >
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                  Create Post
+                  Opret Indlæg
                 </Button>
               </div>
 
@@ -141,7 +141,10 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
               )}
 
               {/* Social Feed */}
-              <SocialFeed ref={socialFeedRef} highlightedPostId={postId ?? undefined} />
+              <SocialFeed
+                ref={socialFeedRef}
+                highlightedPostId={postId ?? undefined}
+              />
             </div>
           )}
 

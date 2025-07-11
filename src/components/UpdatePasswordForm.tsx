@@ -116,10 +116,11 @@ export default function UpdatePasswordForm() {
           <KeyRound className="h-8 w-8 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold text-gray-800">
-          Set New Password
+          Vælg et nyt kodeord
         </CardTitle>
         <p className="text-gray-600 text-sm">
-          Choose a secure new password for your account
+          Indtast et nyt kodeord for at fortsætte. Det skal være mindst 8 tegn
+          langt og indeholde både store og små bogstaver samt tal.
         </p>
       </CardHeader>
 
@@ -127,13 +128,13 @@ export default function UpdatePasswordForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="password" className="text-gray-700 font-medium">
-              New Password
+              Nyt Kodeord
             </Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a new password"
+                placeholder="Indtast dit nye kodeord"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pr-10"
@@ -157,13 +158,13 @@ export default function UpdatePasswordForm() {
               htmlFor="confirmPassword"
               className="text-gray-700 font-medium"
             >
-              Confirm Password
+              Bekræft Kodeord
             </Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
+                placeholder="Bekræft dit nye kodeord"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="pr-10"
@@ -197,7 +198,7 @@ export default function UpdatePasswordForm() {
             disabled={loading || !sessionReady || message?.startsWith("✅")}
             className="w-full bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-semibold py-2 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
           >
-            {loading ? "Updating..." : "Update Password"}
+            {loading ? "Opdaterer..." : "Opdater Kodeord"}
           </Button>
         </form>
       </CardContent>

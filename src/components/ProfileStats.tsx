@@ -52,7 +52,7 @@ const ProfileStats = ({
       {/* Category Breakdown */}
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
-          <CardTitle className="text-white">Points Breakdown</CardTitle>
+          <CardTitle className="text-white">Oversigt</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
@@ -83,7 +83,7 @@ const ProfileStats = ({
       {/* Recent Activity */}
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
-          <CardTitle className="text-white">Recent Activity</CardTitle>
+          <CardTitle className="text-white">Seneste Aktivitet</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 text-sm mb-4">
@@ -110,7 +110,7 @@ const ProfileStats = ({
                   </div>
                 ))
             ) : (
-              <div className="text-white/50 italic">No recent activity</div>
+              <div className="text-white/50 italic">Ingen aktivitet</div>
             )}
           </div>
 

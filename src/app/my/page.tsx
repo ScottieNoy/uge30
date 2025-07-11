@@ -182,11 +182,13 @@ export default function MyPage() {
             className="text-white hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Tilbage
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-white">My Profile</h1>
-            <p className="text-blue-100">Manage your account and view stats</p>
+            <h1 className="text-3xl font-bold text-white">Min profil</h1>
+            <p className="text-blue-100">
+              Administrer din profil og se dine point
+            </p>
           </div>
         </div>
 
@@ -197,7 +199,7 @@ export default function MyPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-white flex items-center space-x-2">
                   <UserIcon className="h-5 w-5" />
-                  <span>Profile Information</span>
+                  <span>Profil Info</span>
                 </CardTitle>
                 {!isEditing ? (
                   <Button
@@ -207,7 +209,7 @@ export default function MyPage() {
                     className="border-white/30 text-white hover:bg-white/10"
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    Rediger
                   </Button>
                 ) : (
                   <div className="flex space-x-2">
@@ -219,7 +221,7 @@ export default function MyPage() {
                       disabled={!isNameValid || isCheckingName}
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      Save
+                      Gem
                     </Button>
                     <Button
                       variant="outline"
@@ -228,7 +230,7 @@ export default function MyPage() {
                       className="border-red-500/50 text-red-400 hover:bg-red-500/10"
                     >
                       <X className="h-4 w-4 mr-2" />
-                      Cancel
+                      Annuller
                     </Button>
                   </div>
                 )}
@@ -260,7 +262,7 @@ export default function MyPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstname" className="text-white">
-                      First Name
+                      Fornavn
                     </Label>
                     <Input
                       id="firstname"
@@ -278,7 +280,7 @@ export default function MyPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastname" className="text-white">
-                      Last Name
+                      Efternavn
                     </Label>
                     <Input
                       id="lastname"
@@ -341,20 +343,20 @@ export default function MyPage() {
           <div className="space-y-6">
             <Card className="bg-white/10 backdrop-blur-md border-white/20">
               <CardHeader>
-                <CardTitle className="text-white">Overall Stats</CardTitle>
+                <CardTitle className="text-white">Den gule trøje</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-cyan-400">
                     {totalPoints}
                   </div>
-                  <div className="text-white/60 text-sm">Total Points</div>
+                  <div className="text-white/60 text-sm">Samlet Point</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-orange-400">
                     #{rank}
                   </div>
-                  <div className="text-white/60 text-sm">Current Rank</div>
+                  <div className="text-white/60 text-sm">Placering</div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-green-400">
@@ -367,14 +369,14 @@ export default function MyPage() {
                       }
                     )}
                   </div>
-                  <div className="text-white/60 text-sm">Member Since</div>
+                  <div className="text-white/60 text-sm">Tilmeldt siden</div>
                 </div>
               </CardContent>
             </Card>
             {myJerseys.length > 0 && (
               <Card className="bg-white/10 backdrop-blur-md border-white/20">
                 <CardHeader>
-                  <CardTitle className="text-white">Current Jerseys</CardTitle>
+                  <CardTitle className="text-white">Dine trøjer</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {myJerseys.map((j) => (
