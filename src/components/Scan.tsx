@@ -57,20 +57,19 @@ const Scan = () => {
   // Handle QR result
   const handleQRScan = async (qrData: string) => {
     console.log("QR Code scanned:", qrData);
-    const match = qrData.match(/^([a-zA-Z0-9-]+)$/);
 
-    if (!match) {
-      toast("Invalid QR Code");
+    if (!qrData) {
+      toast("No QR Code data found.");
       setShowScanner(false);
       return;
     }
 
-    const displayName = match[1];
+    const userId = qrData.trim();
 
     const { data: foundUser, error } = await supabase
       .from("users")
       .select("*")
-      .eq("displayname", displayName)
+      .eq("id", userId)
       .single();
 
     if (!foundUser || error) {
@@ -210,10 +209,7 @@ const Scan = () => {
                 Vis din QR-kode til andre ryttere for at modtage point.
               </p>
               <div className="flex flex-col items-center w-fit justify-center bg-white p-6 rounded-lg text-center">
-                <QRCodeCanvas
-                  value={`${currentUser?.displayname}`}
-                  size={180}
-                />
+                <QRCodeCanvas value={`${currentUser?.id}`} size={180} />
                 <p className="text-gray-800 font-medium mt-3">
                   {currentUser?.displayname || "Loading..."}
                 </p>

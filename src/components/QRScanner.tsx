@@ -45,79 +45,37 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20">
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle className="text-white">Scan QR Code</CardTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-white hover:bg-white/20"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
+      <div className="relative w-full max-w-md">
+        {/* Close Button in top-right corner */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onClose}
+          className="absolute -top-4 -right-4 text-white bg-black/60 border-white/30 hover:bg-white/20 rounded-full p-2 z-10"
+        >
+          <X className="h-5 w-5" />
+        </Button>
 
-        <CardContent className="space-y-4">
-          {error ? (
-            <div className="text-white text-center space-y-4">
-              <p className="text-red-400">{error}</p>
+        <Card className="w-full bg-white/10 backdrop-blur-md border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white">Scan QR-kode</CardTitle>
+          </CardHeader>
 
-              {loadingUsers ? (
-                <p className="text-white/50 text-sm">Loading users…</p>
-              ) : (
-                <>
-                  <Label className="text-white/80">Select user instead:</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      onScan(value); // Simulate scanning this user ID
-                    }}
-                  >
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Vælg en rytter…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <ScrollArea className="h-60">
-                        {users.map((user) => (
-                          <SelectItem key={user.id} value={user.displayname}>
-                            {user.displayname ||
-                              `${user.firstname} ${user.lastname}`}
-                          </SelectItem>
-                        ))}
-                      </ScrollArea>
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-            </div>
-          ) : (
-            <>
-              <div className="relative aspect-square bg-black rounded-lg overflow-hidden">
-                <Scanner
-                  onScan={(codes) => {
-                    if (codes[0]?.rawValue) onScan(codes[0].rawValue);
-                  }}
-                  onError={(e) => setError((e as Error).message)}
-                  constraints={{ facingMode: "environment" }}
-                  components={{ finder: true, torch: true, zoom: true }}
-                  scanDelay={500}
-                />
-              </div>
+          <CardContent className="space-y-4">
+            {error ? (
+              <div className="text-white text-center space-y-4">
+                <p className="text-red-400">{error}</p>
 
-              <div className="text-center">
-                <p className="text-white/80 text-sm mb-4">
-                  Point your camera at a QR code
-                </p>
                 {loadingUsers ? (
                   <p className="text-white/50 text-sm">Loading users…</p>
                 ) : (
                   <>
                     <Label className="text-white/80">
-                      Select user instead:
+                      Vælg en rytter i stedet:
                     </Label>
                     <Select
                       onValueChange={(value) => {
-                        onScan(value); // Simulate scanning this user ID
+                        onScan(value);
                       }}
                     >
                       <SelectTrigger className="bg-white/10 border-white/20 text-white">
@@ -126,7 +84,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                       <SelectContent>
                         <ScrollArea className="h-60">
                           {users.map((user) => (
-                            <SelectItem key={user.id} value={user.displayname}>
+                            <SelectItem key={user.id} value={user.id}>
                               {user.displayname ||
                                 `${user.firstname} ${user.lastname}`}
                             </SelectItem>
@@ -137,10 +95,58 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                   </>
                 )}
               </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            ) : (
+              <>
+                <div className="relative aspect-square bg-black rounded-lg overflow-hidden">
+                  <Scanner
+                    onScan={(codes) => {
+                      if (codes[0]?.rawValue) onScan(codes[0].rawValue);
+                    }}
+                    onError={(e) => setError((e as Error).message)}
+                    constraints={{ facingMode: "environment" }}
+                    components={{ finder: true, torch: true, zoom: true }}
+                    scanDelay={500}
+                  />
+                </div>
+
+                <div className="text-center">
+                  <p className="text-white/80 text-sm mb-4">
+                    Peg dit kamera mod QR-koden
+                  </p>
+                  {loadingUsers ? (
+                    <p className="text-white/50 text-sm">Loading users…</p>
+                  ) : (
+                    <>
+                      <Label className="text-white/80">
+                        Vælg en rytter i stedet:
+                      </Label>
+                      <Select
+                        onValueChange={(value) => {
+                          onScan(value); // Simulate scanning this user ID
+                        }}
+                      >
+                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                          <SelectValue placeholder="Vælg en rytter…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <ScrollArea className="h-60">
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.displayname ||
+                                  `${user.firstname} ${user.lastname}`}
+                              </SelectItem>
+                            ))}
+                          </ScrollArea>
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
