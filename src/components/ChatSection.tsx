@@ -73,7 +73,7 @@ const ChatSection = () => {
                   <div className="space-y-3">
                     {messages.length === 0 ? (
                       <div className="text-center text-white/60 py-8">
-                        No messages yet. Start the conversation!
+                        Ingen beskeder endnu. Start samtalen!
                       </div>
                     ) : (
                       messages.map((msg) => (

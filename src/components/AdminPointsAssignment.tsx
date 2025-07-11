@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Minus, Plus, Shield, Trophy } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Select,
   SelectContent,
@@ -23,11 +24,17 @@ const AdminPointsAssignment = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [jerseys, setJerseys] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoryId, setCategoryId] = useState<string>("");
 
   const [userId, setUserId] = useState("");
   const [jerseyId, setJerseyId] = useState("");
   const [value, setValue] = useState(1);
   const [note, setNote] = useState("");
+  const filteredCategories = categories.filter(
+    (category) => category.jersey_id === jerseyId
+  );
+
   const pointId = crypto.randomUUID(); // Optional, or let the DB auto-generate
 
   useEffect(() => {
@@ -40,6 +47,11 @@ const AdminPointsAssignment = () => {
         .select("id, name");
       setUsers(usersData || []);
       setJerseys(jerseysData || []);
+      const { data: categoriesData } = await supabase
+        .from("categories")
+        .select("id, name, slug, points, jersey_id");
+
+      setCategories(categoriesData || []);
     };
 
     fetchData();
@@ -66,6 +78,9 @@ const AdminPointsAssignment = () => {
       return;
     }
 
+    const selectedCategory = categories.find((c) => c.id === categoryId);
+    const categorySlug = selectedCategory?.slug || "admin"; // fallback if needed
+
     const { error: transactionError } = await supabase.rpc(
       "perform_point_and_jersey_insert",
       {
@@ -74,9 +89,9 @@ const AdminPointsAssignment = () => {
         p_submitted_by: adminId,
         p_value: value,
         p_note: note,
-        p_stage_id: currentStageId, // Use dynamic stage ID here
+        p_stage_id: currentStageId,
         p_jersey_id: jerseyId,
-        p_category: "admin",
+        p_category: categorySlug,
       }
     );
 
@@ -151,6 +166,41 @@ const AdminPointsAssignment = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {/* Category Selection */}
+              {jerseyId && (
+                <div className="space-y-2">
+                  <Label htmlFor="category-select" className="text-white">
+                    Vælg Kategori
+                  </Label>
+                  <Select
+                    value={categoryId}
+                    onValueChange={(id) => {
+                      setCategoryId(id);
+                      const selected = categories.find((c) => c.id === id);
+                      if (selected) {
+                        setValue(selected.points); // Auto-set points
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder="Vælg en kategori..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredCategories.length > 0 ? (
+                        filteredCategories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name} ({category.points}p)
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="text-white/40 px-4 py-2 text-sm">
+                          Ingen kategorier for denne trøje
+                        </div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Points Amount */}
               <div className="space-y-2">
