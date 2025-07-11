@@ -12,7 +12,7 @@ import SocialFeed from "@/components/SocialFeed";
 import ChatSection from "@/components/ChatSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Plus } from "lucide-react";
+import { MessageSquare, Plus, X } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface SocialFeedProps {
@@ -40,6 +40,8 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
   const [activeTab, setActiveTab] = useState<"feed" | "chat">("feed");
   const [postId, setPostId] = useState<string | null>(null);
   const [showPostCreation, setShowPostCreation] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const socialFeedRef = useRef<{ refreshPosts: () => void }>(null);
 
   const handlePostCreated = () => {
@@ -63,6 +65,28 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
       setActiveTab(newTab);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (previewImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [previewImage]);
+
+  useEffect(() => {
+    const handleEscKey = (event: { key: string }) => {
+      if (event.key === "Escape" && previewImage) {
+        setPreviewImage(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscKey);
+    return () => document.removeEventListener("keydown", handleEscKey);
+  }, [previewImage]);
 
   useImperativeHandle(ref, () => ({
     refreshPosts: () => {
@@ -150,11 +174,56 @@ const Social = forwardRef<SocialFeedHandle, SocialFeedProps>((props, ref) => {
 
           {activeTab === "chat" && (
             <div className="h-full">
-              <ChatSection />
+              <ChatSection onImageClick={setPreviewImage} />
             </div>
           )}
         </div>
       </div>
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setPreviewImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="image-preview-title"
+        >
+          <div
+            className="relative max-w-[95vw] max-h-[95vh] bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 shadow-2xl animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image container with loading state */}
+            <div className="relative overflow-hidden rounded-xl">
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="w-auto h-auto max-w-[90vw] max-h-[85vh] object-contain rounded-xl"
+                onLoad={(e) => {
+                  // Optional: handle load success
+                  e.currentTarget.classList.add("animate-fade-in");
+                }}
+                onError={(e) => {
+                  // Optional: handle load error
+                  console.error("Failed to load image:", previewImage);
+                }}
+              />
+
+              {/* Subtle overlay gradient for better button visibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/20 pointer-events-none rounded-xl" />
+            </div>
+
+            {/* Close button - repositioned and improved */}
+            <Button
+              onClick={() => setPreviewImage(null)}
+              variant="ghost"
+              size="icon"
+              className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-white/95 hover:bg-white text-gray-700 hover:text-black shadow-lg hover:shadow-xl transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent border border-gray-200/50"
+              aria-label="Close image preview"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

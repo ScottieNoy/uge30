@@ -12,12 +12,15 @@ import { toast } from "sonner";
 import { useOnlineUsers } from "@/hooks/useOnlineUsers";
 import { ScrollArea } from "./ui/scroll-area";
 
-const ChatSection = () => {
+interface ChatSectionProps {
+  onImageClick: (imageUrl: string) => void;
+}
+
+const ChatSection = ({ onImageClick }: ChatSectionProps) => {
   const { user } = useAuth();
   const { messages, isLoading, sendMessage } = useChatMessages();
   const { onlineUsers } = useOnlineUsers(user?.id);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -59,7 +62,7 @@ const ChatSection = () => {
 
           <CardContent className="flex flex-col flex-1 p-0 overflow-hidden">
             {/* Chat message area */}
-            
+
             <ScrollArea
               className="h-[calc(100vh-400px)] sm:h-[calc(100vh-350px)] lg:h-[calc(100vh-250px)]"
               ref={scrollAreaRef}
@@ -81,18 +84,18 @@ const ChatSection = () => {
                           key={msg.id}
                           message={msg}
                           currentUserId={user?.id}
+                          onImageClick={onImageClick}
                         />
                       ))
                     )}
                   </div>
                 )}
               </div>
-
             </ScrollArea>
             {/* Input stays fixed below */}
-              <div className="border-t border-white/10 bg-white/5 backdrop-blur-sm flex-shrink-0">
-                <ChatInput onSendMessage={handleSendMessage} disabled={!user} />
-              </div>
+            <div className="border-t border-white/10 bg-white/5 backdrop-blur-sm flex-shrink-0">
+              <ChatInput onSendMessage={handleSendMessage} disabled={!user} />
+            </div>
           </CardContent>
         </Card>
       </div>
