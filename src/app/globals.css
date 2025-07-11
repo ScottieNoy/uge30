@@ -143,6 +143,9 @@
 }
 .backface-hidden {
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Safari/iOS */
+  will-change: transform; /* Tells browser to optimize for transforms */
+  transform: translateZ(0); /* Force GPU acceleration */
 }
 .rotate-y-180 {
   transform: rotateY(180deg);
