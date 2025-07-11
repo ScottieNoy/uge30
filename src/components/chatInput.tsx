@@ -21,7 +21,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +39,11 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
 
       if (message.trim()) {
         await sendNotification({
-          userId: user?.id,
+          senderId: profile.id,
           broadcast: true,
           title: "Ny chatbesked",
           body: `${
-            user?.user_metadata?.displayname || "Nogen"
+            profile.displayname || "Nogen"
           } har sendt en besked: "${message.trim()}"`,
           url: "/social?tab=chat",
         });

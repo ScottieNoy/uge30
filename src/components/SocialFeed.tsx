@@ -59,7 +59,7 @@ interface SocialFeedProps {
 
 const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
   ({ highlightedPostId }, ref) => {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const supabase = createClient();
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -183,7 +183,7 @@ const SocialFeed = forwardRef<SocialFeedRef, SocialFeedProps>(
               userId: post?.user_id ?? "",
               title: "Nyt like på dit opslag",
               body: `${
-                user.user_metadata?.displayname || "Nogen"
+                profile.displayname || "Nogen"
               } synes godt om dit opslag.`,
               url: `/social?tab=feed&post=${postId}`,
             });
