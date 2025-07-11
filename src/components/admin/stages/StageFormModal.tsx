@@ -17,7 +17,9 @@ export default function StageFormModal({
   const supabase = createClient();
   const [name, setName] = useState(existingStage?.name ?? "");
   const [date, setDate] = useState(
-    existingStage?.date ? new Date(existingStage.date).toISOString().slice(0, 10) : ""
+    existingStage?.date
+      ? new Date(existingStage.date).toISOString().slice(0, 10)
+      : ""
   );
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
@@ -44,7 +46,7 @@ export default function StageFormModal({
       if (data) {
         const formatted = data.map((event) => ({
           ...event,
-          time: formatForInput(event.time? event.time : ""),
+          time: formatForInput(event.time ? event.time : ""),
         }));
         setEvents(formatted);
       }
@@ -53,8 +55,14 @@ export default function StageFormModal({
     fetchEvents();
   }, [existingStage]);
   function formatForInput(dateString: string) {
-    const date = new Date(dateString);
-    return date.toISOString().slice(0, 16); // strips seconds + Z
+    const date = new Date(dateString); // parsed as local
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`; // local time string
   }
 
   const handleSubmit = async () => {
@@ -115,20 +123,6 @@ export default function StageFormModal({
     await supabase.from("events").update(event).eq("id", event.id);
     toast.success("Event opdateret");
   };
-  // function toLocalInputValue(utcString: string) {
-  //   const date = new Date(utcString);
-  //   const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
-  //   const localISO = new Date(date.getTime() - tzOffset)
-  //     .toISOString()
-  //     .slice(0, 16);
-  //   return localISO;
-  // }
-  // function localInputToUTC(value: string) {
-  //   const local = new Date(value);
-  //   return new Date(
-  //     local.getTime() - local.getTimezoneOffset() * 60000
-  //   ).toISOString();
-  // }
 
   return (
     <Dialog open onOpenChange={onClose}>
