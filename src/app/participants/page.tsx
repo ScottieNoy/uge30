@@ -18,7 +18,7 @@ export default function ParticipantsPage() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
             UGE30{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-              Deltagere
+              Ryttere
             </span>
           </h1>
           <p className="text-blue-100 text-sm sm:text-base">
