@@ -23,6 +23,9 @@ export default function MyPage() {
 
   const [editForm, setEditForm] = useState(user);
   const supabase = createClient();
+  const [isCheckingName, setIsCheckingName] = useState(false);
+  const [isNameValid, setIsNameValid] = useState(true);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,6 +62,39 @@ export default function MyPage() {
       setEditForm(null);
     };
   }, [supabase, toast]);
+
+  useEffect(() => {
+    if (!editForm?.displayname || editForm.displayname.trim().length < 2) {
+      setIsNameValid(false);
+      setNameError("Navnet skal være mindst 2 tegn");
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setIsCheckingName(true);
+      const { data, error } = await supabase
+        .from("users")
+        .select("id")
+        .eq("displayname", editForm.displayname.trim())
+        .neq("id", user?.id ?? "") // exclude current user
+        .maybeSingle();
+
+      if (error) {
+        setNameError("Fejl ved tjek af navn");
+        setIsNameValid(false);
+      } else if (data) {
+        setNameError("Dette navn er allerede taget");
+        setIsNameValid(false);
+      } else {
+        setNameError(null);
+        setIsNameValid(true);
+      }
+
+      setIsCheckingName(false);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [editForm?.displayname]);
 
   const { jerseyBoards, jerseyData, activityFeed } = useLeaderboard();
   const { data: jerseyHolders } = useJerseyHolders();
@@ -180,6 +216,7 @@ export default function MyPage() {
                       size="sm"
                       onClick={handleSave}
                       className="border-green-500/50 text-green-400 hover:bg-green-500/10"
+                      disabled={!isNameValid || isCheckingName}
                     >
                       <Save className="h-4 w-4 mr-2" />
                       Save
@@ -227,7 +264,11 @@ export default function MyPage() {
                     </Label>
                     <Input
                       id="firstname"
-                      value={isEditing ? editForm.firstname ?? "" : user.firstname ?? ""}
+                      value={
+                        isEditing
+                          ? editForm.firstname ?? ""
+                          : user.firstname ?? ""
+                      }
                       onChange={(e) =>
                         setEditForm({ ...editForm, firstname: e.target.value })
                       }
@@ -241,13 +282,45 @@ export default function MyPage() {
                     </Label>
                     <Input
                       id="lastname"
-                      value={isEditing ? editForm.lastname ?? "" : user.lastname ?? ""}
+                      value={
+                        isEditing
+                          ? editForm.lastname ?? ""
+                          : user.lastname ?? ""
+                      }
                       onChange={(e) =>
                         setEditForm({ ...editForm, lastname: e.target.value })
                       }
                       disabled={!isEditing}
                       className="bg-white/10 border-white/20 text-white disabled:opacity-50"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="displayname" className="text-white">
+                      Brugernavn
+                    </Label>
+                    <Input
+                      id="displayname"
+                      value={editForm.displayname ?? ""}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          displayname: e.target.value,
+                        })
+                      }
+                      disabled={!isEditing}
+                      className="bg-white/10 border-white/20 text-white disabled:opacity-50"
+                    />
+                    {isEditing && isCheckingName && (
+                      <p className="text-xs text-blue-300">Tjekker navn...</p>
+                    )}
+                    {isEditing && nameError && !isCheckingName && (
+                      <p className="text-xs text-red-400">{nameError}</p>
+                    )}
+                    {isEditing && isNameValid && !isCheckingName && (
+                      <p className="text-xs text-green-400">
+                        ✔ Navnet er ledigt
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
