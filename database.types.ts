@@ -71,14 +71,14 @@ export type Database = {
             foreignKeyName: "categories_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders_showcase"
             referencedColumns: ["jersey_id"]
           },
           {
             foreignKeyName: "categories_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
           {
@@ -419,14 +419,14 @@ export type Database = {
             foreignKeyName: "point_jerseys_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders_showcase"
             referencedColumns: ["jersey_id"]
           },
           {
             foreignKeyName: "point_jerseys_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
           {
@@ -827,14 +827,14 @@ export type Database = {
             foreignKeyName: "stage_podiums_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders_showcase"
             referencedColumns: ["jersey_id"]
           },
           {
             foreignKeyName: "stage_podiums_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
           {
@@ -992,14 +992,14 @@ export type Database = {
             foreignKeyName: "user_jerseys_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: true
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders_showcase"
             referencedColumns: ["jersey_id"]
           },
           {
             foreignKeyName: "user_jerseys_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: true
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
           {
@@ -1094,14 +1094,14 @@ export type Database = {
             foreignKeyName: "user_jerseys_history_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_leaderboards"
+            referencedRelation: "v_jersey_holders_showcase"
             referencedColumns: ["jersey_id"]
           },
           {
             foreignKeyName: "user_jerseys_history_jersey_id_fkey"
             columns: ["jersey_id"]
             isOneToOne: false
-            referencedRelation: "v_jersey_overall_leaders"
+            referencedRelation: "v_jersey_leaderboards"
             referencedColumns: ["jersey_id"]
           },
           {
@@ -1218,10 +1218,11 @@ export type Database = {
           created_at: string | null
           displayname: string
           emoji: string | null
-          firstname: string
+          firstname: string | null
           id: string
           is_admin: boolean | null
-          lastname: string
+          lastname: string | null
+          profile_complete: boolean
           role: string | null
           updated_at: string | null
         }
@@ -1230,10 +1231,11 @@ export type Database = {
           created_at?: string | null
           displayname: string
           emoji?: string | null
-          firstname: string
+          firstname?: string | null
           id: string
           is_admin?: boolean | null
-          lastname: string
+          lastname?: string | null
+          profile_complete?: boolean
           role?: string | null
           updated_at?: string | null
         }
@@ -1242,10 +1244,11 @@ export type Database = {
           created_at?: string | null
           displayname?: string
           emoji?: string | null
-          firstname?: string
+          firstname?: string | null
           id?: string
           is_admin?: boolean | null
-          lastname?: string
+          lastname?: string | null
+          profile_complete?: boolean
           role?: string | null
           updated_at?: string | null
         }
@@ -1393,6 +1396,24 @@ export type Database = {
         }
         Relationships: []
       }
+      v_jersey_holders_showcase: {
+        Row: {
+          avatar_url: string | null
+          bg_color: string | null
+          border_color: string | null
+          color: string | null
+          displayname: string | null
+          is_overall: boolean | null
+          jersey_description: string | null
+          jersey_icon: string | null
+          jersey_id: string | null
+          jersey_name: string | null
+          rank: number | null
+          total_points: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       v_jersey_leaderboards: {
         Row: {
           displayname: string | null
@@ -1405,7 +1426,7 @@ export type Database = {
         }
         Relationships: []
       }
-      v_jersey_overall_leaders: {
+      v_overall_jersey_leaders: {
         Row: {
           avatar_url: string | null
           bg_color: string | null

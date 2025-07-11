@@ -1,9 +1,11 @@
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import * as Icons from "lucide-react";
 import { JerseyRow, User } from "@/types";
 import { UserIcon } from "lucide-react";
+import React, { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+
 
 interface JerseyLeaderboardProps {
   jersey: JerseyRow;
@@ -16,10 +18,14 @@ interface JerseyLeaderboardProps {
   }[];
 }
 
+
 const JerseyLeaderboard = ({
   jersey,
   participants,
 }: JerseyLeaderboardProps) => {
+  const { user } = useAuth();
+  const [expanded, setExpanded] = useState(false);
+
   const IconComponent = Icons[jersey.icon as keyof typeof Icons] as React.FC<
     React.SVGProps<SVGSVGElement>
   >;
@@ -37,7 +43,9 @@ const JerseyLeaderboard = ({
     }
   };
 
-  const topParticipants = participants.slice(0, 5);
+  const visibleParticipants = expanded
+    ? participants.slice(0, 50)
+    : participants.slice(0, 5);
 
   return (
     <Card
@@ -58,26 +66,28 @@ const JerseyLeaderboard = ({
           <Badge
             className={`bg-gradient-to-r ${jersey.color} text-white border-0 px-2 py-1 text-xs font-semibold`}
           >
-            Top 5
+            {expanded ? "Top 50" : "Top 5"}
           </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="p-4 pt-0">
         <div className="space-y-2">
-          {topParticipants.map((participant) => (
+          {visibleParticipants.map((participant) => (
             <div
               key={`${jersey.id}-${participant.user.id}`}
-              className="flex items-center justify-between p-3 rounded-lg bg-white/20 hover:bg-white/30 transition-colors border border-white/10"
+              className={`flex items-center justify-between p-3 rounded-lg transition-colors border border-white/10
+  ${
+    participant.user.id === user?.id
+      ? "ring-2 ring-blue-500 bg-white/40"
+      : participant.rank === 1
+      ? "bg-yellow-100/30"
+      : "bg-white/20 hover:bg-white/30"
+  }`}
+
             >
               <div className="flex items-center space-x-3">
                 {getRankIcon(participant.rank)}
-                {/* <div className="text-lg">{participant.user.emoji || "🙂"}</div> */}
-
-                {/* <div className="text-gray-800 text-sm font-semibold"> */}
-                <span>
-                  {/* {participant.user.firstname} {participant.user.lastname} */}
-                </span>
                 <div className="flex items-center justify-center space-x-2">
                   {participant.user.avatar_url ? (
                     <img
@@ -94,7 +104,6 @@ const JerseyLeaderboard = ({
                     {participant.user.displayname}
                   </span>
                 </div>
-
                 <div className="flex items-center space-x-2 text-sm">
                   <span className="text-gray-700 font-medium">
                     {participant.total} pts
@@ -118,9 +127,20 @@ const JerseyLeaderboard = ({
                 </div>
               </div>
             </div>
-            // </div>
           ))}
-          {topParticipants.length === 0 && (
+
+          {participants.length > 5 && (
+            <div className="pt-2 flex justify-center">
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="text-xs text-gray-600 hover:underline"
+              >
+                {expanded ? "Vis færre" : "Se  alle"}
+              </button>
+            </div>
+          )}
+
+          {participants.length === 0 && (
             <div className="text-center py-6 text-gray-600 text-sm">
               No participants yet
             </div>

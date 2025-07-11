@@ -43,7 +43,7 @@ export const useLeaderboard = () => {
         .order("created_at", { ascending: true });
 
       const { data: leaders } = await supabase
-        .from("v_jersey_overall_leaders")
+        .from("v_overall_jersey_leaders")
         .select("*");
 
       const { data: activities } = await supabase

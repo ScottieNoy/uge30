@@ -23,7 +23,7 @@ export type JerseyHolder = {
 const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("v_jersey_overall_leaders")
+    .from("v_jersey_holders_showcase")
     .select("*")
     .order("total_points", { ascending: false });
 
@@ -52,7 +52,7 @@ const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
 // Hook
 export function useJerseyHolders() {
   const { data, error, isLoading, mutate } = useSWR<JerseyHolder[]>(
-    "v_jersey_overall_leaders",
+    "v_jersey_holders_showcase",
     fetchJerseyHolders,
     {
       refreshInterval: 15000, // auto-refresh every 15s
