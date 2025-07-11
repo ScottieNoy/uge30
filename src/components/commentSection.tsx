@@ -41,7 +41,7 @@ const CommentSection = ({
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const supabase = createClient();
 
   const fetchComments = async () => {
@@ -102,14 +102,14 @@ const CommentSection = ({
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || !profile) return;
+    if (!newComment.trim() || !user) return;
 
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from("comments").insert({
         content: newComment.trim(),
         post_id: postId,
-        user_id: profile.id,
+        user_id: user.id,
       });
 
       if (error) {
@@ -120,7 +120,7 @@ const CommentSection = ({
 
       setNewComment("");
       fetchComments();
-      if (postAuthorId && postAuthorId !== profile.id) {
+      if (postAuthorId && postAuthorId !== user.id) {
         await sendNotification({
           userId: postAuthorId,
           title: "Ny kommentar på dit opslag",
@@ -188,7 +188,7 @@ const CommentSection = ({
           </p>
         )}
 
-        {profile && (
+        {user && (
           <form onSubmit={handleSubmitComment} className="flex space-x-2">
             <Textarea
               placeholder="Write a comment..."
