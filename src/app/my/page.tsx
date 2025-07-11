@@ -185,7 +185,7 @@ export default function MyPage() {
             Tilbage
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-white">Min profile</h1>
+            <h1 className="text-3xl font-bold text-white">Min profil</h1>
             <p className="text-blue-100">
               Administrer din profil og se dine point
             </p>
