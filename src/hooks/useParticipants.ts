@@ -12,7 +12,7 @@ export function useParticipants() {
     const load = async () => {
       const { data, error } = await supabase
         .from("users")
-        .select("id, displayname, avatar_url")
+        .select("id, displayname, avatar_url, firstname, lastname")
         .order("displayname", { ascending: true });
 
       if (!error && data) {
@@ -22,9 +22,9 @@ export function useParticipants() {
           avatar_url: item.avatar_url,
           created_at: null,
           emoji: null,
-          firstname: null,
+          firstname: item.firstname,
           is_admin: null,
-          lastname: null,
+          lastname: item.lastname,
           profile_complete: false,
           role: null,
           updated_at: null,

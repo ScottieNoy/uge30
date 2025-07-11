@@ -55,14 +55,20 @@ export default function ParticipantsPage() {
                           <UserIcon className="h-5 w-5 text-white" />
                         </div>
                       )}
-                      <div>
+                      <div className="flex flex-col leading-tight">
                         <p
                           className={`text-sm font-semibold ${
-                            isCurrentUser ? "text-blue-200" : "text-white"
+                            isCurrentUser ? "text-blue-100" : "text-white"
                           }`}
                         >
-                          {user.displayname}
-                          {isCurrentUser && " (dig)"}
+                          {user.firstname} {user.lastname} {isCurrentUser && "(dig)"}
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            isCurrentUser ? "text-blue-300" : "text-gray-300"
+                          }`}
+                        >
+                          {user.displayname} 
                         </p>
                       </div>
                     </CardContent>
