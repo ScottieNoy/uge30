@@ -49,11 +49,12 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
         <CardHeader className="flex justify-between items-center">
           <CardTitle className="text-white">Scan QR Code</CardTitle>
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={onClose}
-            className="text-white hover:bg-white/20"
+            className="text-white hover:bg-white/20 w-fit px-4"
           >
+            <p className="">Luk</p>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -79,7 +80,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                     <SelectContent>
                       <ScrollArea className="h-60">
                         {users.map((user) => (
-                          <SelectItem key={user.id} value={user.displayname}>
+                          <SelectItem key={user.id} value={user.id}>
                             {user.displayname ||
                               `${user.firstname} ${user.lastname}`}
                           </SelectItem>
@@ -126,7 +127,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                       <SelectContent>
                         <ScrollArea className="h-60">
                           {users.map((user) => (
-                            <SelectItem key={user.id} value={user.displayname}>
+                            <SelectItem key={user.id} value={user.id}>
                               {user.displayname ||
                                 `${user.firstname} ${user.lastname}`}
                             </SelectItem>
