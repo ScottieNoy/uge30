@@ -207,7 +207,7 @@ export default function MyPage() {
                     />
                     <AvatarFallback className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-2xl">
                       {user.firstname}
-                      {user.lastname[0]}
+                      {user.lastname ? user.lastname[0] : ""}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-center sm:text-left">
