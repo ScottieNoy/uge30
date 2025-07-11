@@ -259,7 +259,7 @@ export default function Navbar() {
                     onClick={() => openAuthModal("register")}
                   >
                     <Users className="h-4 w-4 mr-2" />
-                    Opret Bruger
+                    Opret Rytter
                   </Button>
                 </div>
               )}
@@ -429,7 +429,7 @@ export default function Navbar() {
                         onClick={() => openAuthModal("register")}
                       >
                         <Users className="h-4 w-4 mr-3" />
-                        Opret Bruger
+                        Opret Rytter
                       </Button>
                     </>
                   )}

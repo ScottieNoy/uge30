@@ -135,7 +135,7 @@ const AuthModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md w-full my-2 p-0 bg-transparent border-0 shadow-none">
         <DialogTitle className="sr-only">
-          {activeTab === "login" ? "Log ind" : "Opret Bruger"}
+          {activeTab === "login" ? "Log ind" : "Opret Rytter"}
         </DialogTitle>
 
         <Button
@@ -171,7 +171,7 @@ const AuthModal = ({
                 }`}
                 onClick={() => setActiveTab("register")}
               >
-                Opret Bruger
+                Opret Rytter
               </Button>
             </div>
           </div>
