@@ -64,53 +64,10 @@ const AuthModal = ({
     const first = clean(firstname);
     const last = clean(lastname);
 
-    const generateCandidates = (first: string, last: string): string[] => {
-      return [
-        first,
-        `${first}${last.charAt(0)}`,
-        `${first}${last}`,
-        `${first.charAt(0)}${last}`,
-      ].filter(Boolean);
-    };
-
-    const candidates = generateCandidates(first, last);
-    let displayname: string | null = null;
-
-    for (const name of candidates) {
-      if (!supabase) {
-        toast.error("Supabase client is not initialized.");
-        setIsLoading(false);
-        return;
-      }
-
-      const { data: existing, error } = await supabase
-        .from("users")
-        .select("id")
-        .eq("displayname", name)
-        .limit(1);
-      if (error) {
-        toast.error("Displayname check failed.");
-        setIsLoading(false);
-        return;
-      }
-      if (!existing?.length) {
-        displayname = name;
-        break;
-      }
-    }
-
-    if (!displayname) {
-      toast.error("Could not generate unique displayname.");
-      setIsLoading(false);
-      return;
-    }
-
     // Use `signUp` from context
     const { error: signUpError } = await signUp(data.email, data.password, {
-      profileComplete: false,
       firstname,
       lastname,
-      displayname,
     });
 
     if (signUpError) {
