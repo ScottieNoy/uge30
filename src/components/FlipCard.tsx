@@ -134,9 +134,11 @@ const FlipCard: FC<FlipCardProps> = ({
                 <br />
                 <span className="text-lg underline">{jersey.jersey_name}</span>
               </h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                {jersey.description || "Ingen beskrivelse tilgængelig."}
-              </p>
+              <div className="overflow-y-auto max-h-[120px] text-sm text-muted-foreground mb-2 whitespace-pre-wrap break-words">
+  {jersey.description || "Ingen beskrivelse tilgængelig."}
+</div>
+
+
               <p className="text-xs text-muted-foreground">
                 Tryk for at flippe tilbage
               </p>
