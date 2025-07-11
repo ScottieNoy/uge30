@@ -227,7 +227,7 @@ export default function MyPage() {
                     </Label>
                     <Input
                       id="firstname"
-                      value={isEditing ? editForm.firstname : user.firstname}
+                      value={isEditing ? editForm.firstname ?? "" : user.firstname ?? ""}
                       onChange={(e) =>
                         setEditForm({ ...editForm, firstname: e.target.value })
                       }
@@ -241,7 +241,7 @@ export default function MyPage() {
                     </Label>
                     <Input
                       id="lastname"
-                      value={isEditing ? editForm.lastname : user.lastname}
+                      value={isEditing ? editForm.lastname ?? "" : user.lastname ?? ""}
                       onChange={(e) =>
                         setEditForm({ ...editForm, lastname: e.target.value })
                       }

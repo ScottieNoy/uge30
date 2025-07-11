@@ -130,7 +130,7 @@ const PointsAssignment = ({
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mx-auto mb-3 flex items-center justify-center">
               <span className="text-white font-bold text-xl">
-                {targetUser.firstname[0]?.toUpperCase()}
+                {targetUser.firstname?.[0]?.toUpperCase() ?? ""}
               </span>
             </div>
             <h3 className="text-white font-semibold text-lg">
