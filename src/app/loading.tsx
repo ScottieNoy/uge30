@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function Loading() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{
@@ -25,7 +25,7 @@ export default function Loading() {
         />
       </motion.div>
       <p className="mt-4 text-sm font-medium text-black opacity-60">
-        Loading...
+        Indlæser...
       </p>
     </div>
   );

@@ -81,7 +81,7 @@ const AdminPointsAssignment = () => {
     );
 
     if (transactionError) {
-      console.error('Error details:', transactionError); // Log the error for better insights
+      console.error("Error details:", transactionError); // Log the error for better insights
       toast.error("Failed to insert point and jersey");
     } else {
       toast.success("Point + jersey linked ✅");
@@ -108,7 +108,9 @@ const AdminPointsAssignment = () => {
               <Shield className="h-6 w-6 text-green-400" />
               <span>Admin Points Assignment</span>
             </CardTitle>
-            <p className="text-white/60">Assign points to users and link them to jerseys</p>
+            <p className="text-white/60">
+              Assign points to users and link them to jerseys
+            </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -119,7 +121,7 @@ const AdminPointsAssignment = () => {
                 </Label>
                 <Select value={userId} onValueChange={setUserId}>
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue placeholder="Choose a user..." />
+                    <SelectValue placeholder="Vælg en rytter..." />
                   </SelectTrigger>
                   <SelectContent>
                     {users.map((user) => (
@@ -138,7 +140,7 @@ const AdminPointsAssignment = () => {
                 </Label>
                 <Select value={jerseyId} onValueChange={setJerseyId}>
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue placeholder="Choose a jersey..." />
+                    <SelectValue placeholder="Vælg en rytter..." />
                   </SelectTrigger>
                   <SelectContent>
                     {jerseys.map((jersey) => (
@@ -184,7 +186,9 @@ const AdminPointsAssignment = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-white/60 text-xs">Use negative values to deduct points</p>
+                <p className="text-white/60 text-xs">
+                  Use negative values to deduct points
+                </p>
               </div>
 
               {/* Quick Point Buttons */}
@@ -229,7 +233,9 @@ const AdminPointsAssignment = () => {
               </Button>
 
               <div className="text-center">
-                <p className="text-white/40 text-xs">Admin privileges - Use responsibly</p>
+                <p className="text-white/40 text-xs">
+                  Admin privileges - Use responsibly
+                </p>
               </div>
             </form>
           </CardContent>

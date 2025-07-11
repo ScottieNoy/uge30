@@ -103,20 +103,19 @@ export default function Home() {
         <div className="max-w-4xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
           <FestivalCountdown />
 
-
           <Card className="bg-white/10 text-center p-4">
-          <Link
-  href="/participants"
-  className="text-sm text-cyan-200 hover:underline"
->
-            <CardContent className="p-0 lg:mt-10">
-              <Users className="h-6 w-6 text-cyan-300 mx-auto mb-2" />
-              <div className="text-xl font-bold text-white">
-                {participants.length}
-              </div>
-              <div className="text-cyan-200 text-sm">Participants</div>
-            </CardContent>
-          </Link>
+            <Link
+              href="/participants"
+              className="text-sm text-cyan-200 hover:underline"
+            >
+              <CardContent className="p-0 lg:mt-10">
+                <Users className="h-6 w-6 text-cyan-300 mx-auto mb-2" />
+                <div className="text-xl font-bold text-white">
+                  {participants.length}
+                </div>
+                <div className="text-cyan-200 text-sm">Ryttere</div>
+              </CardContent>
+            </Link>
           </Card>
           <Card className="bg-white/10 text-center p-4">
             <CardContent className="p-0 lg:mt-10">
@@ -124,7 +123,7 @@ export default function Home() {
               <div className="text-xl font-bold text-white">
                 {Object.keys(jerseyBoards).length}
               </div>
-              <div className="text-cyan-200 text-sm">Jerseys</div>
+              <div className="text-cyan-200 text-sm">Trøjer</div>
             </CardContent>
           </Card>
         </div>
@@ -138,10 +137,10 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-white mb-2">
             Live{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-              Jersey Standings
+              Stilling
             </span>
           </h2>
-          <p className="text-blue-100">Top performers in each category</p>
+          <p className="text-blue-100">De bedste performere i hver kategori</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sortedJerseyItems.map((jersey, i) => (

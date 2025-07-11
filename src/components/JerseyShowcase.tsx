@@ -55,7 +55,7 @@ const JerseyShowcase = () => {
               Trøjer
             </span>
           </h2>
-          <p className="text-blue-100">Current jersey holders</p>
+          <p className="text-blue-100">Nuværende trøje holdere</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">

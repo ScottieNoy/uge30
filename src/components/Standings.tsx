@@ -34,14 +34,15 @@ export default function Standings() {
 
   useEffect(() => {
     const loadData = async () => {
-      const [{ data: points }, { data: users }, { data: jerseys}] = await Promise.all([
-        supabase
-          .from("points")
-          .select("*")
-          .order("created_at", { ascending: true }),
-        supabase.from("users").select("*"),
-        supabase.from("jerseys").select("*"),
-      ]);
+      const [{ data: points }, { data: users }, { data: jerseys }] =
+        await Promise.all([
+          supabase
+            .from("points")
+            .select("*")
+            .order("created_at", { ascending: true }),
+          supabase.from("users").select("*"),
+          supabase.from("jerseys").select("*"),
+        ]);
 
       if (!points || !users || !jerseys) return;
 
@@ -164,7 +165,7 @@ export default function Standings() {
               className="text-white hover:bg-white/10"
             >
               <Icons.ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              Tilbage
             </Button>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">
@@ -181,15 +182,17 @@ export default function Standings() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {jerseyIds.map((j) => {
           // Find the jersey object by id from the jerseys array
-          const jerseyObj = (Array.isArray(jerseyIds)
-            ? (jerseyIds as any[])
-            : []
+          const jerseyObj = (
+            Array.isArray(jerseyIds) ? (jerseyIds as any[]) : []
           ).find((jersey) => jersey.id === j);
 
           const jersey = jerseyData[j];
-          const IconComponent = jerseyObj && jerseyObj.icon
-            ? (Icons[jerseyObj.icon as keyof typeof Icons] as React.FC<React.SVGProps<SVGSVGElement>>)
-            : Icons.Award; // fallback icon
+          const IconComponent =
+            jerseyObj && jerseyObj.icon
+              ? (Icons[jerseyObj.icon as keyof typeof Icons] as React.FC<
+                  React.SVGProps<SVGSVGElement>
+                >)
+              : Icons.Award; // fallback icon
 
           return (
             <Card
@@ -199,11 +202,15 @@ export default function Standings() {
               <CardHeader className="pb-3 sm:pb-6">
                 <CardTitle className="flex items-center space-x-2 sm:space-x-3 text-white text-lg sm:text-xl">
                   <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r ${jerseyObj?.color ?? ""} flex items-center justify-center shadow-lg`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r ${
+                      jerseyObj?.color ?? ""
+                    } flex items-center justify-center shadow-lg`}
                   >
                     <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <span className="text-sm sm:text-base">{jerseyObj?.name ?? "Jersey"}</span>
+                  <span className="text-sm sm:text-base">
+                    {jerseyObj?.name ?? "Jersey"}
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-6 pt-0">

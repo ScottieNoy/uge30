@@ -43,10 +43,16 @@ const PointsAssignment = ({
         { data: categoriesData, error: catError },
         { data: jerseysData, error: jerseyError },
       ] = await Promise.all([
-        supabase.from("categories").select("*").in("jersey_id", allowedJerseys).order("points", { ascending: false }),
+        supabase
+          .from("categories")
+          .select("*")
+          .in("jersey_id", allowedJerseys)
+          .order("points", { ascending: false }),
         supabase
           .from("jerseys")
-          .select("id, name, color, created_at, description, icon, is_overall, bg_color, border_color")
+          .select(
+            "id, name, color, created_at, description, icon, is_overall, bg_color, border_color"
+          )
           .in("id", allowedJerseys),
       ]);
 
@@ -90,7 +96,9 @@ const PointsAssignment = ({
         jersey_id,
         category,
         value,
-        note: `${category.toUpperCase()} blev tildelt af ${currentUser.displayname}`,
+        note: `${category.toUpperCase()} blev tildelt af ${
+          currentUser.displayname
+        }`,
       });
 
       onClose();
@@ -126,7 +134,7 @@ const PointsAssignment = ({
           </Button>
         </CardHeader>
 
-<CardContent className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+        <CardContent className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mx-auto mb-3 flex items-center justify-center">
               <span className="text-white font-bold text-xl">
@@ -137,7 +145,7 @@ const PointsAssignment = ({
               {targetUser.firstname} {targetUser.lastname}
             </h3>
             <p className="text-white/60 text-sm">
-              Choose a category to assign points
+              Vælg en kategori og tildel point
             </p>
           </div>
 
@@ -146,9 +154,9 @@ const PointsAssignment = ({
               ([jerseyId, jerseyCategories]) => (
                 <div key={jerseyId}>
                   <h4 className="text-white text-sm font-semibold mb-2 capitalize">
-                    {/* Display jersey name or ID */
-                      jerseys.find((j) => j.id === jerseyId)?.name ||
-                      jerseyId
+                    {
+                      /* Display jersey name or ID */
+                      jerseys.find((j) => j.id === jerseyId)?.name || jerseyId
                     }{" "}
                     {/* You can also use a mapping to get better labels */}
                     {/* Or use a mapping if you want better labels */}
@@ -179,7 +187,7 @@ const PointsAssignment = ({
                             <div className="text-left">
                               <div className="font-medium">{cat.name}</div>
                               <div className="text-sm text-white/60">
-                                Tap to assign
+                                Tryk for at tildele
                               </div>
                             </div>
                           </div>
@@ -199,7 +207,7 @@ const PointsAssignment = ({
 
           <div className="text-center">
             <p className="text-white/40 text-xs">
-              Points will be added immediately
+              Point vil blive tildelt med det samme
             </p>
           </div>
         </CardContent>

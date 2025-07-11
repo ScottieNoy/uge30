@@ -144,7 +144,7 @@ export default function Navbar() {
                   className="text-white hover:text-cyan-300"
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  Social
+                  Fællesskab
                 </Button>
               </Link>
               <Link href="/stages">
@@ -191,7 +191,7 @@ export default function Navbar() {
                       className="text-green-400 hover:text-green-300"
                     >
                       <Shield className="h-4 w-4 mr-2" />
-                      Points Assignment
+                      Point Tildeling
                     </Button>
                   </Link>
                 </>
@@ -229,7 +229,7 @@ export default function Navbar() {
                           {userName || "User"}
                         </span>
                         <Badge className="bg-cyan-500 text-white font-semibold">
-                          {isAdmin ? "Admin" : "User"}
+                          {isAdmin ? "Admin" : "Rytter"}
                         </Badge>
                       </div>
                     </div>
@@ -259,7 +259,7 @@ export default function Navbar() {
                     onClick={() => openAuthModal("register")}
                   >
                     <Users className="h-4 w-4 mr-2" />
-                    Register
+                    Opret Bruger
                   </Button>
                 </div>
               )}
@@ -297,7 +297,7 @@ export default function Navbar() {
                     className="text-white hover:bg-white/10 hover:text-cyan-300 transition-colors w-full"
                   >
                     <Users className="h-4 w-4 mr-2" />
-                    Social
+                    Fællesskab
                   </Button>
                 </Link>
                 <Link href="/stages" onClick={closeMenu}>
@@ -318,7 +318,7 @@ export default function Navbar() {
                     <Link href="/admin/points-assignment" onClick={closeMenu}>
                       <Button variant="ghost" className="w-full text-green-300">
                         <Shield className="h-4 w-4 mr-2" />
-                        Points Assignment
+                        Point Tildeling
                       </Button>
                     </Link>
                   </>
@@ -399,7 +399,7 @@ export default function Navbar() {
                               {userName || "User"}
                             </span>
                             <Badge className="bg-cyan-500 text-white font-semibold">
-                              {isAdmin ? "Admin" : "User"}
+                              {isAdmin ? "Admin" : "Rytter"}
                             </Badge>
                           </div>
                         </div>
@@ -410,7 +410,7 @@ export default function Navbar() {
                         onClick={handleLogout}
                       >
                         <LogOut className="h-4 w-4 mr-3" />
-                        Logout
+                        Log ud
                       </Button>
                     </>
                   ) : (
@@ -421,7 +421,7 @@ export default function Navbar() {
                         onClick={() => openAuthModal("login")}
                       >
                         <LogIn className="h-4 w-4 mr-3" />
-                        Login
+                        Log ind
                       </Button>
                       <Button
                         variant="ghost"
@@ -429,7 +429,7 @@ export default function Navbar() {
                         onClick={() => openAuthModal("register")}
                       >
                         <Users className="h-4 w-4 mr-3" />
-                        Register
+                        Opret Bruger
                       </Button>
                     </>
                   )}

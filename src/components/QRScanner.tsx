@@ -74,7 +74,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                     }}
                   >
                     <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Choose a user…" />
+                      <SelectValue placeholder="Vælg en rytter…" />
                     </SelectTrigger>
                     <SelectContent>
                       <ScrollArea className="h-60">
@@ -121,7 +121,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                       }}
                     >
                       <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Choose a user…" />
+                        <SelectValue placeholder="Vælg en rytter…" />
                       </SelectTrigger>
                       <SelectContent>
                         <ScrollArea className="h-60">
