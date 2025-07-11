@@ -21,7 +21,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +39,11 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
 
       if (message.trim()) {
         await sendNotification({
-          userId: user?.id,
+          senderId: user?.id,
           broadcast: true,
           title: "Ny chatbesked",
           body: `${
-            user?.user_metadata?.displayname || "Nogen"
+            profile.displayname || "Nogen"
           } har sendt en besked: "${message.trim()}"`,
           url: "/social?tab=chat",
         });
@@ -64,34 +64,32 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     }
   };
 
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = event.target.files;
-    if (!files) return;
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const files = event.target.files;
+  if (!files) return;
 
-    const newFiles: File[] = [];
-    const newPreviews: string[] = [];
+  const newFiles: File[] = [];
+  const newPreviews: string[] = [];
 
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
+  for (const file of Array.from(files)) {
+    if (!file.type.startsWith("image/")) continue;
 
-      try {
-        const compressed = await compressImage(file, 1000); // Resize max 1000px
-        newFiles.push(compressed);
-        const previewUrl = URL.createObjectURL(compressed);
-        newPreviews.push(previewUrl);
-      } catch (err) {
-        console.error("Compression error", err);
-        toast("Kunne ikke komprimere billedet");
-      }
+    try {
+      const compressed = await compressImage(file, 1000); // Resize max 1000px
+      newFiles.push(compressed);
+      const previewUrl = URL.createObjectURL(compressed);
+      newPreviews.push(previewUrl);
+    } catch (err) {
+      console.error("Compression error", err);
+      toast("Kunne ikke komprimere billedet");
     }
+  }
 
-    setImageFiles((prev) => [...prev, ...newFiles]);
-    setImagePreviews((prev) => [...prev, ...newPreviews]);
+  setImageFiles((prev) => [...prev, ...newFiles]);
+  setImagePreviews((prev) => [...prev, ...newPreviews]);
 
-    event.target.value = "";
-  };
+  event.target.value = "";
+};
 
   const removeImage = (index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
@@ -146,7 +144,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Skriv din besked..."
+          placeholder="Type your message..."
           disabled={isSending || disabled}
           className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/60 text-base h-10 sm:h-11"
           onKeyDown={(e) => {

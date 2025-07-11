@@ -23,7 +23,7 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const supabase = createClient();
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -68,7 +68,7 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
     const urls: string[] = [];
 
     for (const file of imageFiles) {
-      const filePath = `posts/${user!.id}/${Date.now()}-${file.name}`;
+      const filePath = `posts/${profile!.id}/${Date.now()}-${file.name}`;
       const { error } = await supabase.storage
         .from("post-images")
         .upload(filePath, file);
@@ -97,7 +97,7 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
       return;
     }
 
-    if (!user) {
+    if (!profile) {
       toast("Please log in to create a post.");
       return;
     }
@@ -111,7 +111,7 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
         .from("posts")
         .insert({
           content: content.trim(),
-          user_id: user.id,
+          user_id: profile.id,
           images: uploadedImageUrls,
           location,
         })
@@ -128,10 +128,12 @@ const PostCreation = ({ onClose, onPostCreated }: PostCreationProps) => {
 
       // Send notification to all users with direct link to the post
       await sendNotification({
-        userId: user.id,
+        senderId: profile.id, // NEW
         broadcast: true,
         title: "New Post Created",
-        body: `${user.user_metadata.displayname || "Someone"} just created a new post!`,
+        body: `${
+          profile.displayname || "Someone"
+        } just created a new post!`,
         url: `/social?tab=feed&post=${postId}`,
       });
 

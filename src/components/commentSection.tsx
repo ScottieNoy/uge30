@@ -41,7 +41,7 @@ const CommentSection = ({
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { profile, user } = useAuth();
   const supabase = createClient();
 
   const fetchComments = async () => {
@@ -125,7 +125,7 @@ const CommentSection = ({
           userId: postAuthorId,
           title: "Ny kommentar på dit opslag",
           body: `${
-            user.user_metadata?.displayname || "Nogen"
+            profile.displayname || "Nogen"
           } har kommenteret på dit opslag.`,
           url: `/social?tab=feed&post=${postId}`,
         });

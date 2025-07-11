@@ -1,33 +1,36 @@
 export async function sendNotification({
-  userId = undefined, // Optional user ID to send notification to
+  userId = undefined,
   title,
   body,
   url,
   broadcast = false,
+  senderId = undefined, // NEW
 }: {
-  userId?: string
-  title: string
-  body: string
-  url?: string
-  broadcast?: boolean
+  userId?: string;
+  title: string;
+  body: string;
+  url?: string;
+  broadcast?: boolean;
+  senderId?: string; // NEW
 }) {
   try {
-    const res = await fetch('/api/send-notification', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/api/send-notification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: userId,
         title,
         body,
         url,
-        broadcast, // If true, send to all users; otherwise, send to specific user
+        broadcast,
+        sender_id: senderId, // NEW
       }),
-    })
+    });
 
     if (!res.ok) {
-      console.error('Failed to send notification')
+      console.error("Failed to send notification");
     }
   } catch (err) {
-    console.error('Error sending notification:', err)
+    console.error("Error sending notification:", err);
   }
 }

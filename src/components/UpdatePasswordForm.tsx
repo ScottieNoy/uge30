@@ -132,6 +132,7 @@ export default function UpdatePasswordForm() {
             </Label>
             <div className="relative">
               <Input
+              textColor="black"
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Indtast dit nye kodeord"
@@ -162,6 +163,7 @@ export default function UpdatePasswordForm() {
             </Label>
             <div className="relative">
               <Input
+                textColor="black"
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Bekræft dit nye kodeord"

@@ -78,6 +78,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
                   Email
                 </Label>
                 <Input
+                textColor="black"
                   id="email"
                   type="email"
                   placeholder="Indtast din email"
