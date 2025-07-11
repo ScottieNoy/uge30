@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import LoginForm from "./LoginForm";
 import RegisterForm, { RegisterFormData } from "./RegisterForm";
-import { createClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
-import { profile } from "console";
+import { useAuth } from "@/hooks/useAuth"; // updated to use context
+import { createClient } from "@/lib/supabaseClient"; // ensure supabase client is imported
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -25,133 +25,107 @@ const AuthModal = ({
 }: AuthModalProps) => {
   const [activeTab, setActiveTab] = useState<"login" | "register">(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
-  const handleLoginSubmit = async (data: { email: string; password: string; }) => {
-  setIsLoading(true);
-  console.log("Login data:", data);
+  const { signIn, signUp } = useAuth(); // from context
+  const supabase = createClient(); // ensure supabase client is created
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: data.email,
-    password: data.password,
-  });
+  const handleLoginSubmit = async (data: {
+    email: string;
+    password: string;
+  }) => {
+    setIsLoading(true);
+    const { error } = await signIn(data.email, data.password);
+    setIsLoading(false);
 
-  setIsLoading(false);
+    if (error) {
+      toast.error("Login failed: " + error.message);
+      return;
+    }
 
-  if (error) {
-    console.error("Login failed:", error.message);
-    return;
-  }
-
-  onAuthSuccess?.(); // Optional callback
-  onClose(); // Close modal or drawer
-  
-  // Full page reload to apply changes
-  window.location.reload();
-};
-
+    toast.success("Welcome back!");
+    onAuthSuccess?.();
+    onClose();
+    window.location.reload();
+  };
 
   const handleRegisterSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
-    console.log("Register data:", data);
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          profileComplete: false, // Initially set to false
-        },
-      },
-    });
-
-    if (authError) {
-      console.error("Sign up error:", authError.message);
+    const nameParts = data.name.trim().split(" ").filter(Boolean);
+    if (nameParts.length === 0) {
+      toast.error("Please enter your full name.");
       setIsLoading(false);
       return;
     }
 
-    const userId = authData.user?.id;
-    if (!userId) {
-      console.error("No user ID returned after sign up.");
-      setIsLoading(false);
-      return;
-    }
-
-    const [firstnameRaw, ...rest] = data.name.trim().split(" ");
-    const firstname = firstnameRaw || "";
-    const lastname = rest.join(" ") || "";
+    const firstname = nameParts[0];
+    const lastname = nameParts.slice(1).join(" ") || "-";
 
     const clean = (s: string) => s.replace(/[^a-z]/gi, "").toUpperCase();
-
     const first = clean(firstname);
     const last = clean(lastname);
 
-    // Helper to try different combinations (e.g., JO+BR, J+OBR, etc.)
     const generateCandidates = (first: string, last: string): string[] => {
-      const capitalize = (s: string) => s.toUpperCase();
-
-      const capitalizedFirst = capitalize(first);
-      const capitalizedLast = capitalize(last);
-
-      const candidates = [
-        capitalizedFirst,
-        `${capitalizedFirst}${capitalizedLast.charAt(0)}`,
-        `${capitalizedFirst}${capitalizedLast}`,
-        `${capitalizedFirst.charAt(0)}${capitalizedLast}`,
-      ];
-
-      return candidates.filter((name) => name.length > 0);
+      return [
+        first,
+        `${first}${last.charAt(0)}`,
+        `${first}${last}`,
+        `${first.charAt(0)}${last}`,
+      ].filter(Boolean);
     };
 
     const candidates = generateCandidates(first, last);
+    let displayname: string | null = null;
 
-    let displayname = null;
+
     for (const name of candidates) {
+      if (!supabase) {
+        toast.error("Supabase client is not initialized.");
+        setIsLoading(false);
+        return;
+      }
+
       const { data: existing, error } = await supabase
         .from("users")
         .select("id")
         .eq("displayname", name)
         .limit(1);
-
       if (error) {
-        console.error("Error checking displayname:", error.message);
+        toast.error("Displayname check failed.");
         setIsLoading(false);
         return;
       }
-
-      if (!existing || existing.length === 0) {
+      if (!existing?.length) {
         displayname = name;
         break;
       }
     }
 
     if (!displayname) {
-      console.error("Unable to generate unique displayname.");
+      toast.error("Could not generate unique displayname.");
       setIsLoading(false);
       return;
     }
 
-    const { error: insertError } = await supabase.from("users").insert({
-      id: userId,
+    // Use `signUp` from context
+    const { error: signUpError } = await signUp(data.email, data.password, {
+      profileComplete: false,
       firstname,
       lastname,
       displayname,
-      emoji: "👤",
     });
 
-    if (insertError) {
-      console.error("Failed to insert user profile:", insertError.message);
+    if (signUpError) {
+      toast.error("Signup failed: " + signUpError.message);
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(false);
-    toast.success("Account created successfully! Please check your email to verify your account.");
+    toast.success("Account created!");
     onAuthSuccess?.();
-    onClose?.();
+    onClose();
+    window.location.reload();
   };
 
-  // Reset tab when modal opens
   React.useEffect(() => {
     if (isOpen) {
       setActiveTab(defaultTab);
@@ -164,7 +138,7 @@ const AuthModal = ({
         <DialogTitle className="sr-only">
           {activeTab === "login" ? "Sign In" : "Sign Up"}
         </DialogTitle>
-        {/* Custom close button - larger and easier to press on mobile */}
+
         <Button
           onClick={onClose}
           variant="ghost"
@@ -176,7 +150,6 @@ const AuthModal = ({
         </Button>
 
         <div className="space-y-4">
-          {/* Fixed height container to prevent vertical movement */}
           <div className="h-12 flex items-center">
             <div className="flex bg-white/20 backdrop-blur-md rounded-lg p-1 border border-white/20 w-full">
               <Button
@@ -204,7 +177,6 @@ const AuthModal = ({
             </div>
           </div>
 
-          {/* Form container with fixed height to prevent movement */}
           <div className="h-[600px] flex items-start justify-center">
             {activeTab === "login" ? (
               <LoginForm onSubmit={handleLoginSubmit} isLoading={isLoading} />

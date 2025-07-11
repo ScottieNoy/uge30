@@ -8,6 +8,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import { createClient } from "@/lib/supabaseClient";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { useAuth } from "@/hooks/useAuth"; // or wherever it’s located
 
 export default function WelcomeModal() {
   const supabase = createClient();
@@ -20,6 +21,7 @@ export default function WelcomeModal() {
   const [installPwaPrompt, setInstallPwaPrompt] = useState<any>(null);
   const [isIos, setIsIos] = useState(false);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const { user, profile } = useAuth();
 
   // Validation for username
   const [isCheckingName, setIsCheckingName] = useState(false);
@@ -44,16 +46,11 @@ export default function WelcomeModal() {
 
   // Check user metadata on load
   useEffect(() => {
-    const check = async () => {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (user && !user.user_metadata?.profile_complete) {
-        setOpen(true);
-        setUserId(user.id);
-      }
-    };
-    check();
-  }, []);
+    if (user && profile && !profile.profile_complete) {
+      setOpen(true);
+      setUserId(user.id);
+    }
+  }, [user, profile]);
 
   // Debounced display name check
   useEffect(() => {
@@ -95,18 +92,15 @@ export default function WelcomeModal() {
     setLoading(true);
 
     const { error: authError } = await supabase.auth.updateUser({
-      data: {
-        avatar: avatarUrl || null,
-        displayname,
-        profile_complete: true,
-      },
+      data: {},
     });
 
     const { error: dbError } = await supabase
       .from("users")
       .update({
-        avatar: avatarUrl || null,
+        avatar_url: avatarUrl || null,
         displayname,
+        profile_complete: true,
       })
       .eq("id", userId);
 
