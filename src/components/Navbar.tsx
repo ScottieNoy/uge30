@@ -194,6 +194,15 @@ export default function Navbar() {
                       Point Tildeling
                     </Button>
                   </Link>
+                  <Link href="/admin/categories">
+                    <Button
+                      variant="ghost"
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      <Shirt className="h-4 w-4 mr-2" />
+                      Kategorier
+                    </Button>
+                  </Link>
                 </>
               )}
 
@@ -319,6 +328,12 @@ export default function Navbar() {
                       <Button variant="ghost" className="w-full text-green-300">
                         <Shield className="h-4 w-4 mr-2" />
                         Point Tildeling
+                      </Button>
+                    </Link>
+                    <Link href="/admin/categories" onClick={closeMenu}>
+                      <Button variant="ghost" className="w-full text-green-300">
+                        <Shirt className="h-4 w-4 mr-2" />
+                        Kategorier
                       </Button>
                     </Link>
                   </>

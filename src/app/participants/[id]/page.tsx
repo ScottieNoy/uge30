@@ -96,6 +96,7 @@ export default function ParticipantProfilePage() {
                   <AvatarImage
                     src={user.avatar_url || ""}
                     alt={user.displayname}
+                    className="object-cover"
                   />
                   <AvatarFallback className="bg-gray-600 text-white text-2xl">
                     {user.firstname?.[0] ?? ""}
@@ -136,30 +137,34 @@ export default function ParticipantProfilePage() {
                   <CardTitle className="text-white">Samlet Statistik</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-  <div className="text-center">
-    <div className="text-3xl font-bold text-blue-200">
-      {totalPoints}
-    </div>
-    <div className="text-gray-300 text-sm">Point i alt</div>
-  </div>
-  <div className="text-center">
-    <div className="text-3xl font-bold text-blue-400">
-      #{rank}
-    </div>
-    <div className="text-gray-300 text-sm">Nuværende placering</div>
-  </div>
-  <div className="text-center">
-    <div className="text-lg font-semibold text-teal-300">
-      {new Date(user.created_at || "").toLocaleDateString("da-DK", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })}
-    </div>
-    <div className="text-gray-300 text-sm">Deltager siden</div>
-  </div>
-</CardContent>
-
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-200">
+                      {totalPoints}
+                    </div>
+                    <div className="text-gray-300 text-sm">Point i alt</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-400">
+                      #{rank}
+                    </div>
+                    <div className="text-gray-300 text-sm">
+                      Nuværende placering
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-teal-300">
+                      {new Date(user.created_at || "").toLocaleDateString(
+                        "da-DK",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )}
+                    </div>
+                    <div className="text-gray-300 text-sm">Deltager siden</div>
+                  </div>
+                </CardContent>
               </Card>
 
               {/* ✅ Jersey badges (if any) */}
