@@ -77,7 +77,8 @@ const PointsAssignment = ({
   const handleSubmit = async (
     jersey_id: Jersey,
     category: string,
-    value: number
+    value: number,
+    categoryName?: string
   ) => {
     if (!currentUser) {
       toast.error("You must be logged in to assign points.");
@@ -99,6 +100,7 @@ const PointsAssignment = ({
         note: `${category.toUpperCase()} blev tildelt af ${
           currentUser.displayname
         }`,
+        categoryName,
       });
 
       onClose();
@@ -171,7 +173,8 @@ const PointsAssignment = ({
                             handleSubmit(
                               cat.jersey_id as Jersey,
                               cat.slug,
-                              cat.points
+                              cat.points,
+                              cat.name
                             )
                           }
                           disabled={isSubmitting}

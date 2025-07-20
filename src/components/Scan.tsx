@@ -146,7 +146,7 @@ const Scan = () => {
       userId: targetUser.id,
       broadcast: false,
       title: "💥 Point Received!",
-      body: `${currentUser.displayname} gav dig ${assignPoints.value} point for ${assignPoints.category}.`,
+      body: `${currentUser.displayname} gav dig ${assignPoints.value} point for ${assignPoints.categoryName}.`,
       url: "/my",
     });
 

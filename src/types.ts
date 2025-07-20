@@ -50,9 +50,6 @@ export type UserPoint = Omit<UserPointRow, "user"> & {
 
 export type ActivityRow = Database["public"]["Views"]["v_activity_feed"]["Row"];
 
-
-
-
 // export const CATEGORY_POINTS: Record<Category, number> = {
 //   beer: 1,
 //   wine: 2,
@@ -128,7 +125,7 @@ export interface AssignPoints {
   category: Category; // DB `category` column
   value: number;
   note?: string;
-  
+  categoryName?: string; // optional, for UI convenience
 }
 
 /* -------------------- LEADERBOARD -------------------- */
@@ -248,4 +245,3 @@ export interface JerseyDisplay extends JerseyCategoryConfig {
 //   jersey_name: string | null;
 //   jersey_color: string | null;
 // }
-
