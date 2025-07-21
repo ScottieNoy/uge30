@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { base64Sound } from "@/lib/dupsBase64";
 
 interface QRScannerProps {
   onScan: (qrData: string) => void;
@@ -106,6 +107,7 @@ export default function QRScanner({ onScan, onClose }: QRScannerProps) {
                     constraints={{ facingMode: "environment" }}
                     components={{ finder: true, torch: true, zoom: true }}
                     scanDelay={500}
+                    sound={base64Sound}
                   />
                 </div>
 
