@@ -1293,6 +1293,7 @@ export type Database = {
         Row: {
           category: string | null
           category_icon: string | null
+          category_name: string | null
           created_at: string | null
           jersey_color: string | null
           jersey_id: string | null

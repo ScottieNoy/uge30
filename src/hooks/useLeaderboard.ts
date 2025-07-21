@@ -100,7 +100,9 @@ export const useLeaderboard = () => {
         points: activity.value ?? 0,
         message:
           activity.note ??
-          `${activity.target_name ?? "Ukendt"} modtog ${activity.category} fra ${activity.source_name ?? "Ukendt"}`,
+          `${activity.target_name ?? "Ukendt"} modtog ${
+            activity.category_name
+          } fra ${activity.source_name ?? "Ukendt"}`,
       }));
 
       setParticipants(users);
@@ -114,10 +116,13 @@ export const useLeaderboard = () => {
 
   return {
     participants,
-    jerseyBoards: jerseyData.reduce<Record<string, JerseyData["participants"]>>((acc, jersey) => {
-      acc[jersey.id] = jersey.participants;
-      return acc;
-    }, {}),
+    jerseyBoards: jerseyData.reduce<Record<string, JerseyData["participants"]>>(
+      (acc, jersey) => {
+        acc[jersey.id] = jersey.participants;
+        return acc;
+      },
+      {}
+    ),
     jerseyData,
     activityFeed,
     allowedCategories,

@@ -25,7 +25,7 @@ const fetchJerseyHolders = async (): Promise<JerseyHolder[]> => {
   const { data, error } = await supabase
     .from("v_jersey_holders_showcase")
     .select("*")
-    .order("total_points", { ascending: false });
+    .order("rank", { ascending: false });
 
   if (error) {
     console.error("Supabase error:", error);

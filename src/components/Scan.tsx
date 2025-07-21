@@ -120,13 +120,30 @@ const Scan = () => {
     if (assignPoints.jersey_id === GYLDNE_BLAERER_ID) {
       const bonusPointId = crypto.randomUUID();
 
+      let pointValue = 2;
+
+      switch (assignPoints.category) {
+        case "trippelt-oelbong":
+          pointValue = 8;
+          break;
+        case "dobbelt-oelbong":
+          pointValue = 6;
+          break;
+        case "oelbong":
+          pointValue = 4;
+          break;
+        default:
+          pointValue = 2;
+          break;
+      }
+
       const { error: bonusError } = await supabase.rpc(
         "perform_point_and_jersey_insert",
         {
           p_point_id: bonusPointId,
           p_user_id: currentUser.id, // giver receives bonus
           p_submitted_by: currentUser.id,
-          p_value: 10,
+          p_value: pointValue,
           p_note: `gav en flydende hånd til ${targetUser.displayname}`,
           p_stage_id: stageId,
           p_jersey_id: FLYDENDE_HAAND_ID,
