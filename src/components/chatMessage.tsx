@@ -10,6 +10,7 @@ interface ChatMessageProps {
     created_at: string;
     user_id: string;
     images: string[] | null;
+    audio_url?: string | null;
     users: {
       displayname: string;
       firstname: string;
@@ -43,6 +44,30 @@ const ChatMessage = ({
       minute: "2-digit",
     });
   };
+
+  const PlayIcon = ({
+    className = "",
+    id,
+  }: {
+    className?: string;
+    id: string;
+  }) => (
+    <svg
+      id={id}
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M14.752 11.168l-5.197-3.028A1 1 0 008 9v6a1 1 0 001.555.832l5.197-3.028a1 1 0 000-1.664z"
+      />
+    </svg>
+  );
 
   return (
     <>
@@ -116,6 +141,74 @@ const ChatMessage = ({
             {/* Message Text */}
             {message.content && (
               <div className="text-sm break-words">{message.content}</div>
+            )}
+            {message.audio_url && (
+              <div className="mt-2 flex items-center gap-3 w-full max-w-xs sm:max-w-sm bg-white/10 backdrop-blur rounded-lg p-2">
+                <button
+                  onClick={() => {
+                    const audio = document.getElementById(
+                      `audio-${message.id}`
+                    ) as HTMLAudioElement;
+                    if (audio?.paused) {
+                      audio?.play();
+                    } else {
+                      audio?.pause();
+                    }
+                  }}
+                  className="text-white hover:text-cyan-300 transition-colors duration-200"
+                >
+                  <PlayIcon
+                    id={`play-icon-${message.id}`}
+                    className="w-6 h-6"
+                  />
+                </button>
+
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  defaultValue={0}
+                  id={`seek-${message.id}`}
+                  className="w-full accent-cyan-400 h-1 rounded-lg cursor-pointer"
+                  onInput={(e) => {
+                    const audio = document.getElementById(
+                      `audio-${message.id}`
+                    ) as HTMLAudioElement;
+                    const input = e.target as HTMLInputElement;
+                    if (audio?.duration) {
+                      const time = (+input.value / 100) * audio.duration;
+                      audio.currentTime = time;
+                    }
+                  }}
+                />
+
+                <audio
+                  id={`audio-${message.id}`}
+                  src={message.audio_url}
+                  preload="metadata"
+                  onTimeUpdate={(e) => {
+                    const audio = e.currentTarget;
+                    const seek = document.getElementById(
+                      `seek-${message.id}`
+                    ) as HTMLInputElement;
+                    if (seek && audio.duration) {
+                      seek.value = (
+                        (audio.currentTime / audio.duration) *
+                        100
+                      ).toString();
+                    }
+
+                    const icon = document.getElementById(
+                      `play-icon-${message.id}`
+                    );
+                    if (icon) {
+                      icon.className = audio.paused
+                        ? "w-6 h-6"
+                        : "w-6 h-6 animate-pulse";
+                    }
+                  }}
+                />
+              </div>
             )}
 
             <div

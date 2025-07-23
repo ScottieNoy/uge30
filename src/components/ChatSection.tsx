@@ -41,10 +41,14 @@ const ChatSection = ({ onImageClick }: ChatSectionProps) => {
     return () => clearTimeout(timer);
   }, [messages]);
 
-  const handleSendMessage = async (content: string, images?: File[]) => {
+  const handleSendMessage = async (
+    content: string,
+    images?: File[],
+    audio?: Blob
+  ) => {
     if (!user) return;
     try {
-      await sendMessage(content, user.id, images);
+      await sendMessage(content, user.id, images, audio); // modify sendMessage to support audio
     } catch (error) {
       console.error("Error in handleSendMessage:", error);
       toast("Failed to send message. Please try again.");

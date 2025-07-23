@@ -3,14 +3,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Image, X, AlertCircle } from "lucide-react";
+import { Send, Loader2, Image, X, AlertCircle, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { sendNotification } from "@/lib/sendNotification";
 import { useAuth } from "@/hooks/useAuth";
 import { compressImage } from "@/lib/compressImage";
+import VoiceRecorder from "./VoiceRecorder";
 
 interface ChatInputProps {
-  onSendMessage: (message: string, images?: File[]) => Promise<void>;
+  onSendMessage: (
+    message: string,
+    images?: File[],
+    audio?: Blob
+  ) => Promise<void>;
   disabled?: boolean;
 }
 
@@ -22,10 +27,16 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, profile } = useAuth();
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioURL, setAudioURL] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!message.trim() && imageFiles.length === 0) || isSending || disabled)
+    if (
+      (!message.trim() && imageFiles.length === 0 && !audioBlob) ||
+      isSending ||
+      disabled
+    )
       return;
 
     setIsSending(true);
@@ -34,7 +45,8 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     try {
       await onSendMessage(
         message.trim(),
-        imageFiles.length > 0 ? imageFiles : undefined
+        imageFiles.length > 0 ? imageFiles : undefined,
+        audioBlob || undefined
       );
 
       if (message.trim()) {
@@ -49,10 +61,15 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         });
       }
 
-      // ✅ Reset after success
+      // ✅ Reset state
       setMessage("");
       setImageFiles([]);
       setImagePreviews([]);
+      if (audioURL) {
+        URL.revokeObjectURL(audioURL);
+      }
+      setAudioBlob(null);
+      setAudioURL(null);
     } catch (error) {
       console.error("Error sending message:", error);
       setUploadError(
@@ -60,36 +77,37 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
       );
       toast("Failed to send message. Please try again.");
     } finally {
-      setIsSending(false); // ✅ always reset sending state
+      setIsSending(false);
     }
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const files = event.target.files;
-  if (!files) return;
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files) return;
 
-  const newFiles: File[] = [];
-  const newPreviews: string[] = [];
+    const newFiles: File[] = [];
+    const newPreviews: string[] = [];
 
-  for (const file of Array.from(files)) {
-    if (!file.type.startsWith("image/")) continue;
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
 
-    try {
-      const compressed = await compressImage(file, 1000); // Resize max 1000px
-      newFiles.push(compressed);
-      const previewUrl = URL.createObjectURL(compressed);
-      newPreviews.push(previewUrl);
-    } catch (err) {
-      console.error("Compression error", err);
-      toast("Kunne ikke komprimere billedet");
+      try {
+        const compressed = await compressImage(file, 1000);
+        newFiles.push(compressed);
+        const previewUrl = URL.createObjectURL(compressed);
+        newPreviews.push(previewUrl);
+      } catch (err) {
+        console.error("Compression error", err);
+        toast("Kunne ikke komprimere billedet");
+      }
     }
-  }
 
-  setImageFiles((prev) => [...prev, ...newFiles]);
-  setImagePreviews((prev) => [...prev, ...newPreviews]);
-
-  event.target.value = "";
-};
+    setImageFiles((prev) => [...prev, ...newFiles]);
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+    event.target.value = "";
+  };
 
   const removeImage = (index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
@@ -97,12 +115,12 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Clean up URLs on unmount
   useEffect(() => {
     return () => {
       imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+      if (audioURL) URL.revokeObjectURL(audioURL);
     };
-  }, [imagePreviews]);
+  }, [imagePreviews, audioURL]);
 
   return (
     <div className="p-3 sm:p-4">
@@ -140,7 +158,25 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      {/* 🎤 Voice preview */}
+      {audioURL && (
+        <div className="mb-3 flex items-center gap-2">
+          <audio controls src={audioURL} className="w-full" />
+          <button
+            type="button"
+            onClick={() => {
+              if (audioURL) URL.revokeObjectURL(audioURL);
+              setAudioBlob(null);
+              setAudioURL(null);
+            }}
+            className="text-red-400 hover:text-red-300"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex gap-2 items-end">
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -176,12 +212,19 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           className="hidden"
         />
 
+        {/* 🎤 Mic button */}
+        <VoiceRecorder
+          onAudioRecorded={(audioBlob) => {
+            onSendMessage("", [], audioBlob);
+          }}
+        />
+
         <Button
           type="submit"
           disabled={
             isSending ||
             disabled ||
-            (!message.trim() && imageFiles.length === 0)
+            (!message.trim() && imageFiles.length === 0 && !audioBlob)
           }
           className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white h-10 w-10 sm:h-11 sm:w-11 p-0 flex-shrink-0"
         >

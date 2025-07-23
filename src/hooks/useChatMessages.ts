@@ -7,6 +7,8 @@ import {
   fetchUserData,
 } from "@/lib/chatMessage";
 import { uploadChatImages } from "@/lib/chatImage";
+import { uploadChatAudio } from "@/lib/chatAudio";
+
 import { createClient } from "@/lib/supabaseClient";
 
 interface ChatMessage {
@@ -15,6 +17,7 @@ interface ChatMessage {
   created_at: string;
   user_id: string;
   images: string[] | null;
+  audio_url?: string | null;
   users: {
     displayname: string;
     firstname: string;
@@ -86,7 +89,8 @@ export const useChatMessages = () => {
   const sendMessage = async (
     content: string,
     userId: string,
-    images?: File[]
+    images?: File[],
+    audio?: Blob
   ) => {
     console.log(
       "Sending message:",
@@ -118,6 +122,19 @@ export const useChatMessages = () => {
       }
     }
 
+    let audioUrl: string | undefined;
+
+    if (audio) {
+      try {
+        console.log("Uploading audio...");
+        audioUrl = await uploadChatAudio(audio, userId);
+        console.log("Audio uploaded:", audioUrl);
+      } catch (error) {
+        console.error("Audio upload failed:", error);
+        throw new Error("Failed to upload audio");
+      }
+    }
+
     // Create optimistic message
     const optimisticMessage: ChatMessage = {
       id: `temp-${Date.now()}`,
@@ -125,6 +142,7 @@ export const useChatMessages = () => {
       created_at: new Date().toISOString(),
       user_id: userId,
       images: imageUrls.length > 0 ? imageUrls : null,
+      audio_url: audioUrl ?? null,
       users: userData
         ? {
             displayname: userData.displayname ?? "",
@@ -151,7 +169,12 @@ export const useChatMessages = () => {
     });
 
     try {
-      const savedMessage = await insertChatMessage(content, userId, imageUrls);
+      const savedMessage = await insertChatMessage(
+        content,
+        userId,
+        imageUrls,
+        audioUrl
+      );
 
       // Replace optimistic message with real message
       if (savedMessage) {
@@ -172,6 +195,7 @@ export const useChatMessages = () => {
                     emoji: savedMessage.users?.emoji ?? "",
                   },
                   images: savedMessage.images ?? null,
+                  audio_url: savedMessage.audio_url ?? null,
                 }
               : msg
           );

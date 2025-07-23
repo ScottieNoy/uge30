@@ -6,6 +6,7 @@ interface ChatMessage {
   created_at: string;
   user_id: string;
   images: string[] | null;
+  audio_url?: string | null;
   users: {
     displayname: string;
     firstname: string;
@@ -27,6 +28,7 @@ export const fetchChatMessages = async (): Promise<ChatMessage[]> => {
       created_at,
       user_id,
       images,
+      audio_url,
       users:user_id (
         displayname,
         firstname,
@@ -51,6 +53,7 @@ export const fetchChatMessages = async (): Promise<ChatMessage[]> => {
     created_at: msg.created_at ?? "",
     user_id: msg.user_id ?? "",
     images: msg.images ?? null,
+    audio_url: msg.audio_url ?? null,
     users: {
       displayname: msg.users?.displayname ?? "",
       firstname: msg.users?.firstname ?? "",
@@ -73,6 +76,7 @@ export const fetchMessageWithUserData = async (
       created_at,
       user_id,
       images,
+      audio_url,
       users:user_id (
         displayname,
         firstname,
@@ -97,6 +101,7 @@ export const fetchMessageWithUserData = async (
     created_at: data.created_at ?? "",
     user_id: data.user_id ?? "",
     images: data.images ?? null,
+    audio_url: data.audio_url ?? null,
     users: {
       displayname: data.users?.displayname ?? "",
       firstname: data.users?.firstname ?? "",
@@ -110,7 +115,8 @@ export const fetchMessageWithUserData = async (
 export const insertChatMessage = async (
   content: string,
   userId: string,
-  imageUrls: string[]
+  imageUrls: string[],
+  audioUrl?: string | null
 ) => {
   const { data, error } = await supabase
     .from("chat_messages")
@@ -118,6 +124,7 @@ export const insertChatMessage = async (
       content,
       user_id: userId,
       images: imageUrls.length > 0 ? imageUrls : null,
+      audio_url: audioUrl ?? null,
     })
     .select(
       `
@@ -126,6 +133,7 @@ export const insertChatMessage = async (
       created_at,
       user_id,
       images,
+      audio_url,
       users:user_id (
         displayname,
         firstname,
